@@ -36,7 +36,6 @@ def load_image(image_path: str) -> np.ndarray:
 
 def remove_background(img):
     canvas = img.copy()
-
     # convert to RGB
     image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     # convert to grayscale
@@ -69,7 +68,12 @@ def remove_background(img):
             eps = 0.0005
             epsilon = arclen * eps
             approx = cv2.approxPolyDP(currentContour, epsilon, True)
+            gray_range = [0, 255]
+            approx
             for pt in approx:
+                # dot_x = pt[0][0]
+                # dot_y = pt[0][1]
+                # print("dot", dot_x, dot_y, gray[dot_x][dot_y])
                 cv2.circle(canvas, (pt[0][0], pt[0][1]), 7, (0, 255, 0), -1)
                 cv2.drawContours(canvas, [approx], -1,
                                  (0, 0, 255), 2, cv2.LINE_AA)
@@ -88,7 +92,7 @@ def remove_background(img):
             # Combine mask and img to replace contours of original image with
             #   transparent background
             out = cv2.bitwise_and(img, mask)
-
+    print("center:", [i/2 for i in image.shape])
     plt.imshow(canvas)
     plt.show()
     plt.imshow(out)
@@ -186,19 +190,23 @@ def getHeroes(image: np.array):
 
             out = remove_background(ROI)
             name = "hero_{}x{}_{}x{}.png".format(d[3], d[2], d[0], d[1])
-
+            # raise KeyboardInterrupt
             heroes[name] = out
-            raise KeyboardInterrupt
     return heroes
 
 
 if __name__ == "__main__":
 
-    image = cv2.imread("./test_ss.png")
+    import os
+    files = os.listdir("..")
+    print(files)
+    image = cv2.imread("../test_ss.png")
 
     heroes = getHeroes(image)
-    # for name, image in heroes.items():
-    #     cv2.imwrite(name, image)
+    import os
+    for name, image in heroes.items():
+
+        cv2.imwrite(name, image)
 
 
 # %%

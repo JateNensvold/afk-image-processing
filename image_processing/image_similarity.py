@@ -65,13 +65,20 @@ def get_corrected_img(img1, img2):
 
 if __name__ == "__main__":
 
+    import os
+    out = os.listdir(".")
+    print(sorted(out))
     e_pippa = cv2.imread("./pippa.jpg")
+    # plt.imshow(e_pippa)
+    # plt.show()
+    test = cv2.cvtColor(e_pippa, cv2.COLOR_RGB2BGRA)
+    plt.imshow(test)
+    plt.show()
     o_pippa = cv2.imread("./heroes/pippa.jpg")
     o_lorsan = cv2.imread("./heroes/lorsan.jpg")
     e_lorsan = cv2.imread("./lorsan.jpg")
     img = get_corrected_img(e_pippa, o_pippa)
     img = get_corrected_img(e_lorsan, o_lorsan)
-
 
     # image1 = feature_detect(image1)
     # image2 = feature_detect(image2)
