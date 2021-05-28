@@ -8,7 +8,7 @@ def nothing(x):
 
 
 # Load in image
-image = cv2.imread('stamina-2.jpg')
+image = cv2.imread("/home/nate/projects/afk-image-processing/image_processing/tempHero/hero_146x163_114x114.png")
 
 # Create a window
 cv2.namedWindow('image')

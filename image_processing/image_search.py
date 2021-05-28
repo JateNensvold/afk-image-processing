@@ -29,7 +29,6 @@ def image_search(img1_path: str, img2_path: str):
         plt.show()
         alpha, mask = classify.colorClassify(hero_image[0], hero_image[1])
         cv2.imwrite("./temp/" + name, hero_image[0])
-        
 
     for name in files:
         Image.save("./temp/" + name)

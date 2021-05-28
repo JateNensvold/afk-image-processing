@@ -1,10 +1,14 @@
-import matplotlib.pyplot as plt
 
 # from skimage.feature import canny
 from skimage import io
 from skimage.color import rgb2gray, rgba2rgb
 import numpy as np
 import cv2
+import os
+
+import image_processing.build_db as BD
+import image_processing.globals as GV
+import image_processing.processing as pr
 
 
 def grayscale(rgb_image: str) -> np.ndarray:
@@ -33,20 +37,35 @@ def load_image(image_path: str) -> np.ndarray:
     return io.imread(image_path)
 
 
-def blur_image(image: np.ndarray) -> np.ndarray:
+def blur_image(image: np.ndarray, dilate=False) -> np.ndarray:
     """
+    Args:
+        image: grayscale image
+
+    Returns:
+        blurred and dilated image
     """
+
+    # image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
     v = np.median(image)
     sigma = 0.33
 
     # ---- apply optimal Canny edge detection using the computed median----
+    # automated
     lower_thresh = int(max(0, (1.0 - sigma) * v))
     upper_thresh = int(min(255, (1.0 + sigma) * v))
+
+    # preset
+    # lower_thresh = (hMin = 0 , sMin = 0, vMin = 0)
+# (hMin = 0 , sMin = 0, vMin = 0), (hMax = 179 , sMax = 255, vMax = 197)
+
     neighborhood_size = 7
     blurred = cv2.GaussianBlur(
         image, (neighborhood_size, neighborhood_size), 0)
-    canny = cv2.Canny(blurred, lower_thresh, upper_thresh, 1)
+    output = cv2.Canny(blurred, lower_thresh, upper_thresh, 1)
     # print("Gaussian")
+    # plt.figure()
     # plt.imshow(canny)
     # plt.show()
 
@@ -59,16 +78,18 @@ def blur_image(image: np.ndarray) -> np.ndarray:
     # sigmaColor = sigmaSpace = 75.
     # blurred = cv2.bilateralFilter(
     #     image, neighborhood_size, sigmaColor, sigmaSpace)
-    # canny = cv2.Canny(blurred, lower_thresh, upper_thresh, 1)
+    # output = cv2.Canny(blurred, lower_thresh, upper_thresh, 1)
     # print("bilateral")
     # plt.imshow(canny)
     # plt.show()
 
-    kernel = np.ones((5, 5), np.uint8)
-    dilate = cv2.dilate(canny, kernel, iterations=1)
+    # plt.figure()
     # plt.imshow(dilate)
     # plt.show()
-    return canny
+    if dilate:
+        kernel = np.ones((5, 5), np.uint8)
+        return cv2.dilate(output, kernel, iterations=1)
+    return output
 
 
 def remove_background(img):
@@ -93,14 +114,14 @@ def remove_background(img):
     _, binary = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY_INV)
 
     # Find the contours
-    # contours, hierarchy = cv2.findContours(
-    #     binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 
     contours, hierarchy = cv2.findContours(
         binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     # get the actual inner list of hierarchy descriptions
     hierarchy = hierarchy[0]
+
+    # Convert image to BGRA so it has an alpha channel
     img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
     # Create a mask with all the same channels as img
     mask = np.zeros_like(img)
@@ -111,7 +132,6 @@ def remove_background(img):
         if currentHierarchy[2] < 0:
             # these are the innermost child components
             pass
-            # cv2.rectangle(img, (x, y), (x+w, y+h), (0, 0, 255), 3)
         elif currentHierarchy[3] < 0:
             # these are the outermost parent components
 
@@ -121,14 +141,9 @@ def remove_background(img):
             bestapprox = cv2.approxPolyDP(currentContour, epsilon, True)
 
             for pt in bestapprox:
-                # dot_x = pt[0][0]
-                # dot_y = pt[0][1]
-                # print("dot", dot_x, dot_y, gray[dot_x][dot_y])
                 cv2.circle(canvas, (pt[0][0], pt[0][1]), 7, (0, 255, 0), -1)
                 cv2.drawContours(canvas, [bestapprox], -1,
                                  (0, 0, 255), 2, cv2.LINE_AA)
-
-        # Convert image to BGRA so it has an alpha channel
 
         # Draw the countours onto the mask
         cv2.drawContours(mask, contours, index, (255,)*img.shape[2], -1)
@@ -136,37 +151,14 @@ def remove_background(img):
         # Combine mask and img to replace contours of original image with
         #   transparent background
         out = cv2.bitwise_and(img, mask)
-    # print("center:", [i/2 for i in image.shape])
-    # plt.imshow(canvas)
-    # plt.show()
     return out, bestapprox
 
 
-def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15):
-    """
-    Parse a screenshot or image of an AFK arena hero roster into sub
-        components that represent all the heroes in the image
-
-    Args:
-        image: image/screenshot of hero roster
-        sizeAllowanceBoundary: percentage that each 'contour' boundary must be
-            within the average contour size
-    Return:
-        dictionary of subimages that represent all heroes in original 'image'
-    """
-    original = image.copy()
+def getHeroContours(image: np.array, sizeAllowanceBoundary, **blurKwargs):
 
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    # blurred = cv2.GaussianBlur(gray, (3, 3), 0)
-
-    # canny = cv2.Canny(blurred, 120, 255, 1)
-
-    # kernel = np.ones((5, 5), np.uint8)
-    # dilate = cv2.dilate(canny, kernel, iterations=1)
-    dilate = blur_image(gray)
-
-    # plt.imshow(cv2.cvtColor(dilate, cv2.COLOR_BGR2RGB))
+    dilate = blur_image(gray, **blurKwargs)
 
     # Find contours
     cnts = cv2.findContours(dilate, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -183,17 +175,9 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15):
         diff = abs(h-w)
         avg_h_w = ((h+w)/2)
         tolerance = avg_h_w * 0.2
-        # print("diff: {} tolerance: {} {} {}".format(diff, tolerance, h, w))
-
-        # ROI = original[y:y+h, x:x+w]
 
         if diff < tolerance and (h*w) > 2500:
 
-            # print(c)
-            # print(type(c), c.shape)
-            # print(type(c[0]), c[0].shape)
-            # print(type(c[0][0]), c[0][0].shape)
-            # print(c[0][0])
             x = x
             a = x+w
             y = y
@@ -202,8 +186,6 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15):
             outside = []
 
             outside.append([x, y])
-            # outside.append([[x2, y1]])
-            # outside.append([[x1, y2]])
             outside.append([a, b])
             addStatus = True
             for shape in customContour:
@@ -212,52 +194,24 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15):
                 if not (a < x1 or a1 < x or b < y1 or b1 < y):
                     addStatus = False
                     break
-            print("addStatus", addStatus)
-
             if not addStatus:
                 continue
-            print("added")
 
             if h*w not in sizes:
                 sizes[h*w] = []
             sizes[h*w].append((h, w, x, y))
 
             customContour.append(outside)
-            # cv2.rectangle(image, (x, y), (x + w, y + h), (36, 255, 12), 2)
-            # cv2.drawContours(image, c, -1, 255, 3)
-            # Temp
-            # ------------------------------------------------------
-            # arclen = cv2.arcLength(c, True)
-            # eps = 0.0005
-            # epsilon = arclen * eps
-            # bestapprox = cv2.approxPolyDP(c, epsilon, True)
-
-            # for pt in bestapprox:
-            #     # dot_x = pt[0][0]
-            #     # dot_y = pt[0][1]
-            #     # print("dot", dot_x, dot_y, gray[dot_x][dot_y])
-            #     cv2.circle(image, (pt[0][0], pt[0][1]), 7, (0, 255, 0), -1)
-            #     cv2.drawContours(image, [bestapprox], -1,
-            #                      (0, 0, 255), 2, cv2.LINE_AA)
-            # # ------------------------------------------------------
-
-            # print(h, w)
             heights.append(h)
             widths.append(w)
-            # ROI = original[y:y+h, x:x+w]
-            # plt.figure()
-            # plt.imshow(image)
-            # plt.figure()
 
         image_number += 1
 
-    print()
-
-    mean = np.mean([i for i in sizes.keys()])
+    # mean = np.mean([i for i in sizes.keys()])
     h_mean = np.median(heights)
     w_mean = np.median(widths)
 
-    print("mean: ", mean)
+    # print("mean: ", mean)
     lowerBoundary = 1.0 - sizeAllowanceBoundary
     upperBoundary = 1.0 + sizeAllowanceBoundary
     h_low = h_mean * lowerBoundary
@@ -268,7 +222,6 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15):
     occurrences = 0
     valid_sizes = {}
     for size, dimensions in sizes.items():
-        print(dimensions)
         for i in dimensions:
             if (h_low <= i[0] <= h_high) and \
                     (w_low <= i[1] <= w_high):
@@ -276,30 +229,99 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15):
                 if size not in valid_sizes:
                     valid_sizes[size] = []
                 valid_sizes[size].append(i)
-            else:
-                print(h_low, i[0], h_high, w_low, i[1], w_high)
-                print(i)
 
     length = 0
     for i in sizes.values():
         length += len(i)
     print("occurrences: {}/{} {}%".format(occurrences,
-          length, occurrences/length))
-    print("sizes", sorted(valid_sizes))
+          length, occurrences/length * 100))
+    # print("sizes", sorted(valid_sizes))
+    return valid_sizes
+
+
+def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
+              maxHeroes: bool = True,
+              removeBG: bool = False):
+    """
+    Parse a screenshot or image of an AFK arena hero roster into sub
+        components that represent all the heroes in the image
+
+    Args:
+        image: image/screenshot of hero roster
+        sizeAllowanceBoundary: percentage that each 'contour' boundary must be
+            within the average contour size
+        maxHeroes: flag that tells the function to experiment with multiple
+            preprocessing algorithms to find the maximum number of valid heroes
+        removeBG: flag to attempt to remove the background from each hero
+            returned
+    Return:
+        dictionary of subimages that represent all heroes from the passed in
+            'image'
+    """
+    original = image.copy()
     heroes = {}
+    valid_sizes = {}
+    baseArgs = (image, sizeAllowanceBoundary)
+    if maxHeroes:
+        multiValid = []
+        multiValid.append(getHeroContours(*baseArgs, dilate=True))
+        multiValid.append(getHeroContours(*baseArgs))
+
+        multiValid = sorted(multiValid, key=lambda x: len(x), reverse=True)
+        valid_sizes = multiValid[0]
+    else:
+        valid_sizes = getHeroContours(*baseArgs)
+
+    # ----------------------
+    # import image_processing.globals as GV
+    # import image_processing.load_images as load
+    # import os
+    # si_dict = []
+    # baseSIDir = GV.siPath
+
+    # siFolders = os.listdir(baseSIDir)
+    # for folder in siFolders:
+    #     SIDir = os.path.join(baseSIDir, folder)
+    #     SIPhotos = os.listdir(SIDir)
+    #     for imageName in SIPhotos:
+
+    #         siImage = cv2.imread(os.path.join(
+    #             baseSIDir, folder, imageName))
+    #         # if folder not in si_dict:
+    #         #     si_dict[folder] = {}
+    #         # si_dict[imageName] = siImage
+    #         si_dict.append(siImage)
+    #         # plt.imshow(siImage)
+    # plt.show()
+    # ----------------------
+
+    # siDB = load.build_flann(siImage)
+
     for size, dimensions in valid_sizes.items():
         for d in dimensions:
             ROI = original[d[3]:
                            d[3]+d[0],
                            d[2]:
                            d[2]+d[1]]
+
             # plt.imshow(ROI)
             # plt.show()
-            out, poly = remove_background(ROI)
+
+            # staminaLib.signatureItemFeatures(ROI)
+
             name = "hero_{}x{}_{}x{}.png".format(d[3], d[2], d[0], d[1])
+            cv2.imwrite("./tempHero/{}".format(name), ROI)
+
             heroes[name] = {}
-            heroes[name]["image"] = out
-            heroes[name]["poly"] = poly
+
+            if removeBG:
+
+                out, poly = remove_background(ROI)
+                heroes[name]["image"] = out
+                heroes[name]["poly"] = poly
+            else:
+                heroes[name]["image"] = ROI
+
             heroes[name]["dimensions"] = {}
             heroes[name]["dimensions"]["y"] = (d[3], d[3]+d[0])
             heroes[name]["dimensions"]["x"] = (d[2], d[2]+d[1])
@@ -309,13 +331,20 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15):
 
 if __name__ == "__main__":
 
-    import os
-    files = os.listdir("..")
-    print(files)
-    image = cv2.imread("../test_ss.png")
+    imageDB = BD.buildDB(enrichedDB=True)
+    siPath = GV.siPath
 
-    heroes = getHeroes(image)
-    for name, image in heroes.items():
-        plt.imshow(image[0])
-        plt.show()
-        cv2.imwrite(name, image[0])
+    siTempPath = os.path.join(siPath, "temp")
+
+    for imagePath in os.listdir(siTempPath):
+        rosterImage = cv2.imread(os.path.join(GV.siPath, "temp", imagePath))
+        heroes = pr.getHeroes(rosterImage)
+        # cropHeroes = load.crop_heroes(heroes)
+
+        for name, imageDict in heroes.items():
+            heroImage = imageDict["image"]
+
+            heroLabel, _ = imageDB.search(heroImage)
+            # import matplotlib.pyplot as plt
+            # plt.imshow(heroImage)
+            # plt.show()
