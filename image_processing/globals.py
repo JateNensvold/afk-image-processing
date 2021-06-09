@@ -9,4 +9,6 @@ flannPath = os.path.join(databasePath, "baseHeroes.flann")
 numbersPath = os.path.join(baseDir, "numbers")
 
 siPath = os.path.join(baseDir, "si")
+siTrainPath = os.path.join(siPath, "train")
+siBasePath = os.path.join(siPath, "base")
 fiPath = os.path.join(baseDir, "fi")

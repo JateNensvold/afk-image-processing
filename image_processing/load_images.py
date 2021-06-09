@@ -10,6 +10,21 @@ import image_processing.processing as processing
 import image_processing.database.imageDB as imageSearchDB
 
 
+def display_image(image, multiple=False, display=False):
+    if not display:
+        return
+    plt.ion()
+
+    plt.figure()
+    if multiple:
+        image = concat_resize(image)
+    plt.imshow(image)
+
+    plt.show()
+    input('Press any key to continue...')
+    plt.close()
+
+
 def findFiles(path: str, flag=True, lower=False):
     """
     Finds and returns all filepaths that match the pattern/path passed
@@ -220,19 +235,33 @@ def concat_resize(img_list, interpolation=cv2.INTER_CUBIC):
     h_max = max(img.shape[0]
                 for img in img_list)
     # resizing images
-    im_list_resize = [cv2.resize(img,
-                                 (w_max, h_max),
-                                 interpolation=interpolation)
-                      for img in img_list]
-    # return final image
-    for i in im_list_resize:
-        print(i.shape)
-    return np.concatenate([i[:, :, 2] for i in im_list_resize], axis=1)
-    #    im_list_resize[1][:, :, 2]),
-    #   axis=1)
+    im_list_resize = []
+    for img in img_list:
+        height, width = img.shape[:2]
+        ratio = width/height
+        width_dist = w_max - int(width/ratio)
+        height_dist = h_max - height
+
+        if width_dist < height_dist:
+            resize = cv2.resize(img,
+                                (w_max, min(h_max, int(height*w_max/width))),
+                                interpolation=interpolation)
+        else:
+            resize = cv2.resize(img,
+                                (min(w_max, int(width*h_max/height)), h_max),
+                                interpolation=interpolation)
+
+        new_h, new_w = resize.shape[:2]
+
+        canvas = np.zeros((h_max, new_w, 3))
+
+        canvas[0:new_h, 0:new_w, 0:3] = resize
+        im_list_resize.append(canvas)
+
+    return np.hstack(im_list_resize).astype(np.uint8)
 
 
-def build_flann(baseHeroes: list):
+def build_flann(baseHeroes: list, ratio=0.8):
     """
     Build database of heroes to match to
 
@@ -243,7 +272,7 @@ def build_flann(baseHeroes: list):
         An instance of imageSearch() with baseHeroes added to it with the
             matcher trained on them
     """
-    imageDB = imageSearchDB.imageSearch(lowesRatio=0.8)
+    imageDB = imageSearchDB.imageSearch(lowesRatio=ratio)
     for index, heroTuple in enumerate(baseHeroes):
         name = heroTuple[0]
         hero = heroTuple[1]
