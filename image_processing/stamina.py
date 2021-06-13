@@ -18,15 +18,25 @@ def sort_row(row: list, heroes: dict):
 
 
 def generate_rows(heroes: dict, spacing: int = 10):
+    """
+    Args:
+        heroes: dictionary of image data to use as a lookup table
+        spacing: number of pixels an image has to be away from an existing row
+            to signal for the creation of a new row
+
+    Return:
+        list of lists of tuples(label, name, image)
+    """
     rows = []
     heads = {}
-
+    count = 0
     for k, v in heroes.items():
         y = v["dimensions"]["y"][0]
 
         closeRow = False
         index = None
         for head, headIndex in heads.items():
+            # If there are no close rows set flag to create new row
             if abs(head - y) < spacing:
                 closeRow = True
                 index = headIndex
@@ -36,7 +46,12 @@ def generate_rows(heroes: dict, spacing: int = 10):
             rows.append([])
             heads[y] = len(rows) - 1
             index = heads[y]
-        rows[index].append((v["label"], k))
+        if "label" in v:
+            label = v["label"]
+        else:
+            label = str(count)
+        rows[index].append((label, k, v["image"]))
+        count += 1
     rows = sorted(rows, key=lambda x: heroes[x[0][1]]["dimensions"]["y"][0])
     for i in range(len(rows)):
         newRow = sort_row(rows[i], heroes)
@@ -82,7 +97,7 @@ def get_text(staminaAreas: dict, train: bool = False):
 
     # build template dictionary
     digits = {}
-    numbersFolder = GV.numbersPath
+    numbersFolder = GV.staminaTemplatesPath
     # numbersFolder = os.path.join(os.path.dirname(
     #     os.path.abspath(__file__)), "numbers")
 
@@ -181,7 +196,6 @@ def signatureItemFeatures(hero: np.array, templates):
 
             templateGray = cv2.cvtColor(templateImage, cv2.COLOR_BGR2GRAY)
 
-            # (hMin = 0 , sMin = 8, vMin = 0), (hMax = 179 , sMax = 255, vMax = 255)
             if "morph" in templates[folder] and templates[folder]["morph"]:
                 # print(folder, templates[folder])
                 se = np.ones((2, 2), dtype='uint8')
@@ -235,92 +249,110 @@ def signatureItemFeatures(hero: np.array, templates):
 
             si_dict[folder]["image"] = SIGray
 
-            circles = cv2.HoughCircles(
-                SIGray,
-                cv2.HOUGH_GRADIENT,
-                # resolution of accumulator array.
-                dp=2.5,
-                minDist=100,
-                # number of pixels center of circles should be from each other,
-                #   hardcode
-                param1=50,
-                param2=100,
-                # HoughCircles will look for circles at minimum this size
-                minRadius=(70),
-                # HoughCircles will look for circles at maximum this size
-                maxRadius=(83))
+            # circles = cv2.HoughCircles(
+            #     SIGray,
+            #     cv2.HOUGH_GRADIENT,
+            #     # resolution of accumulator array.
+            #     dp=2.5,
+            #     minDist=100,
+            #     # number of pixels center of circles should be from each other,
+            #     #   hardcode
+            #     param1=50,
+            #     param2=100,
+            #     # HoughCircles will look for circles at minimum this size
+            #     minRadius=(70),
+            #     # HoughCircles will look for circles at maximum this size
+            #     maxRadius=(83))
 
-            if circles is not None:
-                circles = np.uint16(np.around(circles))
-                for i in circles[0, :]:
-                    cv2.circle(siImage, (i[0], i[1]), i[2], (0, 255, 0), 2)
+            # if circles is not None:
+            #     circles = np.uint16(np.around(circles))
+            #     for i in circles[0, :]:
+            #         cv2.circle(siImage, (i[0], i[1]), i[2], (0, 255, 0), 2)
 
-                    si_dict[folder]["circle"] = i
-                    si_dict[folder]["center"] = i[:2]
-                    print(folder, i)
+            #         si_dict[folder]["circle"] = i
+            #         si_dict[folder]["center"] = i[:2]
+            #         print(folder, i)
     circles = None
-    # (array([[[43.5, 37.5, 22.4]]], dtype=float32), {'maxRadius': 23, 'minRadius': 10, 'param2': 42, 'dp': 1.0}) albedo 450
-    # (array([[[41.5, 35.5, 22.4]]], dtype=float32), {'maxRadius': 23, 'minRadius': 10, 'param2': 40, 'dp': 1.0}) albedo 394
-    # (array([[[42.5, 36.5, 18.5]]], dtype=float32), {'maxRadius': 28, 'minRadius': 15, 'param2': 44, 'dp': 1.0}) alna 394
-    # (array([[[42.5, 36.5, 18.5]]], dtype=float32), {'maxRadius': 28, 'minRadius': 15, 'param2': 44, 'dp': 1.0})
+    # (array([[[43.5, 37.5, 22.4]]], dtype=float32), {'maxRadius': 23,
+    # 'minRadius': 10, 'param2': 42, 'dp': 1.0}) albedo 450
+    # (array([[[41.5, 35.5, 22.4]]], dtype=float32), {'maxRadius': 23,
+    # 'minRadius': 10, 'param2': 40, 'dp': 1.0}) albedo 394
+    # (array([[[42.5, 36.5, 18.5]]], dtype=float32), {'maxRadius': 28,
+    # 'minRadius': 15, 'param2': 44, 'dp': 1.0}) alna 394
+    # (array([[[42.5, 36.5, 18.5]]], dtype=float32), {'maxRadius': 28,
+    # 'minRadius': 15, 'param2': 44, 'dp': 1.0})
     # max, min, param2, dp
-    circleParams = [[23, 10, 48, 1.0], [23, 10, 42, 1.0],
-                    [23, 10, 40, 1.0], [28, 15, 32, 1.0]]
-    itr = 0
-    heroCircle = -1
-    while circles is None and itr < len(circleParams):
-        # print(circleParams)
-        circles = cv2.HoughCircles(
-            grayCopy,
-            cv2.HOUGH_GRADIENT,
-            # resolution of accumulator array.
-            dp=circleParams[itr][3],
-            minDist=100,
-            # number of pixels center of circles should be from each other,
-            #    hardcode
-            param1=50,
-            param2=circleParams[itr][2],
-            # HoughCircles will look for circles at minimum this size
-            minRadius=(circleParams[itr][1]),
-            # HoughCircles will look for circles at maximum this size
-            maxRadius=(circleParams[itr][0]))
+    # circleParams = [[23, 10, 48, 1.0], [23, 10, 42, 1.0],
+    #                 [23, 10, 40, 1.0], [28, 15, 32, 1.0]]
+    # itr = 0
+    # heroCircle = -1
+    # while circles is None and itr < len(circleParams):
+    #     # print(circleParams)
+    #     circles = cv2.HoughCircles(
+    #         grayCopy,
+    #         cv2.HOUGH_GRADIENT,
+    #         # resolution of accumulator array.
+    #         dp=circleParams[itr][3],
+    #         minDist=100,
+    #         # number of pixels center of circles should be from each other,
+    #         #    hardcode
+    #         param1=50,
+    #         param2=circleParams[itr][2],
+    #         # HoughCircles will look for circles at minimum this size
+    #         minRadius=(circleParams[itr][1]),
+    #         # HoughCircles will look for circles at maximum this size
+    #         maxRadius=(circleParams[itr][0]))
 
-        if circles is not None:
-            circles = np.uint16(np.around(circles))
-            for i in circles[0, :]:
-                cv2.circle(hero, (i[0]+offset, i[1]+offset),
-                           i[2], (0, 255, 0), 2)
-                heroCircle = i
-        itr += 1
-    if isinstance(heroCircle, int):
-        return heroCircle
+    #     if circles is not None:
+    #         circles = np.uint16(np.around(circles))
+    #         for i in circles[0, :]:
+    #             cv2.circle(hero, (i[0]+offset, i[1]+offset),
+    #                        i[2], (0, 255, 0), 2)
+    #             heroCircle = i
+    #     itr += 1
+    # if isinstance(heroCircle, int):
+    #     return heroCircle
 
     numberScore = {}
 
     for folderName, imageDict in si_dict.items():
         siImage = imageDict["template"]
-        circle = imageDict["circle"]
-        si_W, si_H, _ = siImage.shape
+        # circle = imageDict["circle"]
         # load.display_image(imageDict["mask"], display=True)
 
         # center_x = center[0]
         # center_y = center[1]
 
         # template radius
-        radius = circle[2]
-        heroRadius = heroCircle[2]
+        # radius = circle[2]
+        # heroRadius = heroCircle[2]
 
-        circleRatio = radius/heroRadius
+        # circleRatio = radius/heroRadius
         # print(circleRatio)
+        sourceSIImage = templates[folderName]["image"]
+        h = templates[folderName]["height"]
+        w = templates[folderName]["width"]
+        hero_h, hero_w = sourceSIImage.shape[:2]
+        print(folderName)
+        print("h", hero_h)
+        print("w", hero_w)
 
-        si_ratio = si_H / si_W
+        ratio_w = hero_w/w
+        print(ratio_w, hero_w, w)
+        ratio_h = hero_h/h
+        print(ratio_h, hero_h, h)
 
+        image_ratio = (ratio_w + ratio_h)/2
+
+        print(image_ratio)
+        print(siImage.shape, hero.shape)
         x, y, _ = hero.shape
         sizedROI = cv2.resize(
-            hero, (int(x * circleRatio), int(y * circleRatio)))
-        # print(sizedROI.shape, siImage.shape)
+            hero, (int(x * image_ratio), int(y * image_ratio)))
+        # print(siImage.shape, imageDict["mask"].shape)
         templateMatch = cv2.matchTemplate(
-            sizedROI, siImage, cv2.TM_CCOEFF_NORMED, mask=np.bitwise_not(imageDict["mask"]))
+            sizedROI, siImage, cv2.TM_CCOEFF_NORMED,
+            mask=np.bitwise_not(imageDict["mask"]))
 
         (_, score, _, _) = cv2.minMaxLoc(templateMatch)
         # print(folderName, score)
@@ -331,15 +363,38 @@ def signatureItemFeatures(hero: np.array, templates):
         #     display=True)
         numberScore[folderName] = score
     print(numberScore)
+
+    load.display_image(hero, display=True)
+
     return numberScore
+
 # def furnitureItemFeatures(hero: np.array):
 
-def getLevel():
-    # (hMin = 16 , sMin = 95, vMin = 129), (hMax = 27 , sMax = 138, vMax = 255)
 
-    
+# def getLevel(image: np.array, train=True):
+#     # (hMin = 16 , sMin = 95, vMin = 129), (hMax = 27 , sMax = 138, vMax = 255)
 
-def digitFeatures(digit: np.array):
+#     digitFeatures(, baseDir)
+#     if train:
+#         result = cv2.cvtColor(result, cv2.COLOR_BGR2GRAY)
+#         result = cv2.threshold(
+#             result, 0, 255, cv2.THRESH_OTSU + cv2.THRESH_BINARY)[1]
+
+#         digitCnts = cv2.findContours(
+#             mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+#         digitCnts = imutils.grab_contours(digitCnts)
+#         digitCnts = imutils.contours.sort_contours(digitCnts,
+#                                                    method="left-to-right")[0]
+#         digitText = []
+#         for digit in digitCnts:
+#             x, y, w, h = cv2.boundingRect(digit)
+#             if w > 6 and h > 12:
+#                 ROI = stamina_image[y:y+h, x:x+w]
+#                 # sizedROI = cv2.resize(ROI, (57, 88))
+#                 digitFeatures(ROI)
+
+
+def digitFeatures(digit: np.array, saveDir=None):
     """
     Save a presized digit to whatever number is entered
     Args:
@@ -350,13 +405,24 @@ def digitFeatures(digit: np.array):
         None
     """
 
-    baseDir = GV.numbersPath
-    os.listdir(baseDir)
+    baseDir = GV.staminaTemplatesPath
+    if saveDir:
+        baseDir = saveDir
+    digitFolders = os.listdir(baseDir)
     plt.figure()
     plt.imshow(digit)
-    print("Please enter the number shown in the image after you close it: ")
+    plt.ion()
+
     plt.show()
-    number = input()
+
+    number = input("Please enter the number shown in the image: ")
+
+    plt.close()
+
+    if number not in digitFolders:
+        print("No such folder {}".format(number))
+        number = "none"
+
     numberDir = os.path.join(baseDir, number)
     numberLen = str(len(os.listdir(numberDir)))
     numberName = os.path.join(numberDir, numberLen)
@@ -392,8 +458,6 @@ if __name__ == "__main__":
     staminaAreas = get_stamina_area(rows, heroesDict, stamina_image)
     staminaOutput = get_text(staminaAreas)
     output = {}
-
-    
 
     for name, text in staminaOutput.items():
         label = heroesDict[name]["label"]

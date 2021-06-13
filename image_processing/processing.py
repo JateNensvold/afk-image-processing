@@ -9,6 +9,10 @@ import os
 import image_processing.build_db as BD
 import image_processing.globals as GV
 import image_processing.processing as pr
+import image_processing.load_images as load
+import image_processing.stamina as stamina
+
+from typing import Sequence
 
 
 def grayscale(rgb_image: str) -> np.ndarray:
@@ -37,33 +41,47 @@ def load_image(image_path: str) -> np.ndarray:
     return io.imread(image_path)
 
 
-def blur_image(image: np.ndarray, dilate=False) -> np.ndarray:
+def blur_image(image: np.ndarray, dilate=False,
+               hsv_range: Sequence[np.array] = None) -> np.ndarray:
     """
+    Applies Gaussian Blurring or HSV thresholding to image in an attempt to
+        reduce noise in the image. Additionally dilation can be applied to
+        further reduce image noise when the dilation parameter is true
+
     Args:
-        image: grayscale image
-
+        image: BGR image
+        dilate: flag to dilate the image after applying noise reduction.
+        hsv_range: Sequence of 2 numpy arrays that represent the (lower, upper)
+            bounds of the HSV range to threshold on. If this argument is None
+            or False a gaussian blur will be used instead
+        
     Returns:
-        blurred and dilated image
+        Image with gaussianBlur/threshold applied to it
     """
+    if hsv_range:
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
-    # image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        output = cv2.inRange(image, hsv_range[0], hsv_range[1])
 
-    v = np.median(image)
-    sigma = 0.33
+    else:
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    # ---- apply optimal Canny edge detection using the computed median----
-    # automated
-    lower_thresh = int(max(0, (1.0 - sigma) * v))
-    upper_thresh = int(min(255, (1.0 + sigma) * v))
+        v = np.median(image)
+        sigma = 0.33
 
-    # preset
-    # lower_thresh = (hMin = 0 , sMin = 0, vMin = 0)
-# (hMin = 0 , sMin = 0, vMin = 0), (hMax = 179 , sMax = 255, vMax = 197)
+        # ---- apply optimal Canny edge detection using the computed median----
+        # automated
+        lower_thresh = int(max(0, (1.0 - sigma) * v))
+        upper_thresh = int(min(255, (1.0 + sigma) * v))
 
-    neighborhood_size = 7
-    blurred = cv2.GaussianBlur(
-        image, (neighborhood_size, neighborhood_size), 0)
-    output = cv2.Canny(blurred, lower_thresh, upper_thresh, 1)
+        # preset
+        # lower_thresh = (hMin = 0 , sMin = 0, vMin = 0)
+    # (hMin = 0 , sMin = 0, vMin = 0), (hMax = 179 , sMax = 255, vMax = 197)
+
+        neighborhood_size = 7
+        blurred = cv2.GaussianBlur(
+            image, (neighborhood_size, neighborhood_size), 0)
+        output = cv2.Canny(blurred, lower_thresh, upper_thresh, 1)
     # print("Gaussian")
     # plt.figure()
     # plt.imshow(canny)
@@ -87,8 +105,9 @@ def blur_image(image: np.ndarray, dilate=False) -> np.ndarray:
     # plt.imshow(dilate)
     # plt.show()
     if dilate:
-        kernel = np.ones((5, 5), np.uint8)
+        kernel = np.ones((1, 1), np.uint8)
         return cv2.dilate(output, kernel, iterations=1)
+
     return output
 
 
@@ -155,10 +174,18 @@ def remove_background(img):
 
 
 def getHeroContours(image: np.array, sizeAllowanceBoundary, **blurKwargs):
+    """
+    Args:
+        image: hero roster screenshot
 
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    Return:
+        dict with imageSize as key and coordinates(h, w, x, y) as values
+    """
 
-    dilate = blur_image(gray, **blurKwargs)
+    dilate = blur_image(image, **blurKwargs)
+
+    if GV.DEBUG:
+        load.display_image(dilate, display=True)
 
     # Find contours
     cnts = cv2.findContours(dilate, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -171,16 +198,18 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, **blurKwargs):
     widths = []
     customContour = []
     for c in cnts:
+
         x, y, w, h = cv2.boundingRect(c)
         diff = abs(h-w)
         avg_h_w = ((h+w)/2)
         tolerance = avg_h_w * 0.2
 
+        if GV.DEBUG:
+            cv2.rectangle(image, (x, y), (x+w, y+h), (0, 0, 255), 2)
+
         if diff < tolerance and (h*w) > 2500:
 
-            x = x
-            a = x+w
-            y = y
+            a = x + w
             b = y + h
 
             outside = []
@@ -206,6 +235,8 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, **blurKwargs):
             widths.append(w)
 
         image_number += 1
+    if GV.DEBUG:
+        load.display_image(image, display=True)
 
     # mean = np.mean([i for i in sizes.keys()])
     h_mean = np.median(heights)
@@ -230,18 +261,21 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, **blurKwargs):
                     valid_sizes[size] = []
                 valid_sizes[size].append(i)
 
-    length = 0
-    for i in sizes.values():
-        length += len(i)
+    length = len(cnts)
+    # for i in sizes.values():
+    #     length += len(i)
     print("occurrences: {}/{} {}%".format(occurrences,
           length, occurrences/length * 100))
     # print("sizes", sorted(valid_sizes))
     return valid_sizes
 
 
-def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
+def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
               maxHeroes: bool = True,
-              removeBG: bool = False):
+              hsv_range: bool = False,
+              removeBG: bool = False,
+              si_adjustment: int = 0.1,
+              row_elim: int = 3):
     """
     Parse a screenshot or image of an AFK arena hero roster into sub
         components that represent all the heroes in the image
@@ -254,6 +288,11 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
             preprocessing algorithms to find the maximum number of valid heroes
         removeBG: flag to attempt to remove the background from each hero
             returned
+        si_adjustment: percent of the image dimensions to take on the left and
+            top side of the image to ensure si30/40 encapsulation during hero
+            detection
+        row_elim: minimum row size to allow (helps eliminate false positives
+            that are near the same size as the median hero detection)
     Return:
         dictionary of subimages that represent all heroes from the passed in
             'image'
@@ -264,48 +303,36 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
     baseArgs = (image, sizeAllowanceBoundary)
     if maxHeroes:
         multiValid = []
-        multiValid.append(getHeroContours(*baseArgs, dilate=True))
-        multiValid.append(getHeroContours(*baseArgs))
+        # multiValid.append(getHeroContours(*baseArgs, dilate=True))
+
+        multiValid.append(getHeroContours(
+            *baseArgs, hsv_range=hsv_range, dilate=True))
+
+        # multiValid.append(getHeroContours(*baseArgs))
 
         multiValid = sorted(multiValid, key=lambda x: len(x), reverse=True)
         valid_sizes = multiValid[0]
     else:
         valid_sizes = getHeroContours(*baseArgs)
 
-    # ----------------------
-    # import image_processing.globals as GV
-    # import image_processing.load_images as load
-    # import os
-    # si_dict = []
-    # baseSIDir = GV.siPath
-
-    # siFolders = os.listdir(baseSIDir)
-    # for folder in siFolders:
-    #     SIDir = os.path.join(baseSIDir, folder)
-    #     SIPhotos = os.listdir(SIDir)
-    #     for imageName in SIPhotos:
-
-    #         siImage = cv2.imread(os.path.join(
-    #             baseSIDir, folder, imageName))
-    #         # if folder not in si_dict:
-    #         #     si_dict[folder] = {}
-    #         # si_dict[imageName] = siImage
-    #         si_dict.append(siImage)
-    #         # plt.imshow(siImage)
-    # plt.show()
-    # ----------------------
-
-    # siDB = load.build_flann(siImage)
-
     for size, dimensions in valid_sizes.items():
         for d in dimensions:
-            ROI = original[d[3]:
-                           d[3]+d[0],
-                           d[2]:
-                           d[2]+d[1]]
-
-            # plt.imshow(ROI)
-            # plt.show()
+            # h, w, x, y
+            x = d[2]
+            w = d[1]
+            y = d[3]
+            h = d[0]
+            if si_adjustment:
+                x_adjust = int(w * si_adjustment)
+                y_adjust = int(h * si_adjustment)
+                x2 = x+w
+                y2 = y+h
+                x = max(0, x-x_adjust)
+                y = max(0, y-y_adjust)
+            ROI = original[y:
+                           y2,
+                           x:
+                           x2]
 
             # staminaLib.signatureItemFeatures(ROI)
 
@@ -325,8 +352,18 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
             heroes[name]["dimensions"] = {}
             heroes[name]["dimensions"]["y"] = (d[3], d[3]+d[0])
             heroes[name]["dimensions"]["x"] = (d[2], d[2]+d[1])
+    rows = stamina.generate_rows(heroes)
+    row_delete = []
+    for index in range(len(rows)):
+        if len(rows[index]) < row_elim:
+            row_delete.append(index)
+    for row_num in row_delete[::-1]:
+        for heroTuple in rows[row_num]:
+            name = heroTuple[1]
+            del heroes[name]
+        del rows[row_num]
 
-    return heroes
+    return heroes, rows
 
 
 if __name__ == "__main__":

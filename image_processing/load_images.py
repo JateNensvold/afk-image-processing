@@ -8,16 +8,20 @@ import collections
 
 import image_processing.processing as processing
 import image_processing.database.imageDB as imageSearchDB
+import image_processing.globals as GV
 
 
-def display_image(image, multiple=False, display=False):
+def display_image(image, multiple=False, display=GV.DEBUG, color_correct=True):
     if not display:
         return
+
+    if multiple:
+        image = concat_resize(image)
+    elif color_correct and len(image.shape) == 3:
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     plt.ion()
 
     plt.figure()
-    if multiple:
-        image = concat_resize(image)
     plt.imshow(image)
 
     plt.show()
@@ -242,20 +246,30 @@ def concat_resize(img_list, interpolation=cv2.INTER_CUBIC):
         width_dist = w_max - int(width/ratio)
         height_dist = h_max - height
 
-        if width_dist < height_dist:
-            resize = cv2.resize(img,
-                                (w_max, min(h_max, int(height*w_max/width))),
-                                interpolation=interpolation)
-        else:
-            resize = cv2.resize(img,
-                                (min(w_max, int(width*h_max/height)), h_max),
-                                interpolation=interpolation)
+        scale = h_max/height
+        resize = cv2.resize(img, (int(width * scale), int(height * scale)),
+                            interpolation=interpolation)
+        # if width_dist < height_dist:
+        #     resize = cv2.resize(img,
+        #                         (w_max, min(h_max, int(height*w_max/width))),
+        #                         interpolation=interpolation)
+        # else:
+        #     resize = cv2.resize(img,
+        #                         (min(w_max, int(width*h_max/height)), h_max),
+        #                         interpolation=interpolation)
 
         new_h, new_w = resize.shape[:2]
 
         canvas = np.zeros((h_max, new_w, 3))
+        shapeSize = len(resize.shape)
+        if len(resize.shape) == 2:
+            resize = cv2.merge([resize, resize, resize])
 
-        canvas[0:new_h, 0:new_w, 0:3] = resize
+        if shapeSize < 3:
+            canvas[0:new_h, 0:new_w] = resize
+        else:
+            canvas[0:new_h, 0:new_w, 0:3] = resize
+
         im_list_resize.append(canvas)
 
     return np.hstack(im_list_resize).astype(np.uint8)

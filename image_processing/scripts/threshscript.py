@@ -9,10 +9,10 @@ def nothing(x):
 
 # Load in image
 image = cv2.imread(
-    "/home/nate/projects/afk-image-processing/image_processing/image0.png")
+    "/home/nate/projects/afk-image-processing/test_2.jpg")
 # Create a window
-cv2.namedWindow('image')
-
+cv2.namedWindow('image', cv2.WINDOW_NORMAL)
+# cv2.window
 # create trackbars for color change
 # Hue is from 0-179 for Opencv
 cv2.createTrackbar('HMin', 'image', 0, 179, nothing)
