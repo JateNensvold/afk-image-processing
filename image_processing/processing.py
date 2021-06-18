@@ -42,7 +42,8 @@ def load_image(image_path: str) -> np.ndarray:
 
 
 def blur_image(image: np.ndarray, dilate=False,
-               hsv_range: Sequence[np.array] = None) -> np.ndarray:
+               hsv_range: Sequence[np.array] = None,
+               reverse: bool = False) -> np.ndarray:
     """
     Applies Gaussian Blurring or HSV thresholding to image in an attempt to
         reduce noise in the image. Additionally dilation can be applied to
@@ -54,14 +55,30 @@ def blur_image(image: np.ndarray, dilate=False,
         hsv_range: Sequence of 2 numpy arrays that represent the (lower, upper)
             bounds of the HSV range to threshold on. If this argument is None
             or False a gaussian blur will be used instead
-        
+        reverse: flag to bitwise_not the image after applying hsv_range
+
     Returns:
         Image with gaussianBlur/threshold applied to it
     """
+
+    # (hMin = 0 , sMin = 0, vMin = 150), (hMax = 179 , sMax = 255, vMax = 255)
+    lower_hsv_filter = np.array([0, 0, 150])
+    upper_hsv_filter = np.array([179, 255, 255])
+    hvs_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    output = cv2.inRange(hvs_image, lower_hsv_filter, upper_hsv_filter)
+    # output = cv2.cvtColor(output, cv2.COLOR_BGR2GRAY)
+    _, output = cv2.threshold(output, 3, 255, cv2.THRESH_BINARY)
+    # cv2.COLOR_HSV2
+    # load.display_image(output, color_correct=True)
+    mask_inv = cv2.bitwise_not(output)
+    load.display_image(mask_inv)
+
     if hsv_range:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
         output = cv2.inRange(image, hsv_range[0], hsv_range[1])
+        if reverse:
+            output = cv2.bitwise_not(output)
 
     else:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -236,7 +253,7 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, **blurKwargs):
 
         image_number += 1
     if GV.DEBUG:
-        load.display_image(image, display=True)
+        load.display_image(image)
 
     # mean = np.mean([i for i in sizes.keys()])
     h_mean = np.median(heights)
@@ -253,8 +270,9 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, **blurKwargs):
     occurrences = 0
     valid_sizes = {}
     for size, dimensions in sizes.items():
+
         for i in dimensions:
-            if (h_low <= i[0] <= h_high) and \
+            if (h_low <= i[0] <= h_high) or \
                     (w_low <= i[1] <= w_high):
                 occurrences += 1
                 if size not in valid_sizes:
@@ -272,10 +290,11 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, **blurKwargs):
 
 def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
               maxHeroes: bool = True,
-              hsv_range: bool = False,
+              #   hsv_range: bool = False,
               removeBG: bool = False,
               si_adjustment: int = 0.1,
-              row_elim: int = 3):
+              row_elim: int = 3,
+              blur_args: dict = {}):
     """
     Parse a screenshot or image of an AFK arena hero roster into sub
         components that represent all the heroes in the image
@@ -289,29 +308,35 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
         removeBG: flag to attempt to remove the background from each hero
             returned
         si_adjustment: percent of the image dimensions to take on the left and
-            top side of the image to ensure si30/40 encapsulation during hero
-            detection
+            top side of the image to ensure si30/40 capture during hero
+            detection(False/None for no adjustment)
         row_elim: minimum row size to allow (helps eliminate false positives
-            that are near the same size as the median hero detection)
+            i.e. similar size shapes as median hero shape) that are near the
+            same size as the median hero detection)
+        blur_args: keyword arguments for `processing.blur_image` method
+
     Return:
         dictionary of subimages that represent all heroes from the passed in
             'image'
     """
-    original = image.copy()
+    original_modifiable = image.copy()
+    original_unmodifiable = image.copy()
+
     heroes = {}
     valid_sizes = {}
-    baseArgs = (image, sizeAllowanceBoundary)
+    baseArgs = (original_modifiable, sizeAllowanceBoundary)
     if maxHeroes:
         multiValid = []
         # multiValid.append(getHeroContours(*baseArgs, dilate=True))
-
+        # blur_args["dilate"] = True
         multiValid.append(getHeroContours(
-            *baseArgs, hsv_range=hsv_range, dilate=True))
+            *baseArgs, **blur_args))
 
         # multiValid.append(getHeroContours(*baseArgs))
 
         multiValid = sorted(multiValid, key=lambda x: len(x), reverse=True)
         valid_sizes = multiValid[0]
+
     else:
         valid_sizes = getHeroContours(*baseArgs)
 
@@ -322,6 +347,8 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
             w = d[1]
             y = d[3]
             h = d[0]
+            y2 = y + h
+            x2 = x + w
             if si_adjustment:
                 x_adjust = int(w * si_adjustment)
                 y_adjust = int(h * si_adjustment)
@@ -329,10 +356,10 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
                 y2 = y+h
                 x = max(0, x-x_adjust)
                 y = max(0, y-y_adjust)
-            ROI = original[y:
-                           y2,
-                           x:
-                           x2]
+            ROI = original_unmodifiable[y:
+                                        y2,
+                                        x:
+                                        x2]
 
             # staminaLib.signatureItemFeatures(ROI)
 
@@ -344,6 +371,7 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
             if removeBG:
 
                 out, poly = remove_background(ROI)
+
                 heroes[name]["image"] = out
                 heroes[name]["poly"] = poly
             else:
@@ -362,6 +390,11 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
             name = heroTuple[1]
             del heroes[name]
         del rows[row_num]
+
+    # if GV.DEBUG:
+    #     for _row in rows:
+    #         for _hero in _row:
+    #             load.display_image(_hero[2])
 
     return heroes, rows
 

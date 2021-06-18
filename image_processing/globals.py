@@ -1,6 +1,21 @@
 import os
+import cv2
+import argparse
+parser = argparse.ArgumentParser(description='AFK arena object extraction and '
+                                 'image analysis.')
+parser.add_argument("-d", "--DEBUG", help="Runs the program in debug mode,"
+                    "prints verbose output and displays incremental image"
+                    "analysis", action="store_true")
 
-DEBUG = True
+parser.add_argument("-i", "--image", help="Path to Hero Roster Screen shot")
+
+args = parser.parse_args()
+
+DEBUG = args.DEBUG
+image_ss = None
+if args.image:
+    image_ss = cv2.imread(args.image)
+# DEBUG = True
 # DEBUG = False
 
 

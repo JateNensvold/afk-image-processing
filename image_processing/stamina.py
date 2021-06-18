@@ -161,24 +161,42 @@ def get_text(staminaAreas: dict, train: bool = False):
     return output
 
 
-def signatureItemFeatures(hero: np.array, templates):
+def signatureItemFeatures(hero: np.array, templates: dict,
+                          lvlRatioDict: dict = None):
+    """
+    Runs template matching SI identification against the 'hero' passed in.
+        When lvlRatioDict is passed in the templates will be rescaled to
+        attempt and find the best template size for detecting SI objects
+
+    Args:
+        hero: np.array(x,y.3) representing an rgb image
+        templates: dictionary of information about each SI template to get ran
+            against the image
+        lvlRatioDict: dictionary that contains the predicted height of each
+            signature item based on precomputed text to si scaling calculations
+    Returns:
+        dictionary with best "score" that each template achieved on the 'hero'
+            image
+    """
     x, y, _ = hero.shape
     print(x, y)
-    x_div = 2.8
+    x_div = 2.4
     y_div = 2.0
     offset = 10
-    newHero = hero[offset: int(y/y_div), offset: int(x/x_div)]
+    hero_copy = hero.copy()
+
+    hero = hero[0: int(y/y_div), 0: int(x/x_div)]
 
     print("hero", hero.shape)
 
     si_dict = {}
-    baseSIDir = GV.siPath
+    # baseSIDir = GV.siPath
 
     siFolders = os.listdir(GV.siBasePath)
 
-    imgCopy1 = newHero.copy()
-    grayCopy = cv2.cvtColor(imgCopy1, cv2.COLOR_BGR2GRAY)
-    count = 0
+    # imgCopy1 = newHero.copy()
+    # grayCopy = cv2.cvtColor(imgCopy1, cv2.COLOR_BGR2GRAY)
+    # count = 0
     for folder in siFolders:
         SIDir = os.path.join(GV.siBasePath, folder)
         SIPhotos = os.listdir(SIDir)
@@ -249,122 +267,83 @@ def signatureItemFeatures(hero: np.array, templates):
 
             si_dict[folder]["image"] = SIGray
 
-            # circles = cv2.HoughCircles(
-            #     SIGray,
-            #     cv2.HOUGH_GRADIENT,
-            #     # resolution of accumulator array.
-            #     dp=2.5,
-            #     minDist=100,
-            #     # number of pixels center of circles should be from each other,
-            #     #   hardcode
-            #     param1=50,
-            #     param2=100,
-            #     # HoughCircles will look for circles at minimum this size
-            #     minRadius=(70),
-            #     # HoughCircles will look for circles at maximum this size
-            #     maxRadius=(83))
-
-            # if circles is not None:
-            #     circles = np.uint16(np.around(circles))
-            #     for i in circles[0, :]:
-            #         cv2.circle(siImage, (i[0], i[1]), i[2], (0, 255, 0), 2)
-
-            #         si_dict[folder]["circle"] = i
-            #         si_dict[folder]["center"] = i[:2]
-            #         print(folder, i)
-    circles = None
-    # (array([[[43.5, 37.5, 22.4]]], dtype=float32), {'maxRadius': 23,
-    # 'minRadius': 10, 'param2': 42, 'dp': 1.0}) albedo 450
-    # (array([[[41.5, 35.5, 22.4]]], dtype=float32), {'maxRadius': 23,
-    # 'minRadius': 10, 'param2': 40, 'dp': 1.0}) albedo 394
-    # (array([[[42.5, 36.5, 18.5]]], dtype=float32), {'maxRadius': 28,
-    # 'minRadius': 15, 'param2': 44, 'dp': 1.0}) alna 394
-    # (array([[[42.5, 36.5, 18.5]]], dtype=float32), {'maxRadius': 28,
-    # 'minRadius': 15, 'param2': 44, 'dp': 1.0})
-    # max, min, param2, dp
-    # circleParams = [[23, 10, 48, 1.0], [23, 10, 42, 1.0],
-    #                 [23, 10, 40, 1.0], [28, 15, 32, 1.0]]
-    # itr = 0
-    # heroCircle = -1
-    # while circles is None and itr < len(circleParams):
-    #     # print(circleParams)
-    #     circles = cv2.HoughCircles(
-    #         grayCopy,
-    #         cv2.HOUGH_GRADIENT,
-    #         # resolution of accumulator array.
-    #         dp=circleParams[itr][3],
-    #         minDist=100,
-    #         # number of pixels center of circles should be from each other,
-    #         #    hardcode
-    #         param1=50,
-    #         param2=circleParams[itr][2],
-    #         # HoughCircles will look for circles at minimum this size
-    #         minRadius=(circleParams[itr][1]),
-    #         # HoughCircles will look for circles at maximum this size
-    #         maxRadius=(circleParams[itr][0]))
-
-    #     if circles is not None:
-    #         circles = np.uint16(np.around(circles))
-    #         for i in circles[0, :]:
-    #             cv2.circle(hero, (i[0]+offset, i[1]+offset),
-    #                        i[2], (0, 255, 0), 2)
-    #             heroCircle = i
-    #     itr += 1
-    # if isinstance(heroCircle, int):
-    #     return heroCircle
-
     numberScore = {}
 
-    for folderName, imageDict in si_dict.items():
-        siImage = imageDict["template"]
-        # circle = imageDict["circle"]
-        # load.display_image(imageDict["mask"], display=True)
+    for folder_name, imageDict in si_dict.items():
+        si_image = imageDict["template"]
 
-        # center_x = center[0]
-        # center_y = center[1]
-
-        # template radius
-        # radius = circle[2]
-        # heroRadius = heroCircle[2]
-
-        # circleRatio = radius/heroRadius
-        # print(circleRatio)
-        sourceSIImage = templates[folderName]["image"]
-        h = templates[folderName]["height"]
-        w = templates[folderName]["width"]
+        sourceSIImage = templates[folder_name]["image"]
         hero_h, hero_w = sourceSIImage.shape[:2]
-        print(folderName)
-        print("h", hero_h)
-        print("w", hero_w)
 
-        ratio_w = hero_w/w
-        print(ratio_w, hero_w, w)
-        ratio_h = hero_h/h
-        print(ratio_h, hero_h, h)
+        original_height, original_width = si_image.shape[:2]
 
-        image_ratio = (ratio_w + ratio_h)/2
+        base_height_ratio = original_height/hero_h
 
-        print(image_ratio)
-        print(siImage.shape, hero.shape)
-        x, y, _ = hero.shape
-        sizedROI = cv2.resize(
-            hero, (int(x * image_ratio), int(y * image_ratio)))
+        # resize_height
+        base_new_height = round(lvlRatioDict[folder_name]["height"])
+        new_height = round(base_new_height * base_height_ratio)
+        scale_ratio = new_height/original_height
+        new_width = round(original_width * scale_ratio)
+        print(folder_name, scale_ratio, base_new_height, base_height_ratio)
+        print(folder_name, original_height, original_width)
+
+        print(folder_name, new_height, new_width)
+        # load.display_image(siImage)
+        si_image = cv2.resize(
+            si_image, (new_width, new_height))
+        si_image_gray = cv2.cvtColor(si_image, cv2.COLOR_BGR2GRAY)
+        hero_gray = cv2.cvtColor(hero, cv2.COLOR_BGR2GRAY)
+        # load.display_image(siImage)
+        mask = cv2.resize(
+            imageDict["mask"], (new_width, new_height))
+        mask_gray = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
+
+        # siImage = imutils.resize(siImage, height=round(avg_height))
+        # mask = imutils.resize(np.bitwise_not(
+        #     imageDict["mask"]), height=round(avg_height))
+        height, width = si_image.shape[:2]
+
+        print(folder_name, height, width)
+
+        # sizedROI = cv2.resize(
+        #     hero, (int(x * image_ratio), int(y * image_ratio)))
         # print(siImage.shape, imageDict["mask"].shape)
+        if folder_name != "0":
+            mask_gray = cv2.bitwise_not(mask_gray)
+        # load.display_image(
+        #     [si_image_gray, mask_gray], multiple=True,
+        #     display=True)
         templateMatch = cv2.matchTemplate(
-            sizedROI, siImage, cv2.TM_CCOEFF_NORMED,
-            mask=np.bitwise_not(imageDict["mask"]))
+            hero_gray, si_image_gray, cv2.TM_CCOEFF_NORMED,
+            mask=mask_gray)
 
-        (_, score, _, _) = cv2.minMaxLoc(templateMatch)
+        (_, score, _, scoreLoc) = cv2.minMaxLoc(templateMatch)
+        scoreLoc
+        coords = (scoreLoc[0] + width, scoreLoc[1] + height)
+
+        cv2.rectangle(hero_copy, scoreLoc, coords, (255, 0, 0), 1)
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        fontScale = 0.5
+        color = (255, 0, 0)
+        thickness = 2
+
+        cv2.putText(
+            hero_copy, folder_name, coords, font, fontScale, color, thickness,
+            cv2.LINE_AA)
+
+    #     top_left = max_loc
+    # bottom_right = (top_left[0] + w, top_left[1] + h)
+
         # print(folderName, score)
         # print(siImage.shape, imageDict["mask"].shape)
 
         # load.display_image(
         #     [sizedROI, siImage], multiple=True,
         #     display=True)
-        numberScore[folderName] = score
+        numberScore[folder_name] = score
     print(numberScore)
 
-    load.display_image(hero, display=True)
+    load.display_image(hero_copy)
 
     return numberScore
 
