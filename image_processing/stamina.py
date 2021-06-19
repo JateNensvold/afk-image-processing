@@ -17,6 +17,208 @@ def sort_row(row: list, heroes: dict):
     return sorted(row, key=lambda x: heroes[x[1]]["dimensions"]["x"][0])
 
 
+class row():
+    """
+    """
+
+    def __str__(self):
+        return "".join([str(_row) for _row in self._list])
+
+    def __iter__(self):
+        return self
+
+    def __next__(self) -> tuple:
+        self._idx += 1
+        try:
+            return self._list[self._idx - 1]
+        except IndexError:
+            self._idx = 0
+            raise StopIteration
+
+    def __len__(self):
+        return len(self._list)
+
+    def __init__(self):
+        self._items = {}
+        self._list = []
+        self._idx = 0
+
+        self.head = None
+
+    def get_head(self):
+        return self.head
+
+    def get(self, name: str):
+        """
+        Get an item by its associated name
+        Args:
+            name: name of image that is associated with location in row
+
+        Returns tuple(x_coord, y_coord, image_name), index
+        """
+        _index = self._items[name]
+        return self._list[_index], _index
+
+    def __getitem__(self, index: int):
+        """
+        Get an item by its index
+        Args:
+            index: position of item in row
+
+        Returns tuple(x_coord, y_coord, image_name)
+        """
+        return self._list[index]
+
+    def append(self, dimensions, name, detect_collision=True):
+        """
+        Adds a new entry to Row
+        Args:
+            dimensions: x,y,w,h of object
+            name: identifier for row item, can be used for lookup later
+            detect_collision: check for object overlap/collisions when
+                appending to row
+        Return:
+            None
+        """
+        if len(self._list) == 0:
+            self.head = dimensions[1]
+        self._items[name] = len(self._items)
+        if detect_collision:
+            if self.check_collision((dimensions, name)) == -1:
+                self._list.append((dimensions, name))
+        else:
+            self._list.append((dimensions, name))
+
+    def check_collision(self, collision_object: tuple) -> int:
+        """
+        Check if collision_object's dimensions overlap with any of the objects
+            in the row object, and merge collision_object with overlaping
+            object if collisions is detected
+
+        Args:
+            collision_object: new row object to check against existing row
+                objects
+        Return: index of updated row object when collisions occurs, -1
+            otherwise
+        """
+
+        for _index, _row_object in enumerate(self._list):
+            ax1 = _row_object[0][0]
+            ax2 = _row_object[0][0] + _row_object[0][2]
+            ay1 = _row_object[0][1]
+            ay2 = _row_object[0][1] + _row_object[0][3]
+
+            bx1 = collision_object[0][0]
+            bx2 = collision_object[0][0] + collision_object[0][2]
+            by1 = collision_object[0][1]
+            by2 = collision_object[0][1] + collision_object[0][3]
+
+            if ax1 < bx2 and ax2 > bx1 and ay1 < by2 and ay2 > by1:
+                new_x1 = min(ax1, bx1)
+                new_y1 = min(ay1, by1)
+                new_x2 = max(ax2, bx2)
+                new_y2 = max(ay2, by2)
+
+                dimensions = (new_x1, new_y1, new_x2-new_x1, new_y2-new_y1)
+                self._list[_index] = (dimensions, _row_object[1])
+                return _index
+        return -1
+
+    def sort(self):
+        '''
+        Sort the internal data structure by x coordinate of each item
+
+        Args:
+            None
+        Return:
+            None
+        '''
+        self._list.sort(key=lambda x: x[0][0])
+        for _index, _entry in enumerate(self._list):
+            self._items[_entry[1]] = _index
+
+
+class matrix():
+    """
+    """
+
+    def __str__(self):
+        return "\n".join([str(_row) for _row in self._row_list])
+
+    def __iter__(self):
+        return self
+
+    def __next__(self) -> row:
+        self._idx += 1
+        try:
+            return self._row_list[self._idx - 1]
+        except IndexError:
+            self._idx = 0
+            raise StopIteration
+
+    def __len__(self):
+        return len(self._row_list)
+
+    def __init__(self, spacing=10):
+        self.spacing = spacing
+        self._heads = {}
+        self._row_list = []
+        self._idx = 0
+
+    def auto_append(self, dimensions, name, detect_collision=True):
+        """
+        Add a new entry into the matrix, either creating a new row or adding to
+            an existing row depending on `spacing` settings and distance.
+        Args:
+            dimensions: x,y,w,h of object
+            name: identifier for object
+            detect_collision: check for object overlap/collisions when
+                appending to row
+        Return:
+            None
+        """
+        # self._lists.append(row)
+        y = dimensions[1]
+        _row_index = None
+        for _index, _head in self._heads.items():
+            # If there are no close rows set flag to create new row
+            if abs(_head() - y) < self.spacing:
+                _row_index = _index
+                break
+        if _row_index is not None:
+            self._row_list[_row_index].append(
+                dimensions, name, detect_collision=detect_collision)
+        else:
+            _temp_row = row()
+            _temp_row.append(dimensions, name,
+                             detect_collision=detect_collision)
+            self._heads[len(self._row_list)] = _temp_row.get_head
+            self._row_list.append(_temp_row)
+
+    def sort(self):
+        for _row in self._row_list:
+            _row.sort()
+        self._row_list.sort(key=lambda _row: _row.head)
+
+    def prune(self, threshold):
+        """
+        Remove all rows that have a length less than the `threshold`
+
+        Args:
+            threshold: limit that determines if a row should be pruned when
+                its length is less than this
+        Return:
+            None
+        """
+        _prune_list = []
+        for _index, _row_object in enumerate(self._row_list):
+            if len(_row_object) < threshold:
+                _prune_list.append(_index)
+        for _index in _prune_list:
+            self._row_list.remove(_index)
+            del self._heads[_index]
+
+
 def generate_rows(heroes: dict, spacing: int = 10):
     """
     Args:
@@ -29,9 +231,9 @@ def generate_rows(heroes: dict, spacing: int = 10):
     """
     rows = []
     heads = {}
-    count = 0
     for k, v in heroes.items():
         y = v["dimensions"]["y"][0]
+        x = v["dimensions"]["x"][0]
 
         closeRow = False
         index = None
@@ -43,21 +245,26 @@ def generate_rows(heroes: dict, spacing: int = 10):
                 break
 
         if not closeRow:
-            rows.append([])
+            rows.append(row())
             heads[y] = len(rows) - 1
             index = heads[y]
-        if "label" in v:
-            label = v["label"]
-        else:
-            label = str(count)
-        rows[index].append((label, k, v["image"]))
-        count += 1
+        rows[index].append(x, y, k)
     rows = sorted(rows, key=lambda x: heroes[x[0][1]]["dimensions"]["y"][0])
     for i in range(len(rows)):
         newRow = sort_row(rows[i], heroes)
         rows[i] = newRow
 
     return rows
+
+
+# def merge_rows(*args):
+#     master_row = []
+#     for head, headIndex in heads.items():
+#         # If there are no close rows set flag to create new row
+#         if abs(head - y) < spacing:
+#             closeRow = True
+#             index = headIndex
+#             break
 
 
 def get_stamina_area(rows: list, heroes: dict, sourceImage: np.array):

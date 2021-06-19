@@ -117,11 +117,13 @@ if __name__ == "__main__":
 
 
     # (hMin = 5 , sMin = 79, vMin = 211), (hMax = 21 , sMax = 106, vMax = 250)
-    lower_hsv = np.array([5, 79, 211])
-    upper_hsv = np.array([21, 106, 250])
+    lower_hsv = np.array([0, 0, 0])
+    upper_hsv = np.array([179, 255, 192])
+
+# (hMin = 0 , sMin = 0, vMin = 0), (hMax = 179 , sMax = 255, vMax = 192)
 
     hsv_range = [lower_hsv, upper_hsv]
-    blur_args = {"hsv_range": hsv_range, "reverse": True}
+    blur_args = {"hsv_range": hsv_range}
     heroesDict, rows = processing.getHeroes(
         hero_ss, si_adjustment=0, blur_args=blur_args)
     # import sys

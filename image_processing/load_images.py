@@ -11,7 +11,7 @@ import image_processing.database.imageDB as imageSearchDB
 import image_processing.globals as GV
 
 
-def display_image(image, multiple=False, display=GV.DEBUG, color_correct=True):
+def display_image(image, multiple=False, display=GV.DEBUG, color_correct=True, colormap=None):
     if not display:
         return
 
@@ -22,7 +22,11 @@ def display_image(image, multiple=False, display=GV.DEBUG, color_correct=True):
     plt.ion()
 
     plt.figure()
-    plt.imshow(image)
+    if colormap:
+        plt.imshow(image, cmap="gray")
+
+    else:
+        plt.imshow(image)
 
     plt.show()
     input('Press any key to continue...')
