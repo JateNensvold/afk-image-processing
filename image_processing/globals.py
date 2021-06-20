@@ -33,5 +33,7 @@ siPath = os.path.join(baseDir, "si")
 siTrainPath = os.path.join(siPath, "train")
 siBasePath = os.path.join(siPath, "base")
 fiPath = os.path.join(baseDir, "fi")
+fi_train_path = os.path.join(fiPath, "train")
+
 
 lvlPath = os.path.join(baseDir, "levels")
