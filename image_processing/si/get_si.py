@@ -115,7 +115,6 @@ if __name__ == "__main__":
     # lower_hsv = np.array([12, 75, 212])
     # upper_hsv = np.array([23, 109, 253])
 
-
     # (hMin = 5 , sMin = 79, vMin = 211), (hMax = 21 , sMax = 106, vMax = 250)
     lower_hsv = np.array([0, 0, 0])
     upper_hsv = np.array([179, 255, 192])
@@ -189,8 +188,9 @@ if __name__ == "__main__":
         # siScript.getLevelDigit(v["image"], ,train=False)
         si_scores = stamina.signatureItemFeatures(
             v["image"], baseImages, graded_avg_bin)
-        x = heroesDict[k]["dimensions"]["x"]
-        y = heroesDict[k]["dimensions"]["y"]
+        x = heroesDict[k]["object"][0][0]
+        y = heroesDict[k]["object"][0][1]
+
         if si_scores == -1:
             circle_fail += 1
             best_si = "none"
@@ -210,7 +210,7 @@ if __name__ == "__main__":
                 if best_si_score < 0.4:
                     best_si = "n/a"
 
-        coords = (x[0], y[0])
+        coords = (x, y)
         # name = "{},{}".format(name, best_si)
         name = "{}".format(best_si)
 

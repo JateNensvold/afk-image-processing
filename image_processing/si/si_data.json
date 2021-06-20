@@ -1,1 +1,3450 @@
-{"info": {"description": "AFK Arena Hero Info Dataset", "url": "https://github.com/JateNensvold/afk-image-processing", "version": "0.1.0", "year": 2021, "contributor": "jatenensvold", "date_created": "2021-06-06 22:34:21.853554"}, "licenses": [{"id": 1, "name": "Attribution-NonCommercial-ShareAlike License", "url": "http://creativecommons.org/licenses/by-nc-sa/2.0/"}], "categories": [{"id": 0, "name": "none_si", "supercategory": "si"}, {"id": 1, "name": "0_si", "supercategory": "si"}, {"id": 2, "name": "10_si", "supercategory": "si"}, {"id": 3, "name": "20_si", "supercategory": "si"}, {"id": 4, "name": "30_si", "supercategory": "si"}], "images": [{"id": 0, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/antandrahero_912x854_179x179.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/antandrahero_912x854_179x179.png", "width": 179, "height": 179, "date_captured": "2021-05-28 01:17:27", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 1, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/ardenhero_1518x47_178x178.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/ardenhero_1518x47_178x178.png", "width": 178, "height": 178, "date_captured": "2021-05-31 04:38:28", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 2, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/eluardhero_1317x653_178x178.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/eluardhero_1317x653_178x178.png", "width": 178, "height": 178, "date_captured": "2021-05-31 04:38:28", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 3, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/eluardhero_1673x653_179x178.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/eluardhero_1673x653_179x178.png", "width": 178, "height": 179, "date_captured": "2021-05-28 01:20:05", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 4, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/florahero_1317x450_178x179.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/florahero_1317x450_178x179.png", "width": 179, "height": 178, "date_captured": "2021-05-31 04:39:28", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 5, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/gorvohero_1471x47_179x179.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/gorvohero_1471x47_179x179.png", "width": 179, "height": 179, "date_captured": "2021-05-31 04:39:25", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 6, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/isabellahero_1471x854_179x179.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/isabellahero_1471x854_179x179.png", "width": 179, "height": 179, "date_captured": "2021-05-31 04:39:25", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 7, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/kazhero_1114x47_179x179.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/kazhero_1114x47_179x179.png", "width": 179, "height": 179, "date_captured": "2021-05-28 01:17:25", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 8, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/kazhero_1269x248_179x179.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/kazhero_1269x248_179x179.png", "width": 179, "height": 179, "date_captured": "2021-05-28 01:25:22", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 9, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/kelthurhero_1067x652_178x179.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/kelthurhero_1067x652_178x179.png", "width": 179, "height": 178, "date_captured": "2021-05-28 01:24:40", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 10, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/kelthurhero_912x451_179x179.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/kelthurhero_912x451_179x179.png", "width": 179, "height": 179, "date_captured": "2021-05-28 01:17:34", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 11, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/khasoshero_1518x451_178x178.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/khasoshero_1518x451_178x178.png", "width": 178, "height": 178, "date_captured": "2021-05-31 04:39:07", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 12, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/merhiahero_908x47_183x183.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/merhiahero_908x47_183x183.png", "width": 183, "height": 183, "date_captured": "2021-05-31 04:38:59", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 13, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/moraelhero_1067x452_177x176.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/moraelhero_1067x452_177x176.png", "width": 176, "height": 177, "date_captured": "2021-05-28 01:25:40", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 14, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/mortashero_913x249_178x178.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/mortashero_913x249_178x178.png", "width": 178, "height": 178, "date_captured": "2021-05-31 04:38:55", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 15, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/niruhero_1317x855_178x178.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/niruhero_1317x855_178x178.png", "width": 178, "height": 178, "date_captured": "2021-05-31 04:38:53", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 16, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/oscarhero_1115x653_178x179.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/oscarhero_1115x653_178x179.png", "width": 179, "height": 178, "date_captured": "2021-05-31 04:38:51", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 17, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/oscarhero_1269x451_179x179.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/oscarhero_1269x451_179x179.png", "width": 179, "height": 179, "date_captured": "2021-05-28 01:25:19", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 18, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/queenhero_878x854_183x184.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/queenhero_878x854_183x184.png", "width": 184, "height": 183, "date_captured": "2021-05-31 04:38:47", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 19, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/rigbyhero_1317x249_178x178.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/rigbyhero_1317x249_178x178.png", "width": 178, "height": 178, "date_captured": "2021-05-31 04:38:45", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 20, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/satranahero_1673x854_179x178.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/satranahero_1673x854_179x178.png", "width": 178, "height": 179, "date_captured": "2021-05-31 04:38:43", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 21, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/shemirahero_1471x451_179x179.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/shemirahero_1471x451_179x179.png", "width": 179, "height": 179, "date_captured": "2021-05-28 01:25:14", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 22, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/solisehero_1268x46_179x179.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/solisehero_1268x46_179x179.png", "width": 179, "height": 179, "date_captured": "2021-05-31 04:38:39", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 23, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/thanehero_1673x451_179x178.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/thanehero_1673x451_179x178.png", "width": 178, "height": 179, "date_captured": "2021-05-28 01:20:10", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 24, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/theowynhero_1115x854_178x179.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/theowynhero_1115x854_178x179.png", "width": 179, "height": 178, "date_captured": "2021-05-31 04:38:35", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 25, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/tornehero_1471x652_179x179.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/tornehero_1471x652_179x179.png", "width": 179, "height": 179, "date_captured": "2021-05-31 04:38:33", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 26, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/ulmushero_1673x47_179x179.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/ulmushero_1673x47_179x179.png", "width": 179, "height": 179, "date_captured": "2021-05-28 01:25:06", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 27, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/eironnhero_1484x246_183x186.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/eironnhero_1484x246_183x186.png", "width": 186, "height": 183, "date_captured": "2021-05-28 01:18:49", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 28, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/fawkeshero_1396x849_184x186.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/fawkeshero_1396x849_184x186.png", "width": 186, "height": 184, "date_captured": "2021-05-28 01:29:37", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 29, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/hendrikhero_1282x246_183x186.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/hendrikhero_1282x246_183x186.png", "width": 186, "height": 183, "date_captured": "2021-05-28 01:18:51", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 30, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/jokerhero_1080x44_183x186.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/jokerhero_1080x44_183x186.png", "width": 186, "height": 183, "date_captured": "2021-05-28 01:18:57", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 31, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/luciushero_474x852_183x186.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/luciushero_474x852_183x186.png", "width": 186, "height": 183, "date_captured": "2021-05-28 01:19:00", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 32, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/narahero_1286x448_179x181.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/narahero_1286x448_179x181.png", "width": 181, "height": 179, "date_captured": "2021-05-28 01:19:02", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 33, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/nermorahero_878x44_182x186.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/nermorahero_878x44_182x186.png", "width": 186, "height": 182, "date_captured": "2021-05-28 01:18:46", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 34, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/nermorahero_992x850_183x186.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/nermorahero_992x850_183x186.png", "width": 186, "height": 183, "date_captured": "2021-05-28 01:29:54", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 35, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/numisuhero_1194x850_184x186.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/numisuhero_1194x850_184x186.png", "width": 186, "height": 184, "date_captured": "2021-05-28 01:29:39", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 36, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/numisuhero_302x851_183x187.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/numisuhero_302x851_183x187.png", "width": 187, "height": 183, "date_captured": "2021-05-28 01:18:17", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 37, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/odenhero_878x650_182x185.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/odenhero_878x650_182x185.png", "width": 185, "height": 182, "date_captured": "2021-05-28 01:19:43", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 38, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/peggyhero_1673x246_179x181.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/peggyhero_1673x246_179x181.png", "width": 181, "height": 179, "date_captured": "2021-05-28 01:24:44", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 39, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/peggyhero_710x44_179x181.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/peggyhero_710x44_179x181.png", "width": 181, "height": 179, "date_captured": "2021-05-28 01:17:20", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 40, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/seirushero_1067x851_178x182.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/seirushero_1067x851_178x182.png", "width": 182, "height": 178, "date_captured": "2021-05-28 01:25:33", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 41, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/skreghero_1484x448_182x186.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/skreghero_1484x448_182x186.png", "width": 186, "height": 182, "date_captured": "2021-05-28 01:18:40", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 42, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/skriathhero_1080x852_183x185.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/skriathhero_1080x852_183x185.png", "width": 185, "height": 183, "date_captured": "2021-05-28 01:19:34", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 43, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/solisehero_912x650_179x181.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/solisehero_912x650_179x181.png", "width": 181, "height": 179, "date_captured": "2021-05-28 01:17:18", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 44, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/tasihero_1083x447_179x182.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/tasihero_1083x447_179x182.png", "width": 182, "height": 179, "date_captured": "2021-05-28 01:19:23", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 45, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/theowynhero_1598x648_184x185.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/theowynhero_1598x648_184x185.png", "width": 185, "height": 184, "date_captured": "2021-05-28 01:29:23", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 46, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/thoranhero_1471x246_179x181.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/thoranhero_1471x246_179x181.png", "width": 181, "height": 179, "date_captured": "2021-05-28 01:24:47", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 47, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/thoranhero_680x44_179x182.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/thoranhero_680x44_179x182.png", "width": 182, "height": 179, "date_captured": "2021-05-28 01:19:26", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 48, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/warekhero_1484x650_182x186.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/warekhero_1484x650_182x186.png", "width": 186, "height": 182, "date_captured": "2021-05-28 01:18:38", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 49, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/wukonghero_504x44_183x186.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/wukonghero_504x44_183x186.png", "width": 186, "height": 183, "date_captured": "2021-05-28 01:17:54", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 50, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/anokihero_865x44_179x181.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/anokihero_865x44_179x181.png", "width": 181, "height": 179, "date_captured": "2021-05-28 01:24:57", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 51, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/belindahero_992x648_183x185.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/belindahero_992x648_183x185.png", "width": 185, "height": 183, "date_captured": "2021-05-28 01:29:47", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 52, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/ceciliahero_1484x852_182x186.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/ceciliahero_1484x852_182x186.png", "width": 186, "height": 182, "date_captured": "2021-05-28 01:18:32", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 53, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/ceciliahero_461x246_179x181.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/ceciliahero_461x246_179x181.png", "width": 181, "height": 179, "date_captured": "2021-05-28 01:25:03", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 54, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/eironnhero_1396x648_183x185.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/eironnhero_1396x648_183x185.png", "width": 185, "height": 183, "date_captured": "2021-05-28 01:29:41", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 55, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/eziohero_680x650_179x181.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/eziohero_680x650_179x181.png", "width": 181, "height": 179, "date_captured": "2021-05-28 01:19:13", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 56, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/ezizhhero_508x650_179x181.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/ezizhhero_508x650_179x181.png", "width": 181, "height": 179, "date_captured": "2021-05-28 01:17:22", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 57, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/ezizhhero_865x650_178x181.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/ezizhhero_865x650_178x181.png", "width": 181, "height": 178, "date_captured": "2021-05-28 01:25:46", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 58, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/faraelhero_679x448_180x181.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/faraelhero_679x448_180x181.png", "width": 181, "height": 180, "date_captured": "2021-05-28 01:19:48", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 59, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/gwynethhero_680x246_178x182.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/gwynethhero_680x246_178x182.png", "width": 182, "height": 178, "date_captured": "2021-05-28 01:19:45", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 60, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/gwynethhero_790x850_183x186.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/gwynethhero_790x850_183x186.png", "width": 186, "height": 183, "date_captured": "2021-05-28 01:29:56", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 61, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/jokerhero_1598x244_184x185.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/jokerhero_1598x244_184x185.png", "width": 185, "height": 184, "date_captured": "2021-05-28 01:29:26", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 62, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/khasoshero_1194x648_184x185.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/khasoshero_1194x648_184x185.png", "width": 185, "height": 184, "date_captured": "2021-05-28 01:29:29", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 63, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/luciushero_1396x42_183x186.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/luciushero_1396x42_183x186.png", "width": 186, "height": 183, "date_captured": "2021-05-28 01:29:51", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 64, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/lycahero_477x246_180x181.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/lycahero_477x246_180x181.png", "width": 181, "height": 180, "date_captured": "2021-05-28 01:19:50", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 65, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/merhiahero_865x852_178x182.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/merhiahero_865x852_178x182.png", "width": 182, "height": 178, "date_captured": "2021-05-28 01:25:36", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 66, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/mezothhero_1066x44_179x181.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/mezothhero_1066x44_179x181.png", "width": 181, "height": 179, "date_captured": "2021-05-28 01:24:52", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 67, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/nakoruruhero_881x448_179x181.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/nakoruruhero_881x448_179x181.png", "width": 181, "height": 179, "date_captured": "2021-05-28 01:19:06", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 68, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/narahero_1396x446_183x186.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/narahero_1396x446_183x186.png", "width": 186, "height": 183, "date_captured": "2021-05-28 01:29:49", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 69, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/pippahero_1598x446_184x186.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/pippahero_1598x446_184x186.png", "width": 186, "height": 184, "date_captured": "2021-05-28 01:29:33", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 70, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/pippahero_710x448_180x182.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/pippahero_710x448_180x182.png", "width": 182, "height": 180, "date_captured": "2021-05-28 01:17:46", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 71, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/rainehero_302x650_183x186.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/rainehero_302x650_183x186.png", "width": 186, "height": 183, "date_captured": "2021-05-28 01:31:54", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 72, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/rainehero_461x650_179x182.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/rainehero_461x650_179x182.png", "width": 182, "height": 179, "date_captured": "2021-05-28 01:29:04", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 73, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/respenhero_706x650_183x186.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/respenhero_706x650_183x186.png", "width": 186, "height": 183, "date_captured": "2021-05-28 01:17:51", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 74, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/rigbyhero_1268x650_180x181.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/rigbyhero_1268x650_180x181.png", "width": 181, "height": 180, "date_captured": "2021-05-28 01:25:27", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 75, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/rosalinehero_474x448_183x185.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/rosalinehero_474x448_183x185.png", "width": 185, "height": 183, "date_captured": "2021-05-28 01:19:36", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 76, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/shemirahero_878x246_182x186.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/shemirahero_878x246_182x186.png", "width": 186, "height": 182, "date_captured": "2021-05-28 01:18:44", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 77, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/skreghero_1598x42_184x186.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/skreghero_1598x42_184x186.png", "width": 186, "height": 184, "date_captured": "2021-05-28 01:29:35", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 78, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/tasihero_588x446_184x185.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/tasihero_588x446_184x185.png", "width": 185, "height": 184, "date_captured": "2021-05-28 01:29:31", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 79, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/thanehero_1114x448_179x181.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/thanehero_1114x448_179x181.png", "width": 181, "height": 179, "date_captured": "2021-05-28 01:17:13", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 80, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/tidushero_680x852_179x181.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/tidushero_680x852_179x181.png", "width": 181, "height": 179, "date_captured": "2021-05-28 01:19:10", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 81, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/twinshero_508x852_179x182.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/twinshero_508x852_179x182.png", "width": 182, "height": 179, "date_captured": "2021-05-28 01:18:02", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 82, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/vurkhero_1114x246_179x181.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/vurkhero_1114x246_179x181.png", "width": 181, "height": 179, "date_captured": "2021-05-28 01:17:15", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 83, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/vurkhero_259x650_179x182.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/vurkhero_259x650_179x182.png", "width": 182, "height": 179, "date_captured": "2021-05-28 01:29:13", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 84, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/warekhero_1598x850_184x185.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/warekhero_1598x850_184x185.png", "width": 185, "height": 184, "date_captured": "2021-05-28 01:29:17", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 85, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/wukonghero_663x852_179x181.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/wukonghero_663x852_179x181.png", "width": 181, "height": 179, "date_captured": "2021-05-28 01:25:00", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 86, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/zaphraelhero_1396x244_183x185.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/zaphraelhero_1396x244_183x185.png", "width": 185, "height": 183, "date_captured": "2021-05-28 01:29:44", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 87, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/ainzhero_385x35_185x193.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/ainzhero_385x35_185x193.png", "width": 193, "height": 185, "date_captured": "2021-05-28 01:30:42", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 88, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/albedohero_1082x643_180x189.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/albedohero_1082x643_180x189.png", "width": 189, "height": 180, "date_captured": "2021-05-28 01:19:29", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 89, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/albedohero_991x35_184x192.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/albedohero_991x35_184x192.png", "width": 192, "height": 184, "date_captured": "2021-05-28 01:30:03", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 90, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/alnahero_1314x37_181x189.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/alnahero_1314x37_181x189.png", "width": 189, "height": 181, "date_captured": "2021-05-28 01:17:05", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 91, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/alnahero_789x34_185x193.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/alnahero_789x34_185x193.png", "width": 193, "height": 185, "date_captured": "2021-05-28 01:30:26", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 92, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/arthurhero_991x237_184x193.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/arthurhero_991x237_184x193.png", "width": 193, "height": 184, "date_captured": "2021-05-28 01:30:10", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 93, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/athaliahero_661x239_181x189.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/athaliahero_661x239_181x189.png", "width": 189, "height": 181, "date_captured": "2021-05-28 01:25:54", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 94, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/athaliahero_706x845_183x192.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/athaliahero_706x845_183x192.png", "width": 192, "height": 183, "date_captured": "2021-05-28 01:17:49", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 95, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/badenhero_1192x439_186x193.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/badenhero_1192x439_186x193.png", "width": 193, "height": 186, "date_captured": "2021-05-28 01:30:06", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 96, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/drezhero_587x237_185x193.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/drezhero_587x237_185x193.png", "width": 193, "height": 185, "date_captured": "2021-05-28 01:30:31", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 97, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/eironnhero_476x37_181x189.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/eironnhero_476x37_181x189.png", "width": 189, "height": 181, "date_captured": "2021-05-28 01:18:23", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 98, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/eironnhero_587x34_185x193.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/eironnhero_587x34_185x193.png", "width": 193, "height": 185, "date_captured": "2021-05-28 01:30:33", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 99, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/eziohero_385x438_185x193.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/eziohero_385x438_185x193.png", "width": 193, "height": 185, "date_captured": "2021-05-28 01:30:40", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 100, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/faraelhero_789x237_185x193.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/faraelhero_789x237_185x193.png", "width": 193, "height": 185, "date_captured": "2021-05-28 01:30:24", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 101, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/grezhulhero_385x237_185x192.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/grezhulhero_385x237_185x192.png", "width": 192, "height": 185, "date_captured": "2021-05-28 01:30:52", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 102, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/izoldhero_1282x642_183x194.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/izoldhero_1282x642_183x194.png", "width": 194, "height": 183, "date_captured": "2021-05-28 01:19:20", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 103, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/izoldhero_183x236_184x193.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/izoldhero_183x236_184x193.png", "width": 193, "height": 184, "date_captured": "2021-05-28 01:30:17", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 104, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/krenhero_385x842_185x193.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/krenhero_385x842_185x193.png", "width": 193, "height": 185, "date_captured": "2021-05-28 01:30:35", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 105, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/lucretiahero_506x238_181x189.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/lucretiahero_506x238_181x189.png", "width": 189, "height": 181, "date_captured": "2021-05-28 01:17:10", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 106, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/lucretiahero_863x239_181x189.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/lucretiahero_863x239_181x189.png", "width": 189, "height": 181, "date_captured": "2021-05-28 01:25:49", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 107, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/mortashero_459x440_181x189.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/mortashero_459x440_181x189.png", "width": 189, "height": 181, "date_captured": "2021-05-28 01:26:02", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 108, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/nakoruruhero_789x640_184x193.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/nakoruruhero_789x640_184x193.png", "width": 193, "height": 184, "date_captured": "2021-05-28 01:30:15", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 109, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/orthroshero_661x36_181x189.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/orthroshero_661x36_181x189.png", "width": 189, "height": 181, "date_captured": "2021-05-28 01:25:56", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 110, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/rakuhero_706x239_183x193.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/rakuhero_706x239_183x193.png", "width": 193, "height": 183, "date_captured": "2021-05-28 01:18:00", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 111, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/respenhero_789x438_185x193.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/respenhero_789x438_185x193.png", "width": 193, "height": 185, "date_captured": "2021-05-28 01:30:22", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 112, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/rosalinehero_991x439_184x192.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/rosalinehero_991x439_184x192.png", "width": 192, "height": 184, "date_captured": "2021-05-28 01:30:01", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 113, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/rowanhero_1192x236_186x193.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/rowanhero_1192x236_186x193.png", "width": 193, "height": 186, "date_captured": "2021-05-28 01:30:08", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 114, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/rowanhero_1486x36_181x189.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/rowanhero_1486x36_181x189.png", "width": 189, "height": 181, "date_captured": "2021-05-28 01:18:20", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 115, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/safiyahero_274x845_181x193.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/safiyahero_274x845_181x193.png", "width": 193, "height": 181, "date_captured": "2021-05-28 01:20:00", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 116, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/safiyahero_587x843_185x192.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/safiyahero_587x843_185x192.png", "width": 192, "height": 185, "date_captured": "2021-05-28 01:30:48", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 117, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/saurushero_1082x239_180x188.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/saurushero_1082x239_180x188.png", "width": 188, "height": 180, "date_captured": "2021-05-28 01:19:31", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 118, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/saurushero_385x641_185x193.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/saurushero_385x641_185x193.png", "width": 193, "height": 185, "date_captured": "2021-05-28 01:30:37", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 119, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/silashero_1282x845_183x193.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/silashero_1282x845_183x193.png", "width": 193, "height": 183, "date_captured": "2021-05-28 01:19:16", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 120, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/silashero_183x35_184x193.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/silashero_183x35_184x193.png", "width": 193, "height": 184, "date_captured": "2021-05-28 01:30:20", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 121, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/skriathhero_459x844_181x189.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/skriathhero_459x844_181x189.png", "width": 189, "height": 181, "date_captured": "2021-05-28 01:25:59", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 122, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/talenehero_506x441_181x189.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/talenehero_506x441_181x189.png", "width": 189, "height": 181, "date_captured": "2021-05-28 01:17:08", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 123, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/talenehero_661x440_181x189.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/talenehero_661x440_181x189.png", "width": 189, "height": 181, "date_captured": "2021-05-28 01:25:51", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 124, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/tidushero_587x641_185x193.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/tidushero_587x641_185x193.png", "width": 193, "height": 185, "date_captured": "2021-05-28 01:30:28", "license": 1, "coco_url": "", "flickr_url": ""}, {"id": 125, "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/ukyohero_1193x35_184x192.png", "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/ukyohero_1193x35_184x192.png", "width": 192, "height": 184, "date_captured": "2021-05-28 01:29:58", "license": 1, "coco_url": "", "flickr_url": ""}], "annotations": [{"id": 0, "image_id": 0, "category_id": 1, "bbox_mode": 0, "iscrowd": 0, "area": 2916, "bbox": [5, 8, 54, 54], "width": 179, "height": 179}, {"id": 1, "image_id": 1, "category_id": 0, "bbox_mode": 0, "iscrowd": 0, "area": 2024, "bbox": [8, 11, 46, 44], "width": 178, "height": 178}, {"id": 2, "image_id": 2, "category_id": 0, "bbox_mode": 0, "iscrowd": 0, "area": 1980, "bbox": [9, 10, 44, 45], "width": 178, "height": 178}, {"id": 3, "image_id": 3, "category_id": 1, "bbox_mode": 0, "iscrowd": 0, "area": 2916, "bbox": [4, 7, 54, 54], "width": 178, "height": 179}, {"id": 4, "image_id": 4, "category_id": 0, "bbox_mode": 0, "iscrowd": 0, "area": 2704, "bbox": [6, 7, 52, 52], "width": 179, "height": 178}, {"id": 5, "image_id": 5, "category_id": 0, "bbox_mode": 0, "iscrowd": 0, "area": 2862, "bbox": [5, 6, 54, 53], "width": 179, "height": 179}, {"id": 6, "image_id": 6, "category_id": 0, "bbox_mode": 0, "iscrowd": 0, "area": 2970, "bbox": [5, 5, 54, 55], "width": 179, "height": 179}, {"id": 7, "image_id": 7, "category_id": 1, "bbox_mode": 0, "iscrowd": 0, "area": 2970, "bbox": [3, 7, 54, 55], "width": 179, "height": 179}, {"id": 8, "image_id": 8, "category_id": 1, "bbox_mode": 0, "iscrowd": 0, "area": 3025, "bbox": [4, 7, 55, 55], "width": 179, "height": 179}, {"id": 9, "image_id": 9, "category_id": 1, "bbox_mode": 0, "iscrowd": 0, "area": 2916, "bbox": [6, 7, 54, 54], "width": 179, "height": 178}, {"id": 10, "image_id": 10, "category_id": 1, "bbox_mode": 0, "iscrowd": 0, "area": 3024, "bbox": [4, 6, 54, 56], "width": 179, "height": 179}, {"id": 11, "image_id": 11, "category_id": 0, "bbox_mode": 0, "iscrowd": 0, "area": 2652, "bbox": [6, 7, 51, 52], "width": 178, "height": 178}, {"id": 12, "image_id": 12, "category_id": 0, "bbox_mode": 0, "iscrowd": 0, "area": 2652, "bbox": [5, 11, 51, 52], "width": 183, "height": 183}, {"id": 13, "image_id": 13, "category_id": 1, "bbox_mode": 0, "iscrowd": 0, "area": 2862, "bbox": [3, 7, 53, 54], "width": 176, "height": 177}, {"id": 14, "image_id": 14, "category_id": 0, "bbox_mode": 0, "iscrowd": 0, "area": 2652, "bbox": [5, 7, 51, 52], "width": 178, "height": 178}, {"id": 15, "image_id": 15, "category_id": 0, "bbox_mode": 0, "iscrowd": 0, "area": 2704, "bbox": [5, 6, 52, 52], "width": 178, "height": 178}, {"id": 16, "image_id": 16, "category_id": 0, "bbox_mode": 0, "iscrowd": 0, "area": 2070, "bbox": [8, 9, 45, 46], "width": 179, "height": 178}, {"id": 17, "image_id": 17, "category_id": 1, "bbox_mode": 0, "iscrowd": 0, "area": 2862, "bbox": [5, 7, 53, 54], "width": 179, "height": 179}, {"id": 18, "image_id": 18, "category_id": 0, "bbox_mode": 0, "iscrowd": 0, "area": 2756, "bbox": [5, 10, 52, 53], "width": 184, "height": 183}, {"id": 19, "image_id": 19, "category_id": 0, "bbox_mode": 0, "iscrowd": 0, "area": 2652, "bbox": [5, 6, 51, 52], "width": 178, "height": 178}, {"id": 20, "image_id": 20, "category_id": 0, "bbox_mode": 0, "iscrowd": 0, "area": 2808, "bbox": [5, 6, 52, 54], "width": 178, "height": 179}, {"id": 21, "image_id": 21, "category_id": 1, "bbox_mode": 0, "iscrowd": 0, "area": 2809, "bbox": [5, 8, 53, 53], "width": 179, "height": 179}, {"id": 22, "image_id": 22, "category_id": 0, "bbox_mode": 0, "iscrowd": 0, "area": 2862, "bbox": [5, 6, 53, 54], "width": 179, "height": 179}, {"id": 23, "image_id": 23, "category_id": 1, "bbox_mode": 0, "iscrowd": 0, "area": 2862, "bbox": [4, 7, 54, 53], "width": 178, "height": 179}, {"id": 24, "image_id": 24, "category_id": 0, "bbox_mode": 0, "iscrowd": 0, "area": 2970, "bbox": [5, 4, 54, 55], "width": 179, "height": 178}, {"id": 25, "image_id": 25, "category_id": 0, "bbox_mode": 0, "iscrowd": 0, "area": 2970, "bbox": [5, 5, 54, 55], "width": 179, "height": 179}, {"id": 26, "image_id": 26, "category_id": 1, "bbox_mode": 0, "iscrowd": 0, "area": 2862, "bbox": [5, 7, 53, 54], "width": 179, "height": 179}, {"id": 27, "image_id": 27, "category_id": 2, "bbox_mode": 0, "iscrowd": 0, "area": 4032, "bbox": [2, 6, 63, 64], "width": 186, "height": 183}, {"id": 28, "image_id": 28, "category_id": 2, "bbox_mode": 0, "iscrowd": 0, "area": 3906, "bbox": [5, 5, 62, 63], "width": 186, "height": 184}, {"id": 29, "image_id": 29, "category_id": 2, "bbox_mode": 0, "iscrowd": 0, "area": 3906, "bbox": [3, 6, 62, 63], "width": 186, "height": 183}, {"id": 30, "image_id": 30, "category_id": 2, "bbox_mode": 0, "iscrowd": 0, "area": 3969, "bbox": [2, 6, 63, 63], "width": 186, "height": 183}, {"id": 31, "image_id": 31, "category_id": 2, "bbox_mode": 0, "iscrowd": 0, "area": 4096, "bbox": [1, 6, 64, 64], "width": 186, "height": 183}, {"id": 32, "image_id": 32, "category_id": 2, "bbox_mode": 0, "iscrowd": 0, "area": 4096, "bbox": [1, 3, 64, 64], "width": 181, "height": 179}, {"id": 33, "image_id": 33, "category_id": 2, "bbox_mode": 0, "iscrowd": 0, "area": 3969, "bbox": [2, 6, 63, 63], "width": 186, "height": 182}, {"id": 34, "image_id": 34, "category_id": 2, "bbox_mode": 0, "iscrowd": 0, "area": 4224, "bbox": [3, 5, 64, 66], "width": 186, "height": 183}, {"id": 35, "image_id": 35, "category_id": 2, "bbox_mode": 0, "iscrowd": 0, "area": 3969, "bbox": [4, 5, 63, 63], "width": 186, "height": 184}, {"id": 36, "image_id": 36, "category_id": 2, "bbox_mode": 0, "iscrowd": 0, "area": 4032, "bbox": [3, 6, 63, 64], "width": 187, "height": 183}, {"id": 37, "image_id": 37, "category_id": 2, "bbox_mode": 0, "iscrowd": 0, "area": 4032, "bbox": [2, 6, 63, 64], "width": 185, "height": 182}, {"id": 38, "image_id": 38, "category_id": 2, "bbox_mode": 0, "iscrowd": 0, "area": 4095, "bbox": [2, 3, 65, 63], "width": 181, "height": 179}, {"id": 39, "image_id": 39, "category_id": 2, "bbox_mode": 0, "iscrowd": 0, "area": 3969, "bbox": [2, 3, 63, 63], "width": 181, "height": 179}, {"id": 40, "image_id": 40, "category_id": 2, "bbox_mode": 0, "iscrowd": 0, "area": 4030, "bbox": [2, 3, 65, 62], "width": 182, "height": 178}, {"id": 41, "image_id": 41, "category_id": 2, "bbox_mode": 0, "iscrowd": 0, "area": 4032, "bbox": [2, 6, 63, 64], "width": 186, "height": 182}, {"id": 42, "image_id": 42, "category_id": 2, "bbox_mode": 0, "iscrowd": 0, "area": 3969, "bbox": [2, 6, 63, 63], "width": 185, "height": 183}, {"id": 43, "image_id": 43, "category_id": 2, "bbox_mode": 0, "iscrowd": 0, "area": 4032, "bbox": [1, 3, 64, 63], "width": 181, "height": 179}, {"id": 44, "image_id": 44, "category_id": 2, "bbox_mode": 0, "iscrowd": 0, "area": 3906, "bbox": [2, 4, 63, 62], "width": 182, "height": 179}, {"id": 45, "image_id": 45, "category_id": 2, "bbox_mode": 0, "iscrowd": 0, "area": 4096, "bbox": [2, 4, 64, 64], "width": 185, "height": 184}, {"id": 46, "image_id": 46, "category_id": 2, "bbox_mode": 0, "iscrowd": 0, "area": 4095, "bbox": [1, 3, 65, 63], "width": 181, "height": 179}, {"id": 47, "image_id": 47, "category_id": 2, "bbox_mode": 0, "iscrowd": 0, "area": 4032, "bbox": [1, 3, 64, 63], "width": 182, "height": 179}, {"id": 48, "image_id": 48, "category_id": 2, "bbox_mode": 0, "iscrowd": 0, "area": 4032, "bbox": [1, 6, 64, 63], "width": 186, "height": 182}, {"id": 49, "image_id": 49, "category_id": 2, "bbox_mode": 0, "iscrowd": 0, "area": 4032, "bbox": [1, 7, 64, 63], "width": 186, "height": 183}, {"id": 50, "image_id": 50, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4940, "bbox": [1, 3, 65, 76], "width": 181, "height": 179}, {"id": 51, "image_id": 51, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4800, "bbox": [4, 5, 64, 75], "width": 185, "height": 183}, {"id": 52, "image_id": 52, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4800, "bbox": [2, 6, 64, 75], "width": 186, "height": 182}, {"id": 53, "image_id": 53, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4884, "bbox": [1, 2, 66, 74], "width": 181, "height": 179}, {"id": 54, "image_id": 54, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4800, "bbox": [4, 4, 64, 75], "width": 185, "height": 183}, {"id": 55, "image_id": 55, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4800, "bbox": [2, 2, 64, 75], "width": 181, "height": 179}, {"id": 56, "image_id": 56, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4736, "bbox": [2, 3, 64, 74], "width": 181, "height": 179}, {"id": 57, "image_id": 57, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4662, "bbox": [2, 3, 63, 74], "width": 181, "height": 178}, {"id": 58, "image_id": 58, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4864, "bbox": [2, 2, 64, 76], "width": 181, "height": 180}, {"id": 59, "image_id": 59, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4788, "bbox": [2, 3, 63, 76], "width": 182, "height": 178}, {"id": 60, "image_id": 60, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4940, "bbox": [3, 5, 65, 76], "width": 186, "height": 183}, {"id": 61, "image_id": 61, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4875, "bbox": [3, 4, 65, 75], "width": 185, "height": 184}, {"id": 62, "image_id": 62, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4736, "bbox": [4, 5, 64, 74], "width": 185, "height": 184}, {"id": 63, "image_id": 63, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 5016, "bbox": [3, 4, 66, 76], "width": 186, "height": 183}, {"id": 64, "image_id": 64, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4725, "bbox": [2, 3, 63, 75], "width": 181, "height": 180}, {"id": 65, "image_id": 65, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4875, "bbox": [1, 3, 65, 75], "width": 182, "height": 178}, {"id": 66, "image_id": 66, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4736, "bbox": [2, 4, 64, 74], "width": 181, "height": 179}, {"id": 67, "image_id": 67, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4800, "bbox": [2, 4, 64, 75], "width": 181, "height": 179}, {"id": 68, "image_id": 68, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4875, "bbox": [4, 5, 65, 75], "width": 186, "height": 183}, {"id": 69, "image_id": 69, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4940, "bbox": [3, 4, 65, 76], "width": 186, "height": 184}, {"id": 70, "image_id": 70, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4875, "bbox": [2, 2, 65, 75], "width": 182, "height": 180}, {"id": 71, "image_id": 71, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4928, "bbox": [2, 6, 64, 77], "width": 186, "height": 183}, {"id": 72, "image_id": 72, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4800, "bbox": [2, 3, 64, 75], "width": 182, "height": 179}, {"id": 73, "image_id": 73, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4788, "bbox": [2, 5, 63, 76], "width": 186, "height": 183}, {"id": 74, "image_id": 74, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4800, "bbox": [2, 3, 64, 75], "width": 181, "height": 180}, {"id": 75, "image_id": 75, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4864, "bbox": [2, 6, 64, 76], "width": 185, "height": 183}, {"id": 76, "image_id": 76, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4788, "bbox": [2, 6, 63, 76], "width": 186, "height": 182}, {"id": 77, "image_id": 77, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4736, "bbox": [3, 5, 64, 74], "width": 186, "height": 184}, {"id": 78, "image_id": 78, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 5016, "bbox": [2, 4, 66, 76], "width": 185, "height": 184}, {"id": 79, "image_id": 79, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4800, "bbox": [2, 2, 64, 75], "width": 181, "height": 179}, {"id": 80, "image_id": 80, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4810, "bbox": [2, 2, 65, 74], "width": 181, "height": 179}, {"id": 81, "image_id": 81, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4800, "bbox": [2, 4, 64, 75], "width": 182, "height": 179}, {"id": 82, "image_id": 82, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4736, "bbox": [2, 3, 64, 74], "width": 181, "height": 179}, {"id": 83, "image_id": 83, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4864, "bbox": [2, 3, 64, 76], "width": 182, "height": 179}, {"id": 84, "image_id": 84, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4864, "bbox": [3, 3, 64, 76], "width": 185, "height": 184}, {"id": 85, "image_id": 85, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4940, "bbox": [1, 2, 65, 76], "width": 181, "height": 179}, {"id": 86, "image_id": 86, "category_id": 3, "bbox_mode": 0, "iscrowd": 0, "area": 4800, "bbox": [3, 4, 64, 75], "width": 185, "height": 183}, {"id": 87, "image_id": 87, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6240, "bbox": [3, 2, 80, 78], "width": 193, "height": 185}, {"id": 88, "image_id": 88, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6006, "bbox": [2, 2, 78, 77], "width": 189, "height": 180}, {"id": 89, "image_id": 89, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6240, "bbox": [2, 2, 80, 78], "width": 192, "height": 184}, {"id": 90, "image_id": 90, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6240, "bbox": [1, 2, 80, 78], "width": 189, "height": 181}, {"id": 91, "image_id": 91, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6237, "bbox": [3, 3, 81, 77], "width": 193, "height": 185}, {"id": 92, "image_id": 92, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6083, "bbox": [3, 3, 79, 77], "width": 193, "height": 184}, {"id": 93, "image_id": 93, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6240, "bbox": [1, 2, 80, 78], "width": 189, "height": 181}, {"id": 94, "image_id": 94, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6162, "bbox": [1, 4, 79, 78], "width": 192, "height": 183}, {"id": 95, "image_id": 95, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6320, "bbox": [3, 4, 80, 79], "width": 193, "height": 186}, {"id": 96, "image_id": 96, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6320, "bbox": [3, 3, 80, 79], "width": 193, "height": 185}, {"id": 97, "image_id": 97, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6083, "bbox": [2, 3, 79, 77], "width": 189, "height": 181}, {"id": 98, "image_id": 98, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6320, "bbox": [4, 3, 80, 79], "width": 193, "height": 185}, {"id": 99, "image_id": 99, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6318, "bbox": [3, 4, 81, 78], "width": 193, "height": 185}, {"id": 100, "image_id": 100, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6400, "bbox": [3, 3, 80, 80], "width": 193, "height": 185}, {"id": 101, "image_id": 101, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6320, "bbox": [3, 4, 80, 79], "width": 192, "height": 185}, {"id": 102, "image_id": 102, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6083, "bbox": [2, 3, 79, 77], "width": 194, "height": 183}, {"id": 103, "image_id": 103, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6080, "bbox": [4, 5, 80, 76], "width": 193, "height": 184}, {"id": 104, "image_id": 104, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6240, "bbox": [3, 4, 80, 78], "width": 193, "height": 185}, {"id": 105, "image_id": 105, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6080, "bbox": [2, 3, 80, 76], "width": 189, "height": 181}, {"id": 106, "image_id": 106, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6162, "bbox": [2, 2, 79, 78], "width": 189, "height": 181}, {"id": 107, "image_id": 107, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6320, "bbox": [2, 3, 80, 79], "width": 189, "height": 181}, {"id": 108, "image_id": 108, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6080, "bbox": [4, 4, 80, 76], "width": 193, "height": 184}, {"id": 109, "image_id": 109, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6006, "bbox": [3, 3, 78, 77], "width": 189, "height": 181}, {"id": 110, "image_id": 110, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6006, "bbox": [2, 5, 78, 77], "width": 193, "height": 183}, {"id": 111, "image_id": 111, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6560, "bbox": [2, 2, 82, 80], "width": 193, "height": 185}, {"id": 112, "image_id": 112, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6240, "bbox": [3, 3, 80, 78], "width": 192, "height": 184}, {"id": 113, "image_id": 113, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6240, "bbox": [3, 4, 80, 78], "width": 193, "height": 186}, {"id": 114, "image_id": 114, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6160, "bbox": [2, 2, 80, 77], "width": 189, "height": 181}, {"id": 115, "image_id": 115, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6240, "bbox": [1, 1, 80, 78], "width": 193, "height": 181}, {"id": 116, "image_id": 116, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6320, "bbox": [2, 3, 80, 79], "width": 192, "height": 185}, {"id": 117, "image_id": 117, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6400, "bbox": [1, 1, 80, 80], "width": 188, "height": 180}, {"id": 118, "image_id": 118, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6320, "bbox": [3, 2, 80, 79], "width": 193, "height": 185}, {"id": 119, "image_id": 119, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6480, "bbox": [1, 2, 81, 80], "width": 193, "height": 183}, {"id": 120, "image_id": 120, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6480, "bbox": [3, 2, 80, 81], "width": 193, "height": 184}, {"id": 121, "image_id": 121, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6399, "bbox": [1, 2, 81, 79], "width": 189, "height": 181}, {"id": 122, "image_id": 122, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6399, "bbox": [1, 2, 81, 79], "width": 189, "height": 181}, {"id": 123, "image_id": 123, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6318, "bbox": [1, 2, 81, 78], "width": 189, "height": 181}, {"id": 124, "image_id": 124, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6399, "bbox": [2, 3, 81, 79], "width": 193, "height": 185}, {"id": 125, "image_id": 125, "category_id": 4, "bbox_mode": 0, "iscrowd": 0, "area": 6400, "bbox": [2, 2, 80, 80], "width": 192, "height": 184}]}
+{
+    "info": {
+        "description": "AFK Arena Hero Info Dataset",
+        "url": "https://github.com/JateNensvold/afk-image-processing",
+        "version": "0.1.0",
+        "year": 2021,
+        "contributor": "jatenensvold",
+        "date_created": "2021-06-06 22:34:21.853554"
+    },
+    "licenses": [
+        {
+            "id": 1,
+            "name": "Attribution-NonCommercial-ShareAlike License",
+            "url": "http://creativecommons.org/licenses/by-nc-sa/2.0/"
+        }
+    ],
+    "categories": [
+        {
+            "id": 0,
+            "name": "none_si",
+            "supercategory": "si"
+        },
+        {
+            "id": 1,
+            "name": "0_si",
+            "supercategory": "si"
+        },
+        {
+            "id": 2,
+            "name": "10_si",
+            "supercategory": "si"
+        },
+        {
+            "id": 3,
+            "name": "20_si",
+            "supercategory": "si"
+        },
+        {
+            "id": 4,
+            "name": "30_si",
+            "supercategory": "si"
+        }
+    ],
+    "images": [
+        {
+            "id": 0,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/antandrahero_912x854_179x179.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/antandrahero_912x854_179x179.png",
+            "width": 179,
+            "height": 179,
+            "date_captured": "2021-05-28 01:17:27",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 1,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/ardenhero_1518x47_178x178.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/ardenhero_1518x47_178x178.png",
+            "width": 178,
+            "height": 178,
+            "date_captured": "2021-05-31 04:38:28",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 2,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/eluardhero_1317x653_178x178.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/eluardhero_1317x653_178x178.png",
+            "width": 178,
+            "height": 178,
+            "date_captured": "2021-05-31 04:38:28",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 3,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/eluardhero_1673x653_179x178.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/eluardhero_1673x653_179x178.png",
+            "width": 178,
+            "height": 179,
+            "date_captured": "2021-05-28 01:20:05",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 4,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/florahero_1317x450_178x179.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/florahero_1317x450_178x179.png",
+            "width": 179,
+            "height": 178,
+            "date_captured": "2021-05-31 04:39:28",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 5,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/gorvohero_1471x47_179x179.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/gorvohero_1471x47_179x179.png",
+            "width": 179,
+            "height": 179,
+            "date_captured": "2021-05-31 04:39:25",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 6,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/isabellahero_1471x854_179x179.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/isabellahero_1471x854_179x179.png",
+            "width": 179,
+            "height": 179,
+            "date_captured": "2021-05-31 04:39:25",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 7,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/kazhero_1114x47_179x179.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/kazhero_1114x47_179x179.png",
+            "width": 179,
+            "height": 179,
+            "date_captured": "2021-05-28 01:17:25",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 8,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/kazhero_1269x248_179x179.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/kazhero_1269x248_179x179.png",
+            "width": 179,
+            "height": 179,
+            "date_captured": "2021-05-28 01:25:22",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 9,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/kelthurhero_1067x652_178x179.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/kelthurhero_1067x652_178x179.png",
+            "width": 179,
+            "height": 178,
+            "date_captured": "2021-05-28 01:24:40",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 10,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/kelthurhero_912x451_179x179.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/kelthurhero_912x451_179x179.png",
+            "width": 179,
+            "height": 179,
+            "date_captured": "2021-05-28 01:17:34",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 11,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/khasoshero_1518x451_178x178.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/khasoshero_1518x451_178x178.png",
+            "width": 178,
+            "height": 178,
+            "date_captured": "2021-05-31 04:39:07",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 12,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/merhiahero_908x47_183x183.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/merhiahero_908x47_183x183.png",
+            "width": 183,
+            "height": 183,
+            "date_captured": "2021-05-31 04:38:59",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 13,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/moraelhero_1067x452_177x176.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/moraelhero_1067x452_177x176.png",
+            "width": 176,
+            "height": 177,
+            "date_captured": "2021-05-28 01:25:40",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 14,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/mortashero_913x249_178x178.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/mortashero_913x249_178x178.png",
+            "width": 178,
+            "height": 178,
+            "date_captured": "2021-05-31 04:38:55",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 15,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/niruhero_1317x855_178x178.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/niruhero_1317x855_178x178.png",
+            "width": 178,
+            "height": 178,
+            "date_captured": "2021-05-31 04:38:53",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 16,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/oscarhero_1115x653_178x179.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/oscarhero_1115x653_178x179.png",
+            "width": 179,
+            "height": 178,
+            "date_captured": "2021-05-31 04:38:51",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 17,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/oscarhero_1269x451_179x179.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/oscarhero_1269x451_179x179.png",
+            "width": 179,
+            "height": 179,
+            "date_captured": "2021-05-28 01:25:19",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 18,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/queenhero_878x854_183x184.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/queenhero_878x854_183x184.png",
+            "width": 184,
+            "height": 183,
+            "date_captured": "2021-05-31 04:38:47",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 19,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/rigbyhero_1317x249_178x178.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/rigbyhero_1317x249_178x178.png",
+            "width": 178,
+            "height": 178,
+            "date_captured": "2021-05-31 04:38:45",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 20,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/satranahero_1673x854_179x178.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/satranahero_1673x854_179x178.png",
+            "width": 178,
+            "height": 179,
+            "date_captured": "2021-05-31 04:38:43",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 21,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/shemirahero_1471x451_179x179.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/shemirahero_1471x451_179x179.png",
+            "width": 179,
+            "height": 179,
+            "date_captured": "2021-05-28 01:25:14",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 22,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/solisehero_1268x46_179x179.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/solisehero_1268x46_179x179.png",
+            "width": 179,
+            "height": 179,
+            "date_captured": "2021-05-31 04:38:39",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 23,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/thanehero_1673x451_179x178.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/thanehero_1673x451_179x178.png",
+            "width": 178,
+            "height": 179,
+            "date_captured": "2021-05-28 01:20:10",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 24,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/theowynhero_1115x854_178x179.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/theowynhero_1115x854_178x179.png",
+            "width": 179,
+            "height": 178,
+            "date_captured": "2021-05-31 04:38:35",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 25,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/tornehero_1471x652_179x179.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/none/tornehero_1471x652_179x179.png",
+            "width": 179,
+            "height": 179,
+            "date_captured": "2021-05-31 04:38:33",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 26,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/ulmushero_1673x47_179x179.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/0/ulmushero_1673x47_179x179.png",
+            "width": 179,
+            "height": 179,
+            "date_captured": "2021-05-28 01:25:06",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 27,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/eironnhero_1484x246_183x186.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/eironnhero_1484x246_183x186.png",
+            "width": 186,
+            "height": 183,
+            "date_captured": "2021-05-28 01:18:49",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 28,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/fawkeshero_1396x849_184x186.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/fawkeshero_1396x849_184x186.png",
+            "width": 186,
+            "height": 184,
+            "date_captured": "2021-05-28 01:29:37",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 29,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/hendrikhero_1282x246_183x186.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/hendrikhero_1282x246_183x186.png",
+            "width": 186,
+            "height": 183,
+            "date_captured": "2021-05-28 01:18:51",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 30,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/jokerhero_1080x44_183x186.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/jokerhero_1080x44_183x186.png",
+            "width": 186,
+            "height": 183,
+            "date_captured": "2021-05-28 01:18:57",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 31,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/luciushero_474x852_183x186.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/luciushero_474x852_183x186.png",
+            "width": 186,
+            "height": 183,
+            "date_captured": "2021-05-28 01:19:00",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 32,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/narahero_1286x448_179x181.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/narahero_1286x448_179x181.png",
+            "width": 181,
+            "height": 179,
+            "date_captured": "2021-05-28 01:19:02",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 33,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/nermorahero_878x44_182x186.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/nermorahero_878x44_182x186.png",
+            "width": 186,
+            "height": 182,
+            "date_captured": "2021-05-28 01:18:46",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 34,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/nermorahero_992x850_183x186.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/nermorahero_992x850_183x186.png",
+            "width": 186,
+            "height": 183,
+            "date_captured": "2021-05-28 01:29:54",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 35,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/numisuhero_1194x850_184x186.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/numisuhero_1194x850_184x186.png",
+            "width": 186,
+            "height": 184,
+            "date_captured": "2021-05-28 01:29:39",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 36,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/numisuhero_302x851_183x187.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/numisuhero_302x851_183x187.png",
+            "width": 187,
+            "height": 183,
+            "date_captured": "2021-05-28 01:18:17",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 37,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/odenhero_878x650_182x185.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/odenhero_878x650_182x185.png",
+            "width": 185,
+            "height": 182,
+            "date_captured": "2021-05-28 01:19:43",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 38,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/peggyhero_1673x246_179x181.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/peggyhero_1673x246_179x181.png",
+            "width": 181,
+            "height": 179,
+            "date_captured": "2021-05-28 01:24:44",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 39,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/peggyhero_710x44_179x181.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/peggyhero_710x44_179x181.png",
+            "width": 181,
+            "height": 179,
+            "date_captured": "2021-05-28 01:17:20",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 40,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/seirushero_1067x851_178x182.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/seirushero_1067x851_178x182.png",
+            "width": 182,
+            "height": 178,
+            "date_captured": "2021-05-28 01:25:33",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 41,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/skreghero_1484x448_182x186.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/skreghero_1484x448_182x186.png",
+            "width": 186,
+            "height": 182,
+            "date_captured": "2021-05-28 01:18:40",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 42,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/skriathhero_1080x852_183x185.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/skriathhero_1080x852_183x185.png",
+            "width": 185,
+            "height": 183,
+            "date_captured": "2021-05-28 01:19:34",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 43,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/solisehero_912x650_179x181.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/solisehero_912x650_179x181.png",
+            "width": 181,
+            "height": 179,
+            "date_captured": "2021-05-28 01:17:18",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 44,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/tasihero_1083x447_179x182.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/tasihero_1083x447_179x182.png",
+            "width": 182,
+            "height": 179,
+            "date_captured": "2021-05-28 01:19:23",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 45,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/theowynhero_1598x648_184x185.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/theowynhero_1598x648_184x185.png",
+            "width": 185,
+            "height": 184,
+            "date_captured": "2021-05-28 01:29:23",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 46,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/thoranhero_1471x246_179x181.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/thoranhero_1471x246_179x181.png",
+            "width": 181,
+            "height": 179,
+            "date_captured": "2021-05-28 01:24:47",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 47,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/thoranhero_680x44_179x182.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/thoranhero_680x44_179x182.png",
+            "width": 182,
+            "height": 179,
+            "date_captured": "2021-05-28 01:19:26",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 48,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/warekhero_1484x650_182x186.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/warekhero_1484x650_182x186.png",
+            "width": 186,
+            "height": 182,
+            "date_captured": "2021-05-28 01:18:38",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 49,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/wukonghero_504x44_183x186.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/10/wukonghero_504x44_183x186.png",
+            "width": 186,
+            "height": 183,
+            "date_captured": "2021-05-28 01:17:54",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 50,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/anokihero_865x44_179x181.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/anokihero_865x44_179x181.png",
+            "width": 181,
+            "height": 179,
+            "date_captured": "2021-05-28 01:24:57",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 51,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/belindahero_992x648_183x185.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/belindahero_992x648_183x185.png",
+            "width": 185,
+            "height": 183,
+            "date_captured": "2021-05-28 01:29:47",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 52,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/ceciliahero_1484x852_182x186.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/ceciliahero_1484x852_182x186.png",
+            "width": 186,
+            "height": 182,
+            "date_captured": "2021-05-28 01:18:32",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 53,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/ceciliahero_461x246_179x181.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/ceciliahero_461x246_179x181.png",
+            "width": 181,
+            "height": 179,
+            "date_captured": "2021-05-28 01:25:03",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 54,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/eironnhero_1396x648_183x185.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/eironnhero_1396x648_183x185.png",
+            "width": 185,
+            "height": 183,
+            "date_captured": "2021-05-28 01:29:41",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 55,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/eziohero_680x650_179x181.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/eziohero_680x650_179x181.png",
+            "width": 181,
+            "height": 179,
+            "date_captured": "2021-05-28 01:19:13",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 56,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/ezizhhero_508x650_179x181.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/ezizhhero_508x650_179x181.png",
+            "width": 181,
+            "height": 179,
+            "date_captured": "2021-05-28 01:17:22",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 57,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/ezizhhero_865x650_178x181.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/ezizhhero_865x650_178x181.png",
+            "width": 181,
+            "height": 178,
+            "date_captured": "2021-05-28 01:25:46",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 58,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/faraelhero_679x448_180x181.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/faraelhero_679x448_180x181.png",
+            "width": 181,
+            "height": 180,
+            "date_captured": "2021-05-28 01:19:48",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 59,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/gwynethhero_680x246_178x182.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/gwynethhero_680x246_178x182.png",
+            "width": 182,
+            "height": 178,
+            "date_captured": "2021-05-28 01:19:45",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 60,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/gwynethhero_790x850_183x186.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/gwynethhero_790x850_183x186.png",
+            "width": 186,
+            "height": 183,
+            "date_captured": "2021-05-28 01:29:56",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 61,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/jokerhero_1598x244_184x185.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/jokerhero_1598x244_184x185.png",
+            "width": 185,
+            "height": 184,
+            "date_captured": "2021-05-28 01:29:26",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 62,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/khasoshero_1194x648_184x185.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/khasoshero_1194x648_184x185.png",
+            "width": 185,
+            "height": 184,
+            "date_captured": "2021-05-28 01:29:29",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 63,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/luciushero_1396x42_183x186.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/luciushero_1396x42_183x186.png",
+            "width": 186,
+            "height": 183,
+            "date_captured": "2021-05-28 01:29:51",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 64,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/lycahero_477x246_180x181.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/lycahero_477x246_180x181.png",
+            "width": 181,
+            "height": 180,
+            "date_captured": "2021-05-28 01:19:50",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 65,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/merhiahero_865x852_178x182.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/merhiahero_865x852_178x182.png",
+            "width": 182,
+            "height": 178,
+            "date_captured": "2021-05-28 01:25:36",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 66,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/mezothhero_1066x44_179x181.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/mezothhero_1066x44_179x181.png",
+            "width": 181,
+            "height": 179,
+            "date_captured": "2021-05-28 01:24:52",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 67,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/nakoruruhero_881x448_179x181.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/nakoruruhero_881x448_179x181.png",
+            "width": 181,
+            "height": 179,
+            "date_captured": "2021-05-28 01:19:06",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 68,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/narahero_1396x446_183x186.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/narahero_1396x446_183x186.png",
+            "width": 186,
+            "height": 183,
+            "date_captured": "2021-05-28 01:29:49",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 69,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/pippahero_1598x446_184x186.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/pippahero_1598x446_184x186.png",
+            "width": 186,
+            "height": 184,
+            "date_captured": "2021-05-28 01:29:33",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 70,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/pippahero_710x448_180x182.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/pippahero_710x448_180x182.png",
+            "width": 182,
+            "height": 180,
+            "date_captured": "2021-05-28 01:17:46",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 71,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/rainehero_302x650_183x186.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/rainehero_302x650_183x186.png",
+            "width": 186,
+            "height": 183,
+            "date_captured": "2021-05-28 01:31:54",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 72,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/rainehero_461x650_179x182.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/rainehero_461x650_179x182.png",
+            "width": 182,
+            "height": 179,
+            "date_captured": "2021-05-28 01:29:04",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 73,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/respenhero_706x650_183x186.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/respenhero_706x650_183x186.png",
+            "width": 186,
+            "height": 183,
+            "date_captured": "2021-05-28 01:17:51",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 74,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/rigbyhero_1268x650_180x181.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/rigbyhero_1268x650_180x181.png",
+            "width": 181,
+            "height": 180,
+            "date_captured": "2021-05-28 01:25:27",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 75,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/rosalinehero_474x448_183x185.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/rosalinehero_474x448_183x185.png",
+            "width": 185,
+            "height": 183,
+            "date_captured": "2021-05-28 01:19:36",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 76,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/shemirahero_878x246_182x186.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/shemirahero_878x246_182x186.png",
+            "width": 186,
+            "height": 182,
+            "date_captured": "2021-05-28 01:18:44",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 77,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/skreghero_1598x42_184x186.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/skreghero_1598x42_184x186.png",
+            "width": 186,
+            "height": 184,
+            "date_captured": "2021-05-28 01:29:35",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 78,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/tasihero_588x446_184x185.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/tasihero_588x446_184x185.png",
+            "width": 185,
+            "height": 184,
+            "date_captured": "2021-05-28 01:29:31",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 79,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/thanehero_1114x448_179x181.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/thanehero_1114x448_179x181.png",
+            "width": 181,
+            "height": 179,
+            "date_captured": "2021-05-28 01:17:13",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 80,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/tidushero_680x852_179x181.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/tidushero_680x852_179x181.png",
+            "width": 181,
+            "height": 179,
+            "date_captured": "2021-05-28 01:19:10",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 81,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/twinshero_508x852_179x182.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/twinshero_508x852_179x182.png",
+            "width": 182,
+            "height": 179,
+            "date_captured": "2021-05-28 01:18:02",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 82,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/vurkhero_1114x246_179x181.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/vurkhero_1114x246_179x181.png",
+            "width": 181,
+            "height": 179,
+            "date_captured": "2021-05-28 01:17:15",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 83,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/vurkhero_259x650_179x182.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/vurkhero_259x650_179x182.png",
+            "width": 182,
+            "height": 179,
+            "date_captured": "2021-05-28 01:29:13",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 84,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/warekhero_1598x850_184x185.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/warekhero_1598x850_184x185.png",
+            "width": 185,
+            "height": 184,
+            "date_captured": "2021-05-28 01:29:17",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 85,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/wukonghero_663x852_179x181.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/wukonghero_663x852_179x181.png",
+            "width": 181,
+            "height": 179,
+            "date_captured": "2021-05-28 01:25:00",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 86,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/zaphraelhero_1396x244_183x185.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/20/zaphraelhero_1396x244_183x185.png",
+            "width": 185,
+            "height": 183,
+            "date_captured": "2021-05-28 01:29:44",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 87,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/ainzhero_385x35_185x193.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/ainzhero_385x35_185x193.png",
+            "width": 193,
+            "height": 185,
+            "date_captured": "2021-05-28 01:30:42",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 88,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/albedohero_1082x643_180x189.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/albedohero_1082x643_180x189.png",
+            "width": 189,
+            "height": 180,
+            "date_captured": "2021-05-28 01:19:29",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 89,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/albedohero_991x35_184x192.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/albedohero_991x35_184x192.png",
+            "width": 192,
+            "height": 184,
+            "date_captured": "2021-05-28 01:30:03",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 90,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/alnahero_1314x37_181x189.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/alnahero_1314x37_181x189.png",
+            "width": 189,
+            "height": 181,
+            "date_captured": "2021-05-28 01:17:05",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 91,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/alnahero_789x34_185x193.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/alnahero_789x34_185x193.png",
+            "width": 193,
+            "height": 185,
+            "date_captured": "2021-05-28 01:30:26",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 92,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/arthurhero_991x237_184x193.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/arthurhero_991x237_184x193.png",
+            "width": 193,
+            "height": 184,
+            "date_captured": "2021-05-28 01:30:10",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 93,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/athaliahero_661x239_181x189.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/athaliahero_661x239_181x189.png",
+            "width": 189,
+            "height": 181,
+            "date_captured": "2021-05-28 01:25:54",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 94,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/athaliahero_706x845_183x192.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/athaliahero_706x845_183x192.png",
+            "width": 192,
+            "height": 183,
+            "date_captured": "2021-05-28 01:17:49",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 95,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/badenhero_1192x439_186x193.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/badenhero_1192x439_186x193.png",
+            "width": 193,
+            "height": 186,
+            "date_captured": "2021-05-28 01:30:06",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 96,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/drezhero_587x237_185x193.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/drezhero_587x237_185x193.png",
+            "width": 193,
+            "height": 185,
+            "date_captured": "2021-05-28 01:30:31",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 97,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/eironnhero_476x37_181x189.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/eironnhero_476x37_181x189.png",
+            "width": 189,
+            "height": 181,
+            "date_captured": "2021-05-28 01:18:23",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 98,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/eironnhero_587x34_185x193.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/eironnhero_587x34_185x193.png",
+            "width": 193,
+            "height": 185,
+            "date_captured": "2021-05-28 01:30:33",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 99,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/eziohero_385x438_185x193.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/eziohero_385x438_185x193.png",
+            "width": 193,
+            "height": 185,
+            "date_captured": "2021-05-28 01:30:40",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 100,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/faraelhero_789x237_185x193.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/faraelhero_789x237_185x193.png",
+            "width": 193,
+            "height": 185,
+            "date_captured": "2021-05-28 01:30:24",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 101,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/grezhulhero_385x237_185x192.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/grezhulhero_385x237_185x192.png",
+            "width": 192,
+            "height": 185,
+            "date_captured": "2021-05-28 01:30:52",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 102,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/izoldhero_1282x642_183x194.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/izoldhero_1282x642_183x194.png",
+            "width": 194,
+            "height": 183,
+            "date_captured": "2021-05-28 01:19:20",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 103,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/izoldhero_183x236_184x193.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/izoldhero_183x236_184x193.png",
+            "width": 193,
+            "height": 184,
+            "date_captured": "2021-05-28 01:30:17",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 104,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/krenhero_385x842_185x193.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/krenhero_385x842_185x193.png",
+            "width": 193,
+            "height": 185,
+            "date_captured": "2021-05-28 01:30:35",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 105,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/lucretiahero_506x238_181x189.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/lucretiahero_506x238_181x189.png",
+            "width": 189,
+            "height": 181,
+            "date_captured": "2021-05-28 01:17:10",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 106,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/lucretiahero_863x239_181x189.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/lucretiahero_863x239_181x189.png",
+            "width": 189,
+            "height": 181,
+            "date_captured": "2021-05-28 01:25:49",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 107,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/mortashero_459x440_181x189.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/mortashero_459x440_181x189.png",
+            "width": 189,
+            "height": 181,
+            "date_captured": "2021-05-28 01:26:02",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 108,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/nakoruruhero_789x640_184x193.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/nakoruruhero_789x640_184x193.png",
+            "width": 193,
+            "height": 184,
+            "date_captured": "2021-05-28 01:30:15",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 109,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/orthroshero_661x36_181x189.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/orthroshero_661x36_181x189.png",
+            "width": 189,
+            "height": 181,
+            "date_captured": "2021-05-28 01:25:56",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 110,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/rakuhero_706x239_183x193.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/rakuhero_706x239_183x193.png",
+            "width": 193,
+            "height": 183,
+            "date_captured": "2021-05-28 01:18:00",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 111,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/respenhero_789x438_185x193.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/respenhero_789x438_185x193.png",
+            "width": 193,
+            "height": 185,
+            "date_captured": "2021-05-28 01:30:22",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 112,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/rosalinehero_991x439_184x192.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/rosalinehero_991x439_184x192.png",
+            "width": 192,
+            "height": 184,
+            "date_captured": "2021-05-28 01:30:01",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 113,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/rowanhero_1192x236_186x193.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/rowanhero_1192x236_186x193.png",
+            "width": 193,
+            "height": 186,
+            "date_captured": "2021-05-28 01:30:08",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 114,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/rowanhero_1486x36_181x189.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/rowanhero_1486x36_181x189.png",
+            "width": 189,
+            "height": 181,
+            "date_captured": "2021-05-28 01:18:20",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 115,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/safiyahero_274x845_181x193.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/safiyahero_274x845_181x193.png",
+            "width": 193,
+            "height": 181,
+            "date_captured": "2021-05-28 01:20:00",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 116,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/safiyahero_587x843_185x192.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/safiyahero_587x843_185x192.png",
+            "width": 192,
+            "height": 185,
+            "date_captured": "2021-05-28 01:30:48",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 117,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/saurushero_1082x239_180x188.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/saurushero_1082x239_180x188.png",
+            "width": 188,
+            "height": 180,
+            "date_captured": "2021-05-28 01:19:31",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 118,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/saurushero_385x641_185x193.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/saurushero_385x641_185x193.png",
+            "width": 193,
+            "height": 185,
+            "date_captured": "2021-05-28 01:30:37",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 119,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/silashero_1282x845_183x193.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/silashero_1282x845_183x193.png",
+            "width": 193,
+            "height": 183,
+            "date_captured": "2021-05-28 01:19:16",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 120,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/silashero_183x35_184x193.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/silashero_183x35_184x193.png",
+            "width": 193,
+            "height": 184,
+            "date_captured": "2021-05-28 01:30:20",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 121,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/skriathhero_459x844_181x189.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/skriathhero_459x844_181x189.png",
+            "width": 189,
+            "height": 181,
+            "date_captured": "2021-05-28 01:25:59",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 122,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/talenehero_506x441_181x189.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/talenehero_506x441_181x189.png",
+            "width": 189,
+            "height": 181,
+            "date_captured": "2021-05-28 01:17:08",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 123,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/talenehero_661x440_181x189.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/talenehero_661x440_181x189.png",
+            "width": 189,
+            "height": 181,
+            "date_captured": "2021-05-28 01:25:51",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 124,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/tidushero_587x641_185x193.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/tidushero_587x641_185x193.png",
+            "width": 193,
+            "height": 185,
+            "date_captured": "2021-05-28 01:30:28",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        },
+        {
+            "id": 125,
+            "file_name": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/ukyohero_1193x35_184x192.png",
+            "path": "/home/nate/projects/afk-image-processing/image_processing/si/train/30/ukyohero_1193x35_184x192.png",
+            "width": 192,
+            "height": 184,
+            "date_captured": "2021-05-28 01:29:58",
+            "license": 1,
+            "coco_url": "",
+            "flickr_url": ""
+        }
+    ],
+    "annotations": [
+        {
+            "id": 0,
+            "image_id": 0,
+            "category_id": 1,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 2916,
+            "bbox": [
+                5,
+                8,
+                54,
+                54
+            ],
+            "width": 179,
+            "height": 179
+        },
+        {
+            "id": 1,
+            "image_id": 1,
+            "category_id": 0,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 2024,
+            "bbox": [
+                8,
+                11,
+                46,
+                44
+            ],
+            "width": 178,
+            "height": 178
+        },
+        {
+            "id": 2,
+            "image_id": 2,
+            "category_id": 0,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 1980,
+            "bbox": [
+                9,
+                10,
+                44,
+                45
+            ],
+            "width": 178,
+            "height": 178
+        },
+        {
+            "id": 3,
+            "image_id": 3,
+            "category_id": 1,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 2916,
+            "bbox": [
+                4,
+                7,
+                54,
+                54
+            ],
+            "width": 178,
+            "height": 179
+        },
+        {
+            "id": 4,
+            "image_id": 4,
+            "category_id": 0,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 2704,
+            "bbox": [
+                6,
+                7,
+                52,
+                52
+            ],
+            "width": 179,
+            "height": 178
+        },
+        {
+            "id": 5,
+            "image_id": 5,
+            "category_id": 0,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 2862,
+            "bbox": [
+                5,
+                6,
+                54,
+                53
+            ],
+            "width": 179,
+            "height": 179
+        },
+        {
+            "id": 6,
+            "image_id": 6,
+            "category_id": 0,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 2970,
+            "bbox": [
+                5,
+                5,
+                54,
+                55
+            ],
+            "width": 179,
+            "height": 179
+        },
+        {
+            "id": 7,
+            "image_id": 7,
+            "category_id": 1,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 2970,
+            "bbox": [
+                3,
+                7,
+                54,
+                55
+            ],
+            "width": 179,
+            "height": 179
+        },
+        {
+            "id": 8,
+            "image_id": 8,
+            "category_id": 1,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 3025,
+            "bbox": [
+                4,
+                7,
+                55,
+                55
+            ],
+            "width": 179,
+            "height": 179
+        },
+        {
+            "id": 9,
+            "image_id": 9,
+            "category_id": 1,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 2916,
+            "bbox": [
+                6,
+                7,
+                54,
+                54
+            ],
+            "width": 179,
+            "height": 178
+        },
+        {
+            "id": 10,
+            "image_id": 10,
+            "category_id": 1,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 3024,
+            "bbox": [
+                4,
+                6,
+                54,
+                56
+            ],
+            "width": 179,
+            "height": 179
+        },
+        {
+            "id": 11,
+            "image_id": 11,
+            "category_id": 0,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 2652,
+            "bbox": [
+                6,
+                7,
+                51,
+                52
+            ],
+            "width": 178,
+            "height": 178
+        },
+        {
+            "id": 12,
+            "image_id": 12,
+            "category_id": 0,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 2652,
+            "bbox": [
+                5,
+                11,
+                51,
+                52
+            ],
+            "width": 183,
+            "height": 183
+        },
+        {
+            "id": 13,
+            "image_id": 13,
+            "category_id": 1,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 2862,
+            "bbox": [
+                3,
+                7,
+                53,
+                54
+            ],
+            "width": 176,
+            "height": 177
+        },
+        {
+            "id": 14,
+            "image_id": 14,
+            "category_id": 0,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 2652,
+            "bbox": [
+                5,
+                7,
+                51,
+                52
+            ],
+            "width": 178,
+            "height": 178
+        },
+        {
+            "id": 15,
+            "image_id": 15,
+            "category_id": 0,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 2704,
+            "bbox": [
+                5,
+                6,
+                52,
+                52
+            ],
+            "width": 178,
+            "height": 178
+        },
+        {
+            "id": 16,
+            "image_id": 16,
+            "category_id": 0,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 2070,
+            "bbox": [
+                8,
+                9,
+                45,
+                46
+            ],
+            "width": 179,
+            "height": 178
+        },
+        {
+            "id": 17,
+            "image_id": 17,
+            "category_id": 1,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 2862,
+            "bbox": [
+                5,
+                7,
+                53,
+                54
+            ],
+            "width": 179,
+            "height": 179
+        },
+        {
+            "id": 18,
+            "image_id": 18,
+            "category_id": 0,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 2756,
+            "bbox": [
+                5,
+                10,
+                52,
+                53
+            ],
+            "width": 184,
+            "height": 183
+        },
+        {
+            "id": 19,
+            "image_id": 19,
+            "category_id": 0,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 2652,
+            "bbox": [
+                5,
+                6,
+                51,
+                52
+            ],
+            "width": 178,
+            "height": 178
+        },
+        {
+            "id": 20,
+            "image_id": 20,
+            "category_id": 0,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 2808,
+            "bbox": [
+                5,
+                6,
+                52,
+                54
+            ],
+            "width": 178,
+            "height": 179
+        },
+        {
+            "id": 21,
+            "image_id": 21,
+            "category_id": 1,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 2809,
+            "bbox": [
+                5,
+                8,
+                53,
+                53
+            ],
+            "width": 179,
+            "height": 179
+        },
+        {
+            "id": 22,
+            "image_id": 22,
+            "category_id": 0,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 2862,
+            "bbox": [
+                5,
+                6,
+                53,
+                54
+            ],
+            "width": 179,
+            "height": 179
+        },
+        {
+            "id": 23,
+            "image_id": 23,
+            "category_id": 1,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 2862,
+            "bbox": [
+                4,
+                7,
+                54,
+                53
+            ],
+            "width": 178,
+            "height": 179
+        },
+        {
+            "id": 24,
+            "image_id": 24,
+            "category_id": 0,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 2970,
+            "bbox": [
+                5,
+                4,
+                54,
+                55
+            ],
+            "width": 179,
+            "height": 178
+        },
+        {
+            "id": 25,
+            "image_id": 25,
+            "category_id": 0,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 2970,
+            "bbox": [
+                5,
+                5,
+                54,
+                55
+            ],
+            "width": 179,
+            "height": 179
+        },
+        {
+            "id": 26,
+            "image_id": 26,
+            "category_id": 1,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 2862,
+            "bbox": [
+                5,
+                7,
+                53,
+                54
+            ],
+            "width": 179,
+            "height": 179
+        },
+        {
+            "id": 27,
+            "image_id": 27,
+            "category_id": 2,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4032,
+            "bbox": [
+                2,
+                6,
+                63,
+                64
+            ],
+            "width": 186,
+            "height": 183
+        },
+        {
+            "id": 28,
+            "image_id": 28,
+            "category_id": 2,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 3906,
+            "bbox": [
+                5,
+                5,
+                62,
+                63
+            ],
+            "width": 186,
+            "height": 184
+        },
+        {
+            "id": 29,
+            "image_id": 29,
+            "category_id": 2,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 3906,
+            "bbox": [
+                3,
+                6,
+                62,
+                63
+            ],
+            "width": 186,
+            "height": 183
+        },
+        {
+            "id": 30,
+            "image_id": 30,
+            "category_id": 2,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 3969,
+            "bbox": [
+                2,
+                6,
+                63,
+                63
+            ],
+            "width": 186,
+            "height": 183
+        },
+        {
+            "id": 31,
+            "image_id": 31,
+            "category_id": 2,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4096,
+            "bbox": [
+                1,
+                6,
+                64,
+                64
+            ],
+            "width": 186,
+            "height": 183
+        },
+        {
+            "id": 32,
+            "image_id": 32,
+            "category_id": 2,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4096,
+            "bbox": [
+                1,
+                3,
+                64,
+                64
+            ],
+            "width": 181,
+            "height": 179
+        },
+        {
+            "id": 33,
+            "image_id": 33,
+            "category_id": 2,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 3969,
+            "bbox": [
+                2,
+                6,
+                63,
+                63
+            ],
+            "width": 186,
+            "height": 182
+        },
+        {
+            "id": 34,
+            "image_id": 34,
+            "category_id": 2,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4224,
+            "bbox": [
+                3,
+                5,
+                64,
+                66
+            ],
+            "width": 186,
+            "height": 183
+        },
+        {
+            "id": 35,
+            "image_id": 35,
+            "category_id": 2,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 3969,
+            "bbox": [
+                4,
+                5,
+                63,
+                63
+            ],
+            "width": 186,
+            "height": 184
+        },
+        {
+            "id": 36,
+            "image_id": 36,
+            "category_id": 2,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4032,
+            "bbox": [
+                3,
+                6,
+                63,
+                64
+            ],
+            "width": 187,
+            "height": 183
+        },
+        {
+            "id": 37,
+            "image_id": 37,
+            "category_id": 2,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4032,
+            "bbox": [
+                2,
+                6,
+                63,
+                64
+            ],
+            "width": 185,
+            "height": 182
+        },
+        {
+            "id": 38,
+            "image_id": 38,
+            "category_id": 2,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4095,
+            "bbox": [
+                2,
+                3,
+                65,
+                63
+            ],
+            "width": 181,
+            "height": 179
+        },
+        {
+            "id": 39,
+            "image_id": 39,
+            "category_id": 2,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 3969,
+            "bbox": [
+                2,
+                3,
+                63,
+                63
+            ],
+            "width": 181,
+            "height": 179
+        },
+        {
+            "id": 40,
+            "image_id": 40,
+            "category_id": 2,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4030,
+            "bbox": [
+                2,
+                3,
+                65,
+                62
+            ],
+            "width": 182,
+            "height": 178
+        },
+        {
+            "id": 41,
+            "image_id": 41,
+            "category_id": 2,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4032,
+            "bbox": [
+                2,
+                6,
+                63,
+                64
+            ],
+            "width": 186,
+            "height": 182
+        },
+        {
+            "id": 42,
+            "image_id": 42,
+            "category_id": 2,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 3969,
+            "bbox": [
+                2,
+                6,
+                63,
+                63
+            ],
+            "width": 185,
+            "height": 183
+        },
+        {
+            "id": 43,
+            "image_id": 43,
+            "category_id": 2,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4032,
+            "bbox": [
+                1,
+                3,
+                64,
+                63
+            ],
+            "width": 181,
+            "height": 179
+        },
+        {
+            "id": 44,
+            "image_id": 44,
+            "category_id": 2,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 3906,
+            "bbox": [
+                2,
+                4,
+                63,
+                62
+            ],
+            "width": 182,
+            "height": 179
+        },
+        {
+            "id": 45,
+            "image_id": 45,
+            "category_id": 2,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4096,
+            "bbox": [
+                2,
+                4,
+                64,
+                64
+            ],
+            "width": 185,
+            "height": 184
+        },
+        {
+            "id": 46,
+            "image_id": 46,
+            "category_id": 2,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4095,
+            "bbox": [
+                1,
+                3,
+                65,
+                63
+            ],
+            "width": 181,
+            "height": 179
+        },
+        {
+            "id": 47,
+            "image_id": 47,
+            "category_id": 2,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4032,
+            "bbox": [
+                1,
+                3,
+                64,
+                63
+            ],
+            "width": 182,
+            "height": 179
+        },
+        {
+            "id": 48,
+            "image_id": 48,
+            "category_id": 2,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4032,
+            "bbox": [
+                1,
+                6,
+                64,
+                63
+            ],
+            "width": 186,
+            "height": 182
+        },
+        {
+            "id": 49,
+            "image_id": 49,
+            "category_id": 2,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4032,
+            "bbox": [
+                1,
+                7,
+                64,
+                63
+            ],
+            "width": 186,
+            "height": 183
+        },
+        {
+            "id": 50,
+            "image_id": 50,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4940,
+            "bbox": [
+                1,
+                3,
+                65,
+                76
+            ],
+            "width": 181,
+            "height": 179
+        },
+        {
+            "id": 51,
+            "image_id": 51,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4800,
+            "bbox": [
+                4,
+                5,
+                64,
+                75
+            ],
+            "width": 185,
+            "height": 183
+        },
+        {
+            "id": 52,
+            "image_id": 52,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4800,
+            "bbox": [
+                2,
+                6,
+                64,
+                75
+            ],
+            "width": 186,
+            "height": 182
+        },
+        {
+            "id": 53,
+            "image_id": 53,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4884,
+            "bbox": [
+                1,
+                2,
+                66,
+                74
+            ],
+            "width": 181,
+            "height": 179
+        },
+        {
+            "id": 54,
+            "image_id": 54,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4800,
+            "bbox": [
+                4,
+                4,
+                64,
+                75
+            ],
+            "width": 185,
+            "height": 183
+        },
+        {
+            "id": 55,
+            "image_id": 55,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4800,
+            "bbox": [
+                2,
+                2,
+                64,
+                75
+            ],
+            "width": 181,
+            "height": 179
+        },
+        {
+            "id": 56,
+            "image_id": 56,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4736,
+            "bbox": [
+                2,
+                3,
+                64,
+                74
+            ],
+            "width": 181,
+            "height": 179
+        },
+        {
+            "id": 57,
+            "image_id": 57,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4662,
+            "bbox": [
+                2,
+                3,
+                63,
+                74
+            ],
+            "width": 181,
+            "height": 178
+        },
+        {
+            "id": 58,
+            "image_id": 58,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4864,
+            "bbox": [
+                2,
+                2,
+                64,
+                76
+            ],
+            "width": 181,
+            "height": 180
+        },
+        {
+            "id": 59,
+            "image_id": 59,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4788,
+            "bbox": [
+                2,
+                3,
+                63,
+                76
+            ],
+            "width": 182,
+            "height": 178
+        },
+        {
+            "id": 60,
+            "image_id": 60,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4940,
+            "bbox": [
+                3,
+                5,
+                65,
+                76
+            ],
+            "width": 186,
+            "height": 183
+        },
+        {
+            "id": 61,
+            "image_id": 61,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4875,
+            "bbox": [
+                3,
+                4,
+                65,
+                75
+            ],
+            "width": 185,
+            "height": 184
+        },
+        {
+            "id": 62,
+            "image_id": 62,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4736,
+            "bbox": [
+                4,
+                5,
+                64,
+                74
+            ],
+            "width": 185,
+            "height": 184
+        },
+        {
+            "id": 63,
+            "image_id": 63,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 5016,
+            "bbox": [
+                3,
+                4,
+                66,
+                76
+            ],
+            "width": 186,
+            "height": 183
+        },
+        {
+            "id": 64,
+            "image_id": 64,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4725,
+            "bbox": [
+                2,
+                3,
+                63,
+                75
+            ],
+            "width": 181,
+            "height": 180
+        },
+        {
+            "id": 65,
+            "image_id": 65,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4875,
+            "bbox": [
+                1,
+                3,
+                65,
+                75
+            ],
+            "width": 182,
+            "height": 178
+        },
+        {
+            "id": 66,
+            "image_id": 66,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4736,
+            "bbox": [
+                2,
+                4,
+                64,
+                74
+            ],
+            "width": 181,
+            "height": 179
+        },
+        {
+            "id": 67,
+            "image_id": 67,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4800,
+            "bbox": [
+                2,
+                4,
+                64,
+                75
+            ],
+            "width": 181,
+            "height": 179
+        },
+        {
+            "id": 68,
+            "image_id": 68,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4875,
+            "bbox": [
+                4,
+                5,
+                65,
+                75
+            ],
+            "width": 186,
+            "height": 183
+        },
+        {
+            "id": 69,
+            "image_id": 69,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4940,
+            "bbox": [
+                3,
+                4,
+                65,
+                76
+            ],
+            "width": 186,
+            "height": 184
+        },
+        {
+            "id": 70,
+            "image_id": 70,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4875,
+            "bbox": [
+                2,
+                2,
+                65,
+                75
+            ],
+            "width": 182,
+            "height": 180
+        },
+        {
+            "id": 71,
+            "image_id": 71,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4928,
+            "bbox": [
+                2,
+                6,
+                64,
+                77
+            ],
+            "width": 186,
+            "height": 183
+        },
+        {
+            "id": 72,
+            "image_id": 72,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4800,
+            "bbox": [
+                2,
+                3,
+                64,
+                75
+            ],
+            "width": 182,
+            "height": 179
+        },
+        {
+            "id": 73,
+            "image_id": 73,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4788,
+            "bbox": [
+                2,
+                5,
+                63,
+                76
+            ],
+            "width": 186,
+            "height": 183
+        },
+        {
+            "id": 74,
+            "image_id": 74,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4800,
+            "bbox": [
+                2,
+                3,
+                64,
+                75
+            ],
+            "width": 181,
+            "height": 180
+        },
+        {
+            "id": 75,
+            "image_id": 75,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4864,
+            "bbox": [
+                2,
+                6,
+                64,
+                76
+            ],
+            "width": 185,
+            "height": 183
+        },
+        {
+            "id": 76,
+            "image_id": 76,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4788,
+            "bbox": [
+                2,
+                6,
+                63,
+                76
+            ],
+            "width": 186,
+            "height": 182
+        },
+        {
+            "id": 77,
+            "image_id": 77,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4736,
+            "bbox": [
+                3,
+                5,
+                64,
+                74
+            ],
+            "width": 186,
+            "height": 184
+        },
+        {
+            "id": 78,
+            "image_id": 78,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 5016,
+            "bbox": [
+                2,
+                4,
+                66,
+                76
+            ],
+            "width": 185,
+            "height": 184
+        },
+        {
+            "id": 79,
+            "image_id": 79,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4800,
+            "bbox": [
+                2,
+                2,
+                64,
+                75
+            ],
+            "width": 181,
+            "height": 179
+        },
+        {
+            "id": 80,
+            "image_id": 80,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4810,
+            "bbox": [
+                2,
+                2,
+                65,
+                74
+            ],
+            "width": 181,
+            "height": 179
+        },
+        {
+            "id": 81,
+            "image_id": 81,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4800,
+            "bbox": [
+                2,
+                4,
+                64,
+                75
+            ],
+            "width": 182,
+            "height": 179
+        },
+        {
+            "id": 82,
+            "image_id": 82,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4736,
+            "bbox": [
+                2,
+                3,
+                64,
+                74
+            ],
+            "width": 181,
+            "height": 179
+        },
+        {
+            "id": 83,
+            "image_id": 83,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4864,
+            "bbox": [
+                2,
+                3,
+                64,
+                76
+            ],
+            "width": 182,
+            "height": 179
+        },
+        {
+            "id": 84,
+            "image_id": 84,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4864,
+            "bbox": [
+                3,
+                3,
+                64,
+                76
+            ],
+            "width": 185,
+            "height": 184
+        },
+        {
+            "id": 85,
+            "image_id": 85,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4940,
+            "bbox": [
+                1,
+                2,
+                65,
+                76
+            ],
+            "width": 181,
+            "height": 179
+        },
+        {
+            "id": 86,
+            "image_id": 86,
+            "category_id": 3,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 4800,
+            "bbox": [
+                3,
+                4,
+                64,
+                75
+            ],
+            "width": 185,
+            "height": 183
+        },
+        {
+            "id": 87,
+            "image_id": 87,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6240,
+            "bbox": [
+                3,
+                2,
+                80,
+                78
+            ],
+            "width": 193,
+            "height": 185
+        },
+        {
+            "id": 88,
+            "image_id": 88,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6006,
+            "bbox": [
+                2,
+                2,
+                78,
+                77
+            ],
+            "width": 189,
+            "height": 180
+        },
+        {
+            "id": 89,
+            "image_id": 89,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6240,
+            "bbox": [
+                2,
+                2,
+                80,
+                78
+            ],
+            "width": 192,
+            "height": 184
+        },
+        {
+            "id": 90,
+            "image_id": 90,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6240,
+            "bbox": [
+                1,
+                2,
+                80,
+                78
+            ],
+            "width": 189,
+            "height": 181
+        },
+        {
+            "id": 91,
+            "image_id": 91,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6237,
+            "bbox": [
+                3,
+                3,
+                81,
+                77
+            ],
+            "width": 193,
+            "height": 185
+        },
+        {
+            "id": 92,
+            "image_id": 92,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6083,
+            "bbox": [
+                3,
+                3,
+                79,
+                77
+            ],
+            "width": 193,
+            "height": 184
+        },
+        {
+            "id": 93,
+            "image_id": 93,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6240,
+            "bbox": [
+                1,
+                2,
+                80,
+                78
+            ],
+            "width": 189,
+            "height": 181
+        },
+        {
+            "id": 94,
+            "image_id": 94,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6162,
+            "bbox": [
+                1,
+                4,
+                79,
+                78
+            ],
+            "width": 192,
+            "height": 183
+        },
+        {
+            "id": 95,
+            "image_id": 95,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6320,
+            "bbox": [
+                3,
+                4,
+                80,
+                79
+            ],
+            "width": 193,
+            "height": 186
+        },
+        {
+            "id": 96,
+            "image_id": 96,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6320,
+            "bbox": [
+                3,
+                3,
+                80,
+                79
+            ],
+            "width": 193,
+            "height": 185
+        },
+        {
+            "id": 97,
+            "image_id": 97,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6083,
+            "bbox": [
+                2,
+                3,
+                79,
+                77
+            ],
+            "width": 189,
+            "height": 181
+        },
+        {
+            "id": 98,
+            "image_id": 98,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6320,
+            "bbox": [
+                4,
+                3,
+                80,
+                79
+            ],
+            "width": 193,
+            "height": 185
+        },
+        {
+            "id": 99,
+            "image_id": 99,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6318,
+            "bbox": [
+                3,
+                4,
+                81,
+                78
+            ],
+            "width": 193,
+            "height": 185
+        },
+        {
+            "id": 100,
+            "image_id": 100,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6400,
+            "bbox": [
+                3,
+                3,
+                80,
+                80
+            ],
+            "width": 193,
+            "height": 185
+        },
+        {
+            "id": 101,
+            "image_id": 101,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6320,
+            "bbox": [
+                3,
+                4,
+                80,
+                79
+            ],
+            "width": 192,
+            "height": 185
+        },
+        {
+            "id": 102,
+            "image_id": 102,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6083,
+            "bbox": [
+                2,
+                3,
+                79,
+                77
+            ],
+            "width": 194,
+            "height": 183
+        },
+        {
+            "id": 103,
+            "image_id": 103,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6080,
+            "bbox": [
+                4,
+                5,
+                80,
+                76
+            ],
+            "width": 193,
+            "height": 184
+        },
+        {
+            "id": 104,
+            "image_id": 104,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6240,
+            "bbox": [
+                3,
+                4,
+                80,
+                78
+            ],
+            "width": 193,
+            "height": 185
+        },
+        {
+            "id": 105,
+            "image_id": 105,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6080,
+            "bbox": [
+                2,
+                3,
+                80,
+                76
+            ],
+            "width": 189,
+            "height": 181
+        },
+        {
+            "id": 106,
+            "image_id": 106,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6162,
+            "bbox": [
+                2,
+                2,
+                79,
+                78
+            ],
+            "width": 189,
+            "height": 181
+        },
+        {
+            "id": 107,
+            "image_id": 107,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6320,
+            "bbox": [
+                2,
+                3,
+                80,
+                79
+            ],
+            "width": 189,
+            "height": 181
+        },
+        {
+            "id": 108,
+            "image_id": 108,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6080,
+            "bbox": [
+                4,
+                4,
+                80,
+                76
+            ],
+            "width": 193,
+            "height": 184
+        },
+        {
+            "id": 109,
+            "image_id": 109,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6006,
+            "bbox": [
+                3,
+                3,
+                78,
+                77
+            ],
+            "width": 189,
+            "height": 181
+        },
+        {
+            "id": 110,
+            "image_id": 110,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6006,
+            "bbox": [
+                2,
+                5,
+                78,
+                77
+            ],
+            "width": 193,
+            "height": 183
+        },
+        {
+            "id": 111,
+            "image_id": 111,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6560,
+            "bbox": [
+                2,
+                2,
+                82,
+                80
+            ],
+            "width": 193,
+            "height": 185
+        },
+        {
+            "id": 112,
+            "image_id": 112,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6240,
+            "bbox": [
+                3,
+                3,
+                80,
+                78
+            ],
+            "width": 192,
+            "height": 184
+        },
+        {
+            "id": 113,
+            "image_id": 113,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6240,
+            "bbox": [
+                3,
+                4,
+                80,
+                78
+            ],
+            "width": 193,
+            "height": 186
+        },
+        {
+            "id": 114,
+            "image_id": 114,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6160,
+            "bbox": [
+                2,
+                2,
+                80,
+                77
+            ],
+            "width": 189,
+            "height": 181
+        },
+        {
+            "id": 115,
+            "image_id": 115,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6240,
+            "bbox": [
+                1,
+                1,
+                80,
+                78
+            ],
+            "width": 193,
+            "height": 181
+        },
+        {
+            "id": 116,
+            "image_id": 116,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6320,
+            "bbox": [
+                2,
+                3,
+                80,
+                79
+            ],
+            "width": 192,
+            "height": 185
+        },
+        {
+            "id": 117,
+            "image_id": 117,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6400,
+            "bbox": [
+                1,
+                1,
+                80,
+                80
+            ],
+            "width": 188,
+            "height": 180
+        },
+        {
+            "id": 118,
+            "image_id": 118,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6320,
+            "bbox": [
+                3,
+                2,
+                80,
+                79
+            ],
+            "width": 193,
+            "height": 185
+        },
+        {
+            "id": 119,
+            "image_id": 119,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6480,
+            "bbox": [
+                1,
+                2,
+                81,
+                80
+            ],
+            "width": 193,
+            "height": 183
+        },
+        {
+            "id": 120,
+            "image_id": 120,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6480,
+            "bbox": [
+                3,
+                2,
+                80,
+                81
+            ],
+            "width": 193,
+            "height": 184
+        },
+        {
+            "id": 121,
+            "image_id": 121,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6399,
+            "bbox": [
+                1,
+                2,
+                81,
+                79
+            ],
+            "width": 189,
+            "height": 181
+        },
+        {
+            "id": 122,
+            "image_id": 122,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6399,
+            "bbox": [
+                1,
+                2,
+                81,
+                79
+            ],
+            "width": 189,
+            "height": 181
+        },
+        {
+            "id": 123,
+            "image_id": 123,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6318,
+            "bbox": [
+                1,
+                2,
+                81,
+                78
+            ],
+            "width": 189,
+            "height": 181
+        },
+        {
+            "id": 124,
+            "image_id": 124,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6399,
+            "bbox": [
+                2,
+                3,
+                81,
+                79
+            ],
+            "width": 193,
+            "height": 185
+        },
+        {
+            "id": 125,
+            "image_id": 125,
+            "category_id": 4,
+            "bbox_mode": 0,
+            "iscrowd": 0,
+            "area": 6400,
+            "bbox": [
+                2,
+                2,
+                80,
+                80
+            ],
+            "width": 192,
+            "height": 184
+        }
+    ]
+}

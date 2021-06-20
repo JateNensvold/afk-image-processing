@@ -89,7 +89,8 @@ class row():
         else:
             self._list.append((dimensions, name))
 
-    def check_collision(self, collision_object: tuple) -> int:
+    def check_collision(self, collision_object: tuple,
+                        size_allowance_boundary: int = 0.25) -> int:
         """
         Check if collision_object's dimensions overlap with any of the objects
             in the row object, and merge collision_object with overlaping
@@ -98,6 +99,9 @@ class row():
         Args:
             collision_object: new row object to check against existing row
                 objects
+            size_allowance_boundary: percent size that collision image must be
+                within the average of all other images in row
+
         Return: index of updated row object when collisions occurs, -1
             otherwise
         """
@@ -114,14 +118,22 @@ class row():
             by2 = collision_object[0][1] + collision_object[0][3]
 
             if ax1 < bx2 and ax2 > bx1 and ay1 < by2 and ay2 > by1:
-                new_x1 = min(ax1, bx1)
-                new_y1 = min(ay1, by1)
-                new_x2 = max(ax2, bx2)
-                new_y2 = max(ay2, by2)
+                new_x = min(ax1, bx1)
+                new_y = min(ay1, by1)
+                new_w = (max(ax2, bx2) - new_x)
+                new_h = (max(ay2, by2) - new_y)
+                avg_w = np.mean([_object[0][2] for _object in self._list])
+                avg_h = np.mean([_object[0][3] for _object in self._list])
+                if (abs(avg_w - new_w) < avg_w * size_allowance_boundary) and \
+                        (abs(avg_h - new_h) < avg_h * size_allowance_boundary):
 
-                dimensions = (new_x1, new_y1, new_x2-new_x1, new_y2-new_y1)
-                self._list[_index] = (dimensions, _row_object[1])
-                return _index
+                    dimensions = (new_x, new_y, new_w, new_h)
+                    self._list[_index] = (dimensions, _row_object[1])
+                    return _index
+                else:
+                    print("row: {} Collision failed beteween "
+                          "({}) and ({})".format(self, _row_object,
+                                                 collision_object))
         return -1
 
     def sort(self):
@@ -214,9 +226,15 @@ class matrix():
         for _index, _row_object in enumerate(self._row_list):
             if len(_row_object) < threshold:
                 _prune_list.append(_index)
-        for _index in _prune_list:
-            self._row_list.remove(_index)
-            del self._heads[_index]
+        if len(_prune_list) > 0:
+            print("Deleting ({}) row objects({}) from matrix. Ensure that "
+                  "getHeroes was successful".format(
+                      len(_prune_list), _prune_list))
+            for _index in _prune_list:
+                print("Deleted row object ({}) of len ({})".format(
+                    self._row_list[_index], len(self._row_list[_index])))
+                self._row_list.pop(_index)
+                del self._heads[_index]
 
 
 def generate_rows(heroes: dict, spacing: int = 10):

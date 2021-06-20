@@ -365,8 +365,9 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
         for _object_name, _object_dimensions in _hero_list.items():
             # print(_object_name, _object_dimensions)
             hero_matrix.auto_append(_object_dimensions, _object_name)
-        # hero_matrix.sort()
         print("Matrix\n", hero_matrix)
+    hero_matrix.prune(threshold=5)
+    hero_matrix.sort()
 
     print(len(hero_matrix))
     for _row in hero_matrix:
