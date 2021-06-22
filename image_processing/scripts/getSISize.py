@@ -140,31 +140,31 @@ def trainLevels(image):
 
 if __name__ == '__main__':
 
-    csvfile = open(
-        "/home/nate/projects/afk-image-processing/image_processing/scripts/lvl_txt_si_scale.txt",
-        "r")
+    # csvfile = open(
+    #     "/home/nate/projects/afk-image-processing/image_processing/scripts/lvl_txt_si_scale.txt",
+    #     "r")
 
-    header = ["digitName", "si_name", "v_scale"]
+    # header = ["digitName", "si_name", "v_scale"]
 
-    reader = csv.DictReader(csvfile, header)
-    si_data_dict = {}
-    for row in reader:
-        digitName = row["digitName"]
-        si_name = row["si_name"]
-        # h_scale = float(row["h_scale"])
-        v_scale = float(row["v_scale"])
-        if si_name not in si_data_dict:
-            si_data_dict[si_name] = {}
-        si_data_dict[si_name][digitName] = {}
-        # si_data_dict[si_name][digitName]["h_scale"] = h_scale
-        si_data_dict[si_name][digitName]["v_scale"] = v_scale
+    # reader = csv.DictReader(csvfile, header)
+    # si_data_dict = {}
+    # for row in reader:
+    #     digitName = row["digitName"]
+    #     si_name = row["si_name"]
+    #     # h_scale = float(row["h_scale"])
+    #     v_scale = float(row["v_scale"])
+    #     if si_name not in si_data_dict:
+    #         si_data_dict[si_name] = {}
+    #     si_data_dict[si_name][digitName] = {}
+    #     # si_data_dict[si_name][digitName]["h_scale"] = h_scale
+    #     si_data_dict[si_name][digitName]["v_scale"] = v_scale
 
-    csvfile = open(
+    si_file = open(
         "/home/nate/projects/afk-image-processing/image_processing/si/si_data.txt",
         "r")
 
-    fieldNames = ["path", "left", "bottom", "right", "top", "label"]
-    reader = csv.DictReader(csvfile, fieldNames)
+    si_field_names = ["path", "left", "bottom", "right", "top", "label"]
+    si_reader = csv.DictReader(si_file, si_field_names)
     id = 0
     data_list = []
     annotation_list = []
@@ -175,16 +175,10 @@ if __name__ == '__main__':
 
     lvl_ratio_dict = {}
 
-    for row in reader:
+    for row in si_reader:
         si_label = row["label"]
         path = row["path"]
         rowName = os.path.basename(path)
-        # hero_si_data[name] = row
-        # if label not in size_dict:
-        #     size_dict[label] = {}
-        #     size_dict[label]["width"] = 0
-        #     size_dict[label]["height"] = 0
-        #     size_dict[label]["count"] = 0
 
         image = cv2.imread(path)
         if image is None:
@@ -231,17 +225,85 @@ if __name__ == '__main__':
             tempDigitDict["v_scale"] = v_scale
             # tempDigitDict["h_scale"] = h_scale
 
-            digitHeight = digitBottom - digitTop
-            temp_v_scale = si_data_dict[si_label][digitName]["v_scale"]
-            newHeights.append((digitHeight*temp_v_scale, digitName))
-            actualHeights.append((digitHeight, temp_v_scale))
+            # digitHeight = digitBottom - digitTop
+        #     temp_v_scale = si_data_dict[si_label][digitName]["v_scale"]
+        #     newHeights.append((digitHeight*temp_v_scale, digitName))
+        #     actualHeights.append((digitHeight, temp_v_scale))
 
             lvl_ratio_dict[digitName][si_label].append(tempDigitDict)
-        print("si: {} {}".format(si_label, actualHeights))
-        print("Prediction - h: {}".format(newHeights))
-        print("Actual - h: {}".format(si_height))
+        # print("si: {} {}".format(si_label, actualHeights))
+        # print("Prediction - h: {}".format(newHeights))
+        # print("Actual - h: {}".format(si_height))
 
-        load.display_image(image)
+    fi_file = open(
+        "/home/nate/projects/afk-image-processing/image_processing/fi/fi_data.txt",
+        "r")
+
+    fi_field_names = ["path", "left", "bottom", "right", "top", "label"]
+    fi_reader = csv.DictReader(fi_file, fi_field_names)
+    id = 0
+    data_list = []
+    annotation_list = []
+    size_dict = {}
+    count = 0
+
+    for row in fi_reader:
+        fi_label = row["label"]
+        path = row["path"]
+        rowName = os.path.basename(path)
+
+        image = cv2.imread(path)
+        if image is None:
+            print("Failed to load image {}".format(path))
+            continue
+
+        left = int(row["left"])
+        right = int(row["right"])
+        top = int(row["top"])
+        bottom = int(row["bottom"])
+
+        fi_width = right - left
+        fi_height = bottom - top
+
+        heights = []
+        newHeights = []
+        actualHeights = []
+
+        verified = getDigit(image)
+
+        for digitName, digitDict in verified.items():
+            digitTuple = digitDict["digit_info"]
+            digitTop = digitTuple[0]
+            digitBottom = digitTuple[1]
+            # index = digitTuple[2]
+            bins = digitDict
+            height = bins["match_info"][2]
+
+            heights.append(height)
+            if digitName not in lvl_ratio_dict:
+                lvl_ratio_dict[digitName] = {}
+
+            if fi_label not in lvl_ratio_dict[digitName]:
+                lvl_ratio_dict[digitName][fi_label] = []
+            tempDigitDict = {"fi": {}}
+            tempDigitDict["height"] = height
+            tempDigitDict["fi"]["height"] = fi_height
+            tempDigitDict["fi"]["width"] = fi_width
+
+            tempDigitDict["path"] = bins["match_info"]
+
+            v_scale = fi_height/height
+            # h_scale = si_width/height
+            tempDigitDict["v_scale"] = v_scale
+            # tempDigitDict["h_scale"] = h_scale
+
+            # digitHeight = digitBottom - digitTop
+        #     temp_v_scale = si_data_dict[si_label][digitName]["v_scale"]
+        #     newHeights.append((digitHeight*temp_v_scale, digitName))
+        #     actualHeights.append((digitHeight, temp_v_scale))
+
+            lvl_ratio_dict[digitName][fi_label].append(tempDigitDict)
+
     for digitName, digitDict in lvl_ratio_dict.items():
         for si_label, tempDicts in digitDict.items():
             print("{} {}".format(digitName, si_label))

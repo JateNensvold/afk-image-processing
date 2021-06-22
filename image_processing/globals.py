@@ -32,7 +32,9 @@ levelTemplatesPath = os.path.join(baseDir, "level_templates")
 siPath = os.path.join(baseDir, "si")
 siTrainPath = os.path.join(siPath, "train")
 siBasePath = os.path.join(siPath, "base")
+
 fiPath = os.path.join(baseDir, "fi")
+fi_base_path = os.path.join(fiPath, "base")
 fi_train_path = os.path.join(fiPath, "train")
 
 

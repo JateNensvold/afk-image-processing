@@ -29,20 +29,23 @@ if __name__ == "__main__":
     image_20 = cv2.imread(os.path.join(GV.siBasePath, "20", "20.png"))
     image_30 = cv2.imread(os.path.join(GV.siBasePath, "30", "30.png"))
 
+    fi_base_images = collections.defaultdict(dict)
 
-# 0 width 52.06666666666667
-# 0 height 52.6
-# 10 width 63.52173913043478
-# 10 height 63.34782608695652
-# 20 width 64.27027027027027
-# 20 height 75.1891891891892
-# 30 width 79.94871794871794
-# 30 height 78.23076923076923
+    fi_3_image = cv2.imread(os.path.join(GV.fi_base_path, "3", "3fi.png"))
+    fi_9_image = cv2.imread(os.path.join(GV.fi_base_path, "9", "9fi.png"))
+
+    baseImages["3"]["image"] = fi_3_image
+    baseImages["3"]["crop"] = fi_3_image[0:, 0:]
+    baseImages["9"]["contourNum"] = 1
+
+    baseImages["9"]["image"] = fi_9_image
+    baseImages["9"]["crop"] = fi_9_image[0:, 0:]
+    baseImages["9"]["contourNum"] = 2
 
     baseImages["0"]["image"] = image_0
     baseImages["0"]["contourNum"] = 2
-    baseImages["0"]["height"] = 52.6
-    baseImages["0"]["width"] = 52.06666666666667
+    # baseImages["0"]["height"] = 52.6
+    # baseImages["0"]["width"] = 52.06666666666667
 
     x, y, _ = image_10.shape
     newx = int(x*0.7)
@@ -51,8 +54,8 @@ if __name__ == "__main__":
     baseImages["10"]["crop"] = image_10[0:, 0:newx]
     baseImages["10"]["contourNum"] = 2
     baseImages["10"]["morph"] = True
-    baseImages["10"]["height"] = 63
-    baseImages["10"]["width"] = 63.52173913043478
+    # baseImages["10"]["height"] = 63
+    # baseImages["10"]["width"] = 63.52173913043478
 
     x, y, _ = image_20.shape
 
@@ -61,8 +64,8 @@ if __name__ == "__main__":
     baseImages["20"]["image"] = image_20
     baseImages["20"]["crop"] = image_20[0:, 0:endx]
     baseImages["20"]["contourNum"] = 2
-    baseImages["20"]["height"] = 75.1891891891892
-    baseImages["20"]["width"] = 64.27027027027027
+    # baseImages["20"]["height"] = 75.1891891891892
+    # baseImages["20"]["width"] = 64.27027027027027
 
     x, y, _ = image_30.shape
     newx = int(x*0.3)
@@ -70,8 +73,8 @@ if __name__ == "__main__":
     baseImages["30"]["image"] = image_30
     baseImages["30"]["crop"] = image_30[0:newy, 0:newx]
     baseImages["30"]["contourNum"] = 1
-    baseImages["30"]["height"] = 78.23076923076923
-    baseImages["30"]["width"] = 79.94871794871794
+    # baseImages["30"]["height"] = 78.23076923076923
+    # baseImages["30"]["width"] = 79.94871794871794
 
     csvfile = open(
         "/home/nate/projects/afk-image-processing/image_processing/scripts/lvl_txt_si_scale.txt",
@@ -178,6 +181,26 @@ if __name__ == "__main__":
             #     "height"] + frequency_height_adjust
         graded_avg_bin[si_name]["height"] = frequency_height_adjust
 
+    # fi_graded_avg_bin = {}
+    # for fi_name, fi_image_dict in fi_base_images.items():
+    #     if si_name not in fi_graded_avg_bin:
+    #         fi_graded_avg_bin[fi_name] = {}
+    #     frequency_height_adjust = 0
+    #     for digit_name, scale_dict in avg_bin.items():
+
+    #         v_scale = fi_base_images[fi_name][digit_name]["v_scale"]
+
+    #         digit_count = scale_dict["count"]
+    #         digit_height = scale_dict["height"]
+    #         digit_freqency = digit_count / total_digit_occurrences
+
+    #         frequency_height_adjust += (v_scale *
+    #                                     digit_height) * digit_freqency
+    #         # print(si_name, v_scale * digit_height)
+    #         # graded_avg_bin[si_name]["height"] += graded_avg_bin[si_name][
+    #         #     "height"] + frequency_height_adjust
+    #     fi_graded_avg_bin[si_name]["height"] = frequency_height_adjust
+
     # print(graded_avg_bin)
     # import sys
     # sys.exit()
@@ -188,6 +211,8 @@ if __name__ == "__main__":
         # siScript.getLevelDigit(v["image"], ,train=False)
         si_scores = stamina.signatureItemFeatures(
             v["image"], baseImages, graded_avg_bin)
+        stamina.furnitureItemFeatures(
+            v["image"], fi_base_images, graded_avg_bin)
         x = heroesDict[k]["object"][0][0]
         y = heroesDict[k]["object"][0][1]
 

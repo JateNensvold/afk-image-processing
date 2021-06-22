@@ -437,8 +437,6 @@ def signatureItemFeatures(hero: np.array, templates: dict,
                 "crop", templates[folder].get("image"))
             mask = np.zeros_like(templateImage)
 
-            templateGray = cv2.cvtColor(templateImage, cv2.COLOR_BGR2GRAY)
-
             if "morph" in templates[folder] and templates[folder]["morph"]:
                 # print(folder, templates[folder])
                 se = np.ones((2, 2), dtype='uint8')
@@ -452,6 +450,8 @@ def signatureItemFeatures(hero: np.array, templates: dict,
                 thresh = cv2.bitwise_not(thresh)
 
             else:
+                templateGray = cv2.cvtColor(templateImage, cv2.COLOR_BGR2GRAY)
+
                 thresh = cv2.threshold(
                     templateGray, 0, 255,
                     cv2.THRESH_OTSU + cv2.THRESH_BINARY)[1]
@@ -483,14 +483,12 @@ def signatureItemFeatures(hero: np.array, templates: dict,
 
             if folder not in si_dict:
                 si_dict[folder] = {}
-            # si_dict[folder][imageName] = siImage
-            si_dict[folder]["image"] = templateImage
+            si_dict[folder]["image"] = SIGray
+
             si_dict[folder]["template"] = templateImage
 
             si_dict[folder]["mask"] = mask
             # load.display_image(si_dict[folder]["mask"], display=True)
-
-            si_dict[folder]["image"] = SIGray
 
     numberScore = {}
 
@@ -572,7 +570,101 @@ def signatureItemFeatures(hero: np.array, templates: dict,
 
     return numberScore
 
-# def furnitureItemFeatures(hero: np.array):
+
+def furnitureItemFeatures(hero: np.array, templates: dict,
+                          lvlRatioDict: dict = None):
+    """
+    Runs template matching FI identification against the 'hero' passed in.
+        When lvlRatioDict is passed in the templates will be rescaled to
+        attempt and find the best template size for detecting FI objects
+
+    Args:
+        hero: np.array(x,y.3) representing an rgb image
+        templates: dictionary of information about each FI template to get ran
+            against the image
+        lvlRatioDict: dictionary that contains the predicted height of each
+            signature item based on precomputed text to si scaling calculations
+    Returns:
+        dictionary with best "score" that each template achieved on the 'hero'
+            image
+    """
+    print(lvlRatioDict)
+    x, y, _ = hero.shape
+    print(x, y)
+    x_div = 2.4
+    y_div = 2.0
+    offset = 10
+    hero_copy = hero.copy()
+
+    hero = hero[0: int(y/y_div), 0: int(x/x_div)]
+
+    print("hero", hero.shape)
+
+    fi_dict = {}
+    # baseSIDir = GV.siPath
+
+    fi_folders = os.listdir(GV.fi_base_path)
+
+    # imgCopy1 = newHero.copy()
+    # grayCopy = cv2.cvtColor(imgCopy1, cv2.COLOR_BGR2GRAY)
+    # count = 0
+    for folder in fi_folders:
+        fi_dir = os.path.join(GV.fi_base_path, folder)
+        fi_photos = os.listdir(fi_dir)
+        for image_name in fi_photos:
+
+            fi_image = cv2.imread(os.path.join(
+                GV.siBasePath, folder, image_name))
+
+            template_image = templates[folder].get(
+                "crop", templates[folder].get("image"))
+            mask = np.zeros_like(template_image)
+
+            if "morph" in templates[folder] and templates[folder]["morph"]:
+                # print(folder, templates[folder])
+                se = np.ones((2, 2), dtype='uint8')
+                # inverted = cv2.bitwise_not(inverted)
+
+                lower = np.array([0, 8, 0])
+                upper = np.array([179, 255, 255])
+                hsv = cv2.cvtColor(template_image, cv2.COLOR_BGR2HSV)
+                thresh = cv2.inRange(hsv, lower, upper)
+                thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, se)
+                thresh = cv2.bitwise_not(thresh)
+
+            else:
+                template_gray = cv2.cvtColor(
+                    template_image, cv2.COLOR_BGR2GRAY)
+
+                thresh = cv2.threshold(
+                    template_gray, 0, 255,
+                    cv2.THRESH_OTSU + cv2.THRESH_BINARY)[1]
+            inverted = cv2.bitwise_not(thresh)
+            x, y = inverted.shape[:2]
+            cv2.rectangle(inverted, (0, 0), (y, x), (255, 0, 0), 1)
+
+            fi_contours = cv2.findContours(
+                inverted, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+            fi_contours = imutils.grab_contours(fi_contours)
+            fi_contours = sorted(fi_contours, key=cv2.contourArea,
+                                 reverse=True)[:templates[
+                                     folder]["contourNum"]]
+
+            # cv2.drawContours(mask, siCont, -1, (255, 255, 255))
+            cv2.fillPoly(mask, fi_contours, [255, 255, 255])
+            # load.display_image([mask, templateImage],
+            #                    multiple=True, display=True)
+
+            if folder not in fi_dict:
+                fi_dict[folder] = {}
+            # si_dict[folder][imageName] = siImage
+            fi_dict[folder]["template"] = template_image
+
+            fi_dict[folder]["mask"] = mask
+            load.display_image(fi_dict[folder]["mask"], display=True)
+
+            fi_gray = cv2.cvtColor(fi_image, cv2.COLOR_BGR2GRAY)
+            fi_dict[folder]["image"] = fi_gray
 
 
 # def getLevel(image: np.array, train=True):

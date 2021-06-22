@@ -11,7 +11,7 @@ def nothing(x):
 # image = cv2.imread(
 #     "/home/nate/projects/afk-image-processing/test_2.jpg")
 image = cv2.imread(
-    "/home/nate/downloads/unknown.png")
+    "/home/nate/projects/afk-image-processing/image_processing/fi/base/9/9fi.png")
 
 # Create a window
 cv2.namedWindow('image', cv2.WINDOW_NORMAL)
