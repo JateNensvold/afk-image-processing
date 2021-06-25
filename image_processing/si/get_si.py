@@ -36,7 +36,7 @@ if __name__ == "__main__":
 
     baseImages["3"]["image"] = fi_3_image
     baseImages["3"]["crop"] = fi_3_image[0:, 0:]
-    baseImages["9"]["contourNum"] = 1
+    baseImages["3"]["contourNum"] = 2
 
     baseImages["9"]["image"] = fi_9_image
     baseImages["9"]["crop"] = fi_9_image[0:, 0:]
@@ -209,19 +209,29 @@ if __name__ == "__main__":
         name, baseHeroImage = imageDB.search(v["image"], display=False)
         heroesDict[k]["label"] = name
         # siScript.getLevelDigit(v["image"], ,train=False)
+
         si_scores = stamina.signatureItemFeatures(
             v["image"], baseImages, graded_avg_bin)
-        stamina.furnitureItemFeatures(
-            v["image"], fi_base_images, graded_avg_bin)
+        fi_scores = stamina.furnitureItemFeatures(
+            v["image"], baseImages, graded_avg_bin)
         x = heroesDict[k]["object"][0][0]
         y = heroesDict[k]["object"][0][1]
+        if fi_scores["9"] > 0.6:
+            best_fi = "9"
+            fi_score = fi_scores["9"]
+        elif fi_scores["3"] > 0.65:
+            best_fi = "3"
+            fi_score = fi_scores["3"]
+        else:
+            best_fi = "0"
+            fi_score = fi_scores["3"]
 
         if si_scores == -1:
             circle_fail += 1
             best_si = "none"
         else:
             print(si_scores)
-            if si_scores["30"] > 0.6:
+            if si_scores["30"] > 0.55:
                 best_si = "30"
             elif si_scores["20"] > 0.6:
                 best_si = "20"
@@ -233,11 +243,13 @@ if __name__ == "__main__":
                 best_si = max(si_label_list, key=lambda x: si_scores[x])
                 best_si_score = si_scores[best_si]
                 if best_si_score < 0.4:
-                    best_si = "n/a"
+                    # best_si = "n/a"
+                    best_si = "00"
 
         coords = (x, y)
         # name = "{},{}".format(name, best_si)
-        name = "{}".format(best_si)
+        # name = "{} s:{:.3}".format(best_fi, fi_score)
+        name = "{}{}".format(best_si, best_fi)
 
         print(best_si)
         # print(si_scores)
