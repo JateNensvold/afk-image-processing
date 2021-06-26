@@ -135,7 +135,7 @@ if __name__ == "__main__":
     hsv_range = [lower_hsv, upper_hsv]
     blur_args = {"hsv_range": hsv_range}
     heroesDict, rows = processing.getHeroes(
-        hero_ss, si_adjustment=0, blur_args=blur_args)
+        hero_ss, blur_args=blur_args)
     # import sys
     # sys.exit(0)
 
@@ -227,7 +227,7 @@ if __name__ == "__main__":
         if fi_scores["9"] > 0.6:
             best_fi = "9"
             fi_score = fi_scores["9"]
-        elif fi_scores["3"] > 0.65:
+        elif fi_scores["3"] > 0.6:
             best_fi = "3"
             fi_score = fi_scores["3"]
         else:

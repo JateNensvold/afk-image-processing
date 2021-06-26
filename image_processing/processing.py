@@ -304,7 +304,7 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
               maxHeroes: bool = True,
               #   hsv_range: bool = False,
               removeBG: bool = False,
-              si_adjustment: int = 0.1,
+              si_adjustment: int = 0.2,
               row_elim: int = 3,
               blur_args: dict = {}):
     """
@@ -353,8 +353,6 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
         multi_valid.append(getHeroContours(
             *baseArgs, **blur_args))
 
-
-
         # baseArgs = (image.copy(), sizeAllowanceBoundary)
         # blur_args["hsv_range"] = [
         #     np.array([5, 79, 211]), np.array([21, 106, 250])]
@@ -382,7 +380,7 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
     print(len(hero_matrix))
     for _row in hero_matrix:
         print(len(_row),)
-        for _object in _row:
+        for _object_index, _object in enumerate(_row):
 
             x = _object[0][0]
             y = _object[0][1]
@@ -391,20 +389,76 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
 
             y2 = y + h
             x2 = x + w
-            if si_adjustment:
-                x_adjust = int(w * si_adjustment)
-                y_adjust = int(h * si_adjustment)
-                x2 = x+w
-                y2 = y+h
-                x = max(0, x-x_adjust)
-                y = max(0, y-y_adjust)
+
+            _hero_name = _object[1]
+
+            # x2 = x+w
+            # y2 = y+h
+            # x = max(0, x-x_adjust)
+            # y = max(0, y-y_adjust)
             ROI = original_unmodifiable[y:
                                         y2,
                                         x:
                                         x2]
+            if si_adjustment:
+                x_adjust = round(w * si_adjustment)
+                y_adjust = round(h * si_adjustment)
+                # load.display_image(ROI)
+
+                _new_x = max(round(x - x_adjust), 0)
+                _new_y = max(round(y - y_adjust), 0)
+                # print(x*si_adjustment, y*si_adjustment)
+                new_ROI = original_unmodifiable[_new_y:
+                                                y2,
+                                                _new_x:
+                                                x2]
+                new_ROI = new_ROI.copy()
+                # lyca # (hMin = 4 , sMin = 69, vMin = 83), (hMax = 23 , sMax = 255, vMax = 255)
+                blurred = blur_image(new_ROI, reverse=True, hsv_range=[
+                    np.array([4, 69, 83]), np.array([23, 255, 355])])
+
+                new_contours = cv2.findContours(
+                    blurred, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+                import imutils
+                new_contours = imutils.grab_contours(new_contours)
+                new_contours = sorted(new_contours, key=cv2.contourArea,
+                                      reverse=True)[0]
+                # save_input = input("Press any key to continue, or enter s to save this image")
+                # if save_input == "s":
+                #     import image_processing.scripts.threshscript as thresh
+                #     thresh.threshold(new_ROI)
+                new_x, new_y, new_w, new_h = cv2.boundingRect(new_contours)
+                # cv2.rectangle(new_ROI, (new_x, new_y),
+                #               (new_x+new_w, new_y+new_h), (0, 0, 255), 2)
+
+                new_contours = [new_contours]
+
+                cv2.fillPoly(new_ROI, new_contours, [255, 0, 0])
+                # (dimensions, name)
+                print(_row)
+                output = _row.check_collision(
+                    ((x2-new_w, y2-new_h, new_w, new_h), _hero_name))
+                print(output)
+                print(_row)
+
+                x = _row[_object_index][0][0]
+                y = _row[_object_index][0][1]
+                w = _row[_object_index][0][2]
+                h = _row[_object_index][0][3]
+
+                y2 = y + h
+                x2 = x + w
+                w_border_offset = max(round(0.03 * w), 2)
+                h_border_offset = max(round(0.03 * h), 2)
+
+                print(w_border_offset, h_border_offset)
+                ROI = original_unmodifiable[y - h_border_offset:
+                                            y2,
+                                            x - w_border_offset:
+                                            x2]
+                # load.display_image(new_ROI)
 
             # staminaLib.signatureItemFeatures(ROI)
-            _hero_name = _object[1]
             print(_hero_name)
             # cv2.imwrite("./tempHero/{}".format(_hero_name), ROI)
 
@@ -434,10 +488,10 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
     #         del heroes[name]
     #     del rows[row_num]
 
-    # for _row in hero_matrix:
-    #     for _hero in _row:
-    #         _name = _hero[1]
-    #         load.display_image(heroes[_name]["image"])
+    for _row in hero_matrix:
+        for _hero in _row:
+            _name = _hero[1]
+            load.display_image(heroes[_name]["image"])
 
     return heroes, hero_matrix
 
