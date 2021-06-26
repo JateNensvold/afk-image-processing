@@ -53,11 +53,11 @@ def getDigit(image):
 
     for index, digit in enumerate(cnts):
         x, y, w, h = cv2.boundingRect(digit)
-        if w > 3 and h > 10:
-            bins[index] = {}
-            bins[index]["cnt"] = digit
-            all_y.append((y, y+h, index))
-
+        # if h/w < 10/3:
+        # if w > 3 and h > 10:
+        bins[index] = {}
+        bins[index]["cnt"] = digit
+        all_y.append((y, y+h, index))
     top_med = statistics.median([num[0] for num in all_y])
     bottom_med = statistics.median([num[1] for num in all_y])
 
@@ -118,12 +118,13 @@ def getLevelDigit(sourceImage, digitDict: np.array, train: bool = False):
 
             heightRatio = h/height
 
-            newHeight = int(height * heightRatio)
-            newWidth = int(width * heightRatio)
+            newHeight = max(round(height * heightRatio), 1)
+            newWidth = max(round(width * heightRatio), 1)
 
+            # print(min(newWidth, w), min(newHeight, h))
+            # print(min(newHeight, h)/min(newWidth, w))
             templateResize = cv2.resize(
                 templateImage, (min(newWidth, w), min(newHeight, h)))
-
             templateMatch = cv2.matchTemplate(
                 ROI, templateResize, cv2.TM_CCOEFF_NORMED)
             (_, score, _, _) = cv2.minMaxLoc(templateMatch)

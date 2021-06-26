@@ -230,7 +230,7 @@ class matrix():
             print("Deleting ({}) row objects({}) from matrix. Ensure that "
                   "getHeroes was successful".format(
                       len(_prune_list), _prune_list))
-            for _index in _prune_list:
+            for _index in sorted(_prune_list, reverse=True):
                 print("Deleted row object ({}) of len ({})".format(
                     self._row_list[_index], len(self._row_list[_index])))
                 self._row_list.pop(_index)
@@ -410,7 +410,8 @@ def signatureItemFeatures(hero: np.array, templates: dict,
     offset = 10
     hero_copy = hero.copy()
 
-    hero = hero[0: int(y/y_div), 0: int(x/x_div)]
+    crop_hero = hero[0: int(y/y_div), 0: int(x/x_div)]
+    # crop_hero = hero
 
     # print("hero", hero.shape)
 
@@ -493,82 +494,123 @@ def signatureItemFeatures(hero: np.array, templates: dict,
 
     numberScore = {}
 
-    for folder_name, imageDict in si_dict.items():
-        si_image = imageDict["template"]
+    for pixel_offset in range(-5, 15, 2):
+        for folder_name, imageDict in si_dict.items():
+            si_image = imageDict["template"]
 
-        sourceSIImage = templates[folder_name]["image"]
-        hero_h, hero_w = sourceSIImage.shape[:2]
+            sourceSIImage = templates[folder_name]["image"]
+            hero_h, hero_w = sourceSIImage.shape[:2]
 
-        original_height, original_width = si_image.shape[:2]
+            original_height, original_width = si_image.shape[:2]
 
-        base_height_ratio = original_height/hero_h
+            base_height_ratio = original_height/hero_h
 
-        # resize_height
-        base_new_height = round(lvlRatioDict[folder_name]["height"])
-        new_height = round(base_new_height * base_height_ratio)
-        scale_ratio = new_height/original_height
-        new_width = round(original_width * scale_ratio)
-        # print(folder_name, scale_ratio, base_new_height, base_height_ratio)
-        # print(folder_name, original_height, original_width)
+            # resize_height
+            base_new_height = round(
+                lvlRatioDict[folder_name]["height"]) + pixel_offset
+            new_height = round(base_new_height * base_height_ratio)
+            scale_ratio = new_height/original_height
+            new_width = round(original_width * scale_ratio)
 
-        # print(folder_name, new_height, new_width)
-        # load.display_image(siImage)
-        si_image = cv2.resize(
-            si_image, (new_width, new_height))
-        si_image_gray = cv2.cvtColor(si_image, cv2.COLOR_BGR2GRAY)
-        hero_gray = cv2.cvtColor(hero, cv2.COLOR_BGR2GRAY)
-        # load.display_image(siImage)
-        mask = cv2.resize(
-            imageDict["mask"], (new_width, new_height))
-        mask_gray = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
+            si_image = cv2.resize(
+                si_image, (new_width, new_height))
+            si_image_gray = cv2.cvtColor(si_image, cv2.COLOR_BGR2GRAY)
+            hero_gray = cv2.cvtColor(crop_hero, cv2.COLOR_BGR2GRAY)
 
-        # siImage = imutils.resize(siImage, height=round(avg_height))
-        # mask = imutils.resize(np.bitwise_not(
-        #     imageDict["mask"]), height=round(avg_height))
-        height, width = si_image.shape[:2]
+            mask = cv2.resize(
+                imageDict["mask"], (new_width, new_height))
+            mask_gray = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
+            # mask_gray = mask
 
-        # print(folder_name, height, width)
+            height, width = si_image.shape[:2]
 
-        # sizedROI = cv2.resize(
-        #     hero, (int(x * image_ratio), int(y * image_ratio)))
-        # print(siImage.shape, imageDict["mask"].shape)
-        if folder_name != "0":
-            mask_gray = cv2.bitwise_not(mask_gray)
-        # load.display_image(
-        #     [si_image_gray, mask_gray], multiple=True, display=True)
-        templateMatch = cv2.matchTemplate(
-            hero_gray, si_image_gray, cv2.TM_CCOEFF_NORMED,
-            mask=mask_gray)
+            # sizedROI = cv2.resize(
+            #     hero, (int(x * image_ratio), int(y * image_ratio)))
+            # print(siImage.shape, imageDict["mask"].shape)\
+            if folder_name != "0":
+                mask_gray = cv2.bitwise_not(mask_gray)
+            if folder_name == "30":
+                # load.display_image(
+                #     [si_image_gray, mask_gray], multiple=True, display=True)
+                # load.display_image(
+                #     hero_gray, display=True)
+                print(mask_gray.shape)
+                print(si_image_gray.shape)
+                print(hero_gray.shape)
+                print(hero.shape[0] < si_image.shape[0],
+                      hero.shape[1] < si_image.shape[1])
+                if crop_hero.shape[0] < si_image.shape[0] or crop_hero.shape[1] < si_image.shape[1]:
+                    _height, _width = si_image.shape[:2]
+                    print(_height, _width)
+                    print(max(int(y/y_div), int(_height*1.3)))
+                    print(max(int(x/x_div), int(_width*1.3)))
+                    crop_hero = hero[0: max(int(y/y_div), int(_height*1.2)),
+                                     0: max(int(x/x_div), int(_width*1.2))]
+                    # load.display_image(
+                    #     crop_hero, display=True)
 
-        (_, score, _, scoreLoc) = cv2.minMaxLoc(templateMatch)
-        scoreLoc
-        coords = (scoreLoc[0] + width, scoreLoc[1] + height)
+                    hero_gray = cv2.cvtColor(crop_hero, cv2.COLOR_BGR2GRAY)
+            try:
+                templateMatch = cv2.matchTemplate(
+                    hero_gray, si_image_gray, cv2.TM_CCOEFF_NORMED,
+                    mask=mask_gray)
+            except Exception:
+                if crop_hero.shape[0] < si_image.shape[0] or crop_hero.shape[1] < si_image.shape[1]:
+                    _height, _width = si_image.shape[:2]
+                    print(_height, _width)
+                    print(max(int(y/y_div), int(_height*1.3)))
+                    print(max(int(x/x_div), int(_width*1.3)))
+                    crop_hero = hero[0: max(int(y/y_div), int(_height*1.2)),
+                                     0: max(int(x/x_div), int(_width*1.2))]
+                    # load.display_image(
+                    #     crop_hero, display=True)
 
-        cv2.rectangle(hero_copy, scoreLoc, coords, (255, 0, 0), 1)
+                    hero_gray = cv2.cvtColor(crop_hero, cv2.COLOR_BGR2GRAY)
+                templateMatch = cv2.matchTemplate(
+                    hero_gray, si_image_gray, cv2.TM_CCOEFF_NORMED,
+                    mask=mask_gray)
+            (_, score, _, scoreLoc) = cv2.minMaxLoc(templateMatch)
+            coords = (scoreLoc[0] + width, scoreLoc[1] + height)
+
+            # cv2.rectangle(hero_copy, scoreLoc, coords, (255, 0, 0), 1)
+            # font = cv2.FONT_HERSHEY_SIMPLEX
+            # fontScale = 0.5
+            # color = (255, 0, 0)
+            # thickness = 2
+
+            # cv2.putText(
+            #     hero_copy, folder_name, coords, font, fontScale, color, thickness,
+            #     cv2.LINE_AA)
+
+            # load.display_image(
+            #     [sizedROI, siImage], multiple=True,
+            #     display=True)
+            if folder_name not in numberScore:
+                numberScore[folder_name] = []
+            numberScore[folder_name].append(
+                (score, pixel_offset, (scoreLoc, coords)))
+    best_score = {}
+    for _folder, _si_scores in numberScore.items():
+        numberScore[_folder] = sorted(_si_scores, key=lambda x: x[0])
+        # print(_folder, numberScore[_folder][-1], numberScore[_folder])
+        _best_match = numberScore[_folder][-1]
+        _score_loc = _best_match[2][0]
+        _coords = _best_match[2][1]
+
+        cv2.rectangle(hero_copy, _score_loc, _coords, (255, 0, 0), 1)
         font = cv2.FONT_HERSHEY_SIMPLEX
         fontScale = 0.5
         color = (255, 0, 0)
         thickness = 2
 
         cv2.putText(
-            hero_copy, folder_name, coords, font, fontScale, color, thickness,
+            hero_copy, _folder, _coords, font, fontScale, color, thickness,
             cv2.LINE_AA)
-
-    #     top_left = max_loc
-    # bottom_right = (top_left[0] + w, top_left[1] + h)
-
-        # print(folderName, score)
-        # print(siImage.shape, imageDict["mask"].shape)
-
-        # load.display_image(
-        #     [sizedROI, siImage], multiple=True,
-        #     display=True)
-        numberScore[folder_name] = score
-    print(numberScore)
+        best_score[_folder] = _best_match[0]
+    print(best_score)
 
     load.display_image(hero_copy)
-
-    return numberScore
+    return best_score
 
 
 def furnitureItemFeatures(hero: np.array, templates: dict,

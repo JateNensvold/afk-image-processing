@@ -344,13 +344,23 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
             np.array([0, 0, 0]), np.array([179, 255, 192])]
         multi_valid.append(getHeroContours(
             *baseArgs, **blur_args))
-        baseArgs = (image.copy(), sizeAllowanceBoundary)
 
+        # (hMin = 0 , sMin = 0, vMin = 74), (hMax = 27 , sMax = 253, vMax = 255)
+        baseArgs = (image.copy(), sizeAllowanceBoundary)
         blur_args["hsv_range"] = [
-            np.array([5, 79, 211]), np.array([21, 106, 250])]
+            np.array([0, 0, 74]), np.array([27, 253, 255])]
         blur_args["reverse"] = True
         multi_valid.append(getHeroContours(
             *baseArgs, **blur_args))
+
+
+
+        # baseArgs = (image.copy(), sizeAllowanceBoundary)
+        # blur_args["hsv_range"] = [
+        #     np.array([5, 79, 211]), np.array([21, 106, 250])]
+        # blur_args["reverse"] = True
+        # multi_valid.append(getHeroContours(
+        #     *baseArgs, **blur_args))
 
         # multi_valid.append(getHeroContours(*baseArgs))
 
@@ -366,7 +376,7 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
             # print(_object_name, _object_dimensions)
             hero_matrix.auto_append(_object_dimensions, _object_name)
         print("Matrix\n", hero_matrix)
-    hero_matrix.prune(threshold=5)
+    # hero_matrix.prune(threshold=5)
     hero_matrix.sort()
 
     print(len(hero_matrix))
@@ -392,7 +402,6 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
                                         y2,
                                         x:
                                         x2]
-            load.display_image(ROI)
 
             # staminaLib.signatureItemFeatures(ROI)
             _hero_name = _object[1]
@@ -425,10 +434,10 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
     #         del heroes[name]
     #     del rows[row_num]
 
-    # if GV.DEBUG:
-    #     for _row in rows:
-    #         for _hero in _row:
-    #             load.display_image(_hero[2])
+    # for _row in hero_matrix:
+    #     for _hero in _row:
+    #         _name = _hero[1]
+    #         load.display_image(heroes[_name]["image"])
 
     return heroes, hero_matrix
 

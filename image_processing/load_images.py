@@ -279,21 +279,21 @@ def concat_resize(img_list, interpolation=cv2.INTER_CUBIC):
     return np.hstack(im_list_resize).astype(np.uint8)
 
 
-def build_flann(baseHeroes: list, ratio=0.8):
+def build_flann(image_list: list, ratio=0.8):
     """
     Build database of heroes to match to
 
     Args:
-        baseHeroes: list of (hero:name) tuples to build database from
+        image_list: list of (image(np.array):name(str)) tuples to build database from
 
     Return:
-        An instance of imageSearch() with baseHeroes added to it with the
+        An instance of imageSearch() with image_list added to it with the
             matcher trained on them
     """
     imageDB = imageSearchDB.imageSearch(lowesRatio=ratio)
-    for index, heroTuple in enumerate(baseHeroes):
-        name = heroTuple[0]
-        hero = heroTuple[1]
+    for index, image_tuple in enumerate(image_list):
+        name = image_tuple[0]
+        hero = image_tuple[1]
         imageDB.add_image(name, hero)
     imageDB.matcher.train()
 

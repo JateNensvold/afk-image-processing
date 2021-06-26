@@ -67,6 +67,14 @@ if __name__ == "__main__":
     # baseImages["20"]["height"] = 75.1891891891892
     # baseImages["20"]["width"] = 64.27027027027027
 
+
+
+
+    # newx = int(x*0.5)
+    # newy = int(y*0.2)
+    # baseImages["30"]["image"] = image_30
+    # baseImages["30"]["crop"] = image_30[0:newy, 0:]
+    # baseImages["30"]["contourNum"] = 1
     x, y, _ = image_30.shape
     newx = int(x*0.3)
     newy = int(y*0.7)
@@ -206,7 +214,7 @@ if __name__ == "__main__":
     # sys.exit()
 
     for k, v in heroesDict.items():
-        name, baseHeroImage = imageDB.search(v["image"], display=False)
+        name, baseHeroImage = imageDB.search(v["image"])
         heroesDict[k]["label"] = name
         # siScript.getLevelDigit(v["image"], ,train=False)
 
@@ -231,7 +239,7 @@ if __name__ == "__main__":
             best_si = "none"
         else:
             print(si_scores)
-            if si_scores["30"] > 0.55:
+            if si_scores["30"] > 0.45:
                 best_si = "30"
             elif si_scores["20"] > 0.6:
                 best_si = "20"
