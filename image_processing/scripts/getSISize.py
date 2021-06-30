@@ -43,9 +43,6 @@ def getDigit(image):
 
     cnts = cv2.findContours(
         cropped_blur, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    cnts = cv2.findContours(
-        cropped_blur, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
     cnts = imutils.contours.sort_contours(cnts, method="left-to-right")[0]
     bins = {}

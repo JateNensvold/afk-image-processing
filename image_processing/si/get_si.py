@@ -36,11 +36,11 @@ if __name__ == "__main__":
 
     baseImages["3"]["image"] = fi_3_image
     baseImages["3"]["crop"] = fi_3_image[0:, 0:]
-    baseImages["3"]["contourNum"] = 2
+    baseImages["3"]["contourNum"] = 1
 
     baseImages["9"]["image"] = fi_9_image
     baseImages["9"]["crop"] = fi_9_image[0:, 0:]
-    baseImages["9"]["contourNum"] = 2
+    baseImages["9"]["contourNum"] = 1
 
     baseImages["0"]["image"] = image_0
     baseImages["0"]["contourNum"] = 2

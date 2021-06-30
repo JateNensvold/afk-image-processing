@@ -14,7 +14,10 @@ args = parser.parse_args()
 DEBUG = args.DEBUG
 image_ss = None
 if args.image:
+    multiplier = 2
     image_ss = cv2.imread(args.image)
+    image_ss = cv2.resize(
+        image_ss, (image_ss.shape[1]*multiplier, image_ss.shape[0]*multiplier))
 # DEBUG = True
 # DEBUG = False
 

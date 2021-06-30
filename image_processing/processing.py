@@ -6,6 +6,8 @@ import numpy as np
 import cv2
 import os
 
+import rtree
+
 import image_processing.build_db as BD
 import image_processing.globals as GV
 import image_processing.processing as pr
@@ -43,6 +45,7 @@ def load_image(image_path: str) -> np.ndarray:
 
 def blur_image(image: np.ndarray, dilate=False,
                hsv_range: Sequence[np.array] = None,
+               rgb_range: Sequence[np.array] = None,
                reverse: bool = False) -> np.ndarray:
     """
     Applies Gaussian Blurring or HSV thresholding to image in an attempt to
@@ -54,6 +57,9 @@ def blur_image(image: np.ndarray, dilate=False,
         dilate: flag to dilate the image after applying noise reduction.
         hsv_range: Sequence of 2 numpy arrays that represent the (lower, upper)
             bounds of the HSV range to threshold on. If this argument is None
+            or False a gaussian blur will be used instead
+        rgb_range: Sequence of 2 numpy arrays that represent the (lower, upper)
+            bounds of the RGB range to threshold on. If this argument is None
             or False a gaussian blur will be used instead
         reverse: flag to bitwise_not the image after applying hsv_range
 
@@ -87,7 +93,14 @@ def blur_image(image: np.ndarray, dilate=False,
             output = cv2.bitwise_not(output)
         # output = cv2.bitwise_and(output, mask_inv)
         # load.display_image(output, colormap="gray")
+    elif rgb_range:
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
+        output = cv2.inRange(image, rgb_range[0], rgb_range[1])
+        if reverse:
+            output = cv2.bitwise_not(output)
+        # output = cv2.bitwise_and(output, mask_inv)
+        # load.display_image(output, colormap="gray")
     else:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
@@ -198,7 +211,7 @@ def remove_background(img):
     return out, bestapprox
 
 
-def getHeroContours(image: np.array, sizeAllowanceBoundary, **blurKwargs):
+def getHeroContours(image: np.array, sizeAllowanceBoundary, display=None, **blurKwargs):
     """
     Args:
         image: hero roster screenshot
@@ -213,8 +226,15 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, **blurKwargs):
         load.display_image(dilate, display=True)
 
     # Find contours
+    import imutils
+    import imutils.contours
     cnts = cv2.findContours(dilate, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    cnts = cnts[0] if len(cnts) == 2 else cnts[1]
+    # cnts = cnts[0] if len(cnts) == 2 else cnts[1]
+    cnts = imutils.grab_contours(cnts)
+    # cnts = imutils.contours.sort_contours(cnts,
+    #                                       method="left-to-right")[0]
+    cnts = sorted(cnts, key=cv2.contourArea,
+                  reverse=True)
 
     # Iterate through contours and filter for ROI
     image_number = 0
@@ -222,15 +242,35 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, **blurKwargs):
     heights = []
     widths = []
     customContour = []
-    for c in cnts:
+
+    idx = rtree.index.Index()
+
+    for _index, c in enumerate(cnts):
 
         x, y, w, h = cv2.boundingRect(c)
         diff = abs(h-w)
         avg_h_w = ((h+w)/2)
         tolerance = avg_h_w * 0.2
 
-        if GV.DEBUG:
-            cv2.rectangle(image, (x, y), (x+w, y+h), (0, 0, 255), 2)
+        if GV.DEBUG and display:
+            _idx_coords = (x, y, x+w, y+h)
+            _intersections = list(idx.intersection(_idx_coords))
+            if _intersections:
+                for _collision in _intersections:
+                    print(_collision)
+            else:
+                idx.insert(_index, _idx_coords)
+                cv2.rectangle(image, (x, y), (x+w, y+h), (0, 0, 255), 2)
+
+            print("cnt", x, y)
+            # ROI = image[y:
+            #             y+h,
+            #             x:
+            #             x+w]
+            # cv2.drawContours(image, [c], -1, (0, 0, 255), thickness=2)
+
+            # load.display_image(image, display=True)
+            # cv2.rectangle(image, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
         if diff < tolerance and (h*w) > 2500:
 
@@ -261,8 +301,6 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, **blurKwargs):
             widths.append(w)
 
         image_number += 1
-    if GV.DEBUG:
-        load.display_image(image)
 
     # mean = np.mean([i for i in sizes.keys()])
     h_mean = np.median(heights)
@@ -351,7 +389,7 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
             np.array([0, 0, 74]), np.array([27, 253, 255])]
         blur_args["reverse"] = True
         multi_valid.append(getHeroContours(
-            *baseArgs, **blur_args))
+            *baseArgs, display=True, **blur_args))
 
         # baseArgs = (image.copy(), sizeAllowanceBoundary)
         # blur_args["hsv_range"] = [
@@ -373,13 +411,12 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
         for _object_name, _object_dimensions in _hero_list.items():
             # print(_object_name, _object_dimensions)
             hero_matrix.auto_append(_object_dimensions, _object_name)
-        print("Matrix\n", hero_matrix)
+        # print("Matrix\n", hero_matrix)
     # hero_matrix.prune(threshold=5)
     hero_matrix.sort()
 
-    print(len(hero_matrix))
+    # print(len(hero_matrix))
     for _row in hero_matrix:
-        print(len(_row),)
         for _object_index, _object in enumerate(_row):
 
             x = _object[0][0]
@@ -403,7 +440,6 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
             if si_adjustment:
                 x_adjust = round(w * si_adjustment)
                 y_adjust = round(h * si_adjustment)
-                # load.display_image(ROI)
 
                 _new_x = max(round(x - x_adjust), 0)
                 _new_y = max(round(y - y_adjust), 0)
@@ -435,11 +471,8 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
 
                 cv2.fillPoly(new_ROI, new_contours, [255, 0, 0])
                 # (dimensions, name)
-                print(_row)
                 output = _row.check_collision(
                     ((x2-new_w, y2-new_h, new_w, new_h), _hero_name))
-                print(output)
-                print(_row)
 
                 x = _row[_object_index][0][0]
                 y = _row[_object_index][0][1]
@@ -451,15 +484,12 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
                 w_border_offset = max(round(0.03 * w), 2)
                 h_border_offset = max(round(0.03 * h), 2)
 
-                print(w_border_offset, h_border_offset)
                 ROI = original_unmodifiable[y - h_border_offset:
                                             y2,
                                             x - w_border_offset:
                                             x2]
-                # load.display_image(new_ROI)
 
             # staminaLib.signatureItemFeatures(ROI)
-            print(_hero_name)
             # cv2.imwrite("./tempHero/{}".format(_hero_name), ROI)
 
             heroes[_hero_name] = {}
@@ -489,9 +519,12 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
     #     del rows[row_num]
 
     for _row in hero_matrix:
-        for _hero in _row:
-            _name = _hero[1]
-            load.display_image(heroes[_name]["image"])
+        load.display_image([heroes[_hero[1]]["image"]
+                           for _hero in _row], multiple=True, display=True)
+
+        # for _hero in _row:
+        #     _name = _hero[1]
+        #     load.display_image(heroes[_name]["image"])
 
     return heroes, hero_matrix
 
