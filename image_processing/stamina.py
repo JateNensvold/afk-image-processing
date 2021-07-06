@@ -65,7 +65,7 @@ class row():
         Args:
             index: position of item in row
 
-        Returns tuple(x_coord, y_coord, image_name)
+        Returns tuple(coords, image_name)
         """
         return self._list[index]
 
@@ -126,9 +126,14 @@ class row():
                 avg_h = np.mean([_object[0][3] for _object in self._list])
                 if (abs(avg_w - new_w) < avg_w * size_allowance_boundary) and \
                         (abs(avg_h - new_h) < avg_h * size_allowance_boundary):
-
                     dimensions = (new_x, new_y, new_w, new_h)
-                    self._list[_index] = (dimensions, _row_object[1])
+
+                    name = "{}x{}_{}x{}".format(
+                        dimensions[0], dimensions[1], dimensions[2],
+                        dimensions[3])
+                    print("1", self._list[_index])
+                    self._list[_index] = (dimensions, name)
+                    print("2", self._list[_index])
                     return _index
                 else:
                     print("row: {} Collision failed beteween "
@@ -170,6 +175,16 @@ class matrix():
 
     def __len__(self):
         return len(self._row_list)
+
+    def __getitem__(self, index: int):
+        """
+        Get an item by its index
+        Args:
+            index: position of item in row
+
+        Returns tuple(x_coord, y_coord, image_name)
+        """
+        return self._row_list[index]
 
     def __init__(self, spacing=10):
         self.spacing = spacing
@@ -551,17 +566,15 @@ def signatureItemFeatures(hero: np.array, templates: dict,
             #         #     crop_hero, display=True)
 
             #         hero_gray = cv2.cvtColor(crop_hero, cv2.COLOR_BGR2GRAY)
-            print(pixel_offset)
-            print(crop_hero.shape, si_image.shape)
 
             try:
                 templateMatch = cv2.matchTemplate(
                     hero_gray, si_image_gray, cv2.TM_CCOEFF_NORMED,
                     mask=mask_gray)
             except Exception:
-                load.display_image([crop_hero, si_image], multiple=True, display=True)
+                load.display_image([crop_hero, si_image],
+                                   multiple=True, display=True)
                 if crop_hero.shape[0] < si_image.shape[0] or crop_hero.shape[1] < si_image.shape[1]:
-                    print("resizing")
                     _height, _width = si_image.shape[:2]
                     # print(_height, _width)
                     # print(max(int(y/y_div), int(_height*1.3)))
@@ -604,16 +617,15 @@ def signatureItemFeatures(hero: np.array, templates: dict,
         _coords = _best_match[2][1]
 
         cv2.rectangle(hero_copy, _score_loc, _coords, (255, 0, 0), 1)
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        fontScale = 0.5
-        color = (255, 0, 0)
-        thickness = 2
+        # font = cv2.FONT_HERSHEY_SIMPLEX
+        # fontScale = 0.5
+        # color = (255, 0, 0)
+        # thickness = 2
 
-        cv2.putText(
-            hero_copy, _folder, _coords, font, fontScale, color, thickness,
-            cv2.LINE_AA)
+        # cv2.putText(
+        #     hero_copy, _folder, _coords, font, fontScale, color, thickness,
+        #     cv2.LINE_AA)
         best_score[_folder] = _best_match[0]
-    print(best_score)
 
     # load.display_image(hero_copy, display=True)
     return best_score
@@ -636,6 +648,7 @@ def furnitureItemFeatures(hero: np.array, templates: dict,
         dictionary with best "score" that each template achieved on the 'hero'
             image
     """
+    # variable_multiplier =
     x, y, _ = hero.shape
     # print(x, y)
     x_div = 2.4
@@ -645,8 +658,6 @@ def furnitureItemFeatures(hero: np.array, templates: dict,
     hero_copy = hero.copy()
 
     crop_hero = hero[y_offset: int(y*0.6), x_offset: int(x*0.4)]
-
-    # print("hero", hero.shape)
 
     fi_dict = {}
     # baseSIDir = GV.siPath
@@ -694,9 +705,6 @@ def furnitureItemFeatures(hero: np.array, templates: dict,
             fi_contours = cv2.findContours(
                 inverted, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
             fi_contours = imutils.grab_contours(fi_contours)
-            # print(templates.keys())
-            # print(templates[folder].keys())
-            # print("cont num", folder, templates[folder]["contourNum"])
             fi_contours = sorted(fi_contours, key=cv2.contourArea,
                                  reverse=True)[:templates[
                                      folder]["contourNum"]]
@@ -732,25 +740,25 @@ def furnitureItemFeatures(hero: np.array, templates: dict,
             # fi_dict[folder]["image"] = fi_gray
 
     numberScore = {}
-    # neighborhood_size = 3
-    # sigmaColor = sigmaSpace = 75.
+    neighborhood_size = 7
+    sigmaColor = sigmaSpace = 75.
 
     # size_multiplier = 4
 
     # size_crop_hero = cv2.resize(
     #     crop_hero, (crop_hero.shape[0]*size_multiplier, crop_hero.shape[1]*size_multiplier))
-
-    # clean_hero = cv2.bilateralFilter(
-    #     size_crop_hero, neighborhood_size, sigmaColor, sigmaSpace)
+    old_crop_hero = crop_hero
+    crop_hero = cv2.bilateralFilter(
+        crop_hero, neighborhood_size, sigmaColor, sigmaSpace)
 
     # # (RMin = 190 , GMin = 34, BMin = 0), (RMax = 255 , GMax = 184, BMax = 157)
     # rgb_range = [
     #     np.array([190, 34, 0]), np.array([255, 184, 157])]
-    # # rgb_range = [
-    # #     np.array([180, 0, 0]), np.array([255, 246, 255])]
+    # rgb_range = [
+    #     np.array([180, 0, 0]), np.array([255, 246, 255])]
 
     # default_blur = processing.blur_image(
-    #     clean_hero, rgb_range=rgb_range)
+    #     crop_hero, rgb_range=rgb_range)
     # # (RMin = 180 , G
     # hero_crop_contours = cv2.findContours(
     #     default_blur, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
@@ -760,29 +768,37 @@ def furnitureItemFeatures(hero: np.array, templates: dict,
     # # (hMin = 0 , sMin = 50, vMin = 124), (hMax = 49 , sMax = 225, vMax = 255)
     # hsv_range = [
     #     np.array([0, 50, 124]), np.array([49, 255, 255])]
+# (RMin = 133 , GMin = 61, BMin = 35), (RMax = 255 , GMax = 151, BMax = 120)
+    rgb_range = [np.array([133, 61, 35]), np.array([255, 151, 120])]
 
-    # blur_hero = processing.blur_image(clean_hero, hsv_range=hsv_range)
+    blur_hero = processing.blur_image(crop_hero, rgb_range=rgb_range)
 
     # load.display_image([crop_hero, clean_hero, default_blur, blur_hero],
     #                    display=True, multiple=True, color_correct=True)
 
-    # fi_color_contours = cv2.findContours(
-    #     blur_hero, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-    # fi_color_contours = imutils.grab_contours(fi_color_contours)
+    fi_color_contours = cv2.findContours(
+        blur_hero, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    fi_color_contours = imutils.grab_contours(fi_color_contours)
+    fi_color_contours = sorted(fi_color_contours, key=cv2.contourArea,
+                               reverse=True)[:2]
     # # # for fi_color_contour in fi_color_contour:
     # blur_hero_mask = np.zeros_like(blur_hero)
-    # crop_hero_mask = np.zeros_like(blur_hero)
+    crop_hero_mask = np.zeros_like(crop_hero)
     # hsv_rgb_mask = np.zeros_like(blur_hero)
 
-    # # hull = cv2.convexHull(np.array(_cont))
-    # crop_hero_mask = cv2.merge(
-    #     [crop_hero_mask, crop_hero_mask, crop_hero_mask])
-    # for _cont in hero_crop_contours:
-    #     hull = cv2.convexHull(np.array(_cont))
-    #     cv2.drawContours(crop_hero_mask, [
-    #                      hull], -1, (255, 255, 255), thickness=cv2.FILLED)
+    master_contour = [
+        _cont for _cont_list in fi_color_contours for _cont in _cont_list]
+    # hull = cv2.convexHull(np.array(master_contour))
 
-    #     # cv2.drawContours(crop_hero_mask, [_cont], -1, (255, 0, 0))
+    # cv2.drawContours(crop_hero_mask, [
+    #     hull], -1, (255, 255, 255), thickness=cv2.FILLED)
+
+    for _cont in fi_color_contours:
+        hull = cv2.convexHull(np.array(_cont))
+        cv2.drawContours(crop_hero_mask, [
+            hull], -1, (255, 255, 255), thickness=cv2.FILLED)
+        # cv2.drawContours(crop_hero_mask, [_cont], -1, (255, 0, 0))
+    # load.display_image(crop_hero_mask, display=True)
 
     # cv2.drawContours(blur_hero_mask, fi_color_contours, -1,
     #                  (255, 255, 255))
@@ -796,14 +812,16 @@ def furnitureItemFeatures(hero: np.array, templates: dict,
     # cv2.drawContours(hsv_rgb_mask, hero_crop_contours, -1,
     #                  (255, 255, 255), thickness=cv2.FILLED)
 
-    # load.display_image([crop_hero, crop_hero_mask, blur_hero_mask, hsv_rgb_mask],
-    #                    display=True, multiple=True, color_correct=True)
-
     # # color_mask = cv2.merge(
     # #     [blur_hero, blur_hero, blur_hero])
-    # blur_hero = cv2.bitwise_and(crop_hero_mask, size_crop_hero)
-    blur_hero = crop_hero
-    for pixel_offset in range(0, 15, 1):
+    blur_hero = cv2.bitwise_and(crop_hero_mask, crop_hero)
+    blur_hero[np.where((blur_hero == [0, 0, 0]).all(axis=2))] = [255, 255, 255]
+    old_crop_hero = cv2.bitwise_and(crop_hero_mask, old_crop_hero)
+
+    # load.display_image([blur_hero, old_crop_hero],
+    #                    display=True, multiple=True, color_correct=True)
+    # blur_hero = crop_hero
+    for pixel_offset in range(-5, 15, 1):
 
         for folder_name, imageDict in fi_dict.items():
             fi_image = imageDict["template"]
@@ -817,9 +835,7 @@ def furnitureItemFeatures(hero: np.array, templates: dict,
             # resize_height
             base_new_height = max(round(
                 lvlRatioDict[folder_name]["height"]), 12)+pixel_offset
-            # print(base_new_height)
             # base_new_height = round(lvlRatioDict[folder_name]["height"])
-            # print(base_new_height)
 
             new_height = round(base_new_height * base_height_ratio)
             scale_ratio = new_height/original_height
@@ -841,12 +857,10 @@ def furnitureItemFeatures(hero: np.array, templates: dict,
 
             # sizedROI = cv2.resize(
             #     hero, (int(x * image_ratio), int(y * image_ratio)))
-            # print(siImage.shape, imageDict["mask"].shape)
             # if folder_name != "0":
             #     mask_gray = cv2.bitwise_not(mask_gray)
             # load.display_image(
             #     [fi_image, mask_gray], multiple=True, display=True)
-            # print("gray", hero_gray.shape)
 
             try:
                 templateMatch = cv2.matchTemplate(
@@ -889,24 +903,23 @@ def furnitureItemFeatures(hero: np.array, templates: dict,
     import math
     for _folder, _fi_scores in numberScore.items():
         numberScore[_folder] = sorted(_fi_scores, key=lambda x: x[0])
-        _best_match = [_num for _num in numberScore[_folder] if not math.isinf(_num[0])][-1]
+        _best_match = [_num for _num in numberScore[_folder]
+                       if not math.isinf(_num[0])][-1]
         _score_loc = _best_match[2][0]
         _coords = _best_match[2][1]
         # print(_score_loc, _coords)
         cv2.rectangle(blur_hero, _score_loc, _coords, (255, 0, 0), 1)
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        fontScale = 0.2
-        color = (255, 0, 0)
-        thickness = 2
+        # font = cv2.FONT_HERSHEY_SIMPLEX
+        # fontScale = 0.2
+        # color = (255, 0, 0)
+        # thickness = 2
 
-        cv2.putText(
-            blur_hero, _folder, _coords, font, fontScale, color, thickness,
-            cv2.LINE_AA)
+        # cv2.putText(
+        #     blur_hero, _folder, _coords, font, fontScale, color, thickness,
+        #     cv2.LINE_AA)
         best_score[_folder] = _best_match[0]
 
-    print(best_score)
-
-    load.display_image(blur_hero, display=True)
+    # load.display_image(blur_hero, display=True)
 
     return best_score
 

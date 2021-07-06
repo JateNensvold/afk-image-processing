@@ -76,14 +76,10 @@ def blur_image(image: np.ndarray, dilate=False,
     # output = cv2.inRange(hvs_image, lower_hsv_filter, upper_hsv_filter)
     # # output = cv2.cvtColor(output, cv2.COLOR_BGR2GRAY)
     # _, hsv_mask = cv2.threshold(output, 3, 255, cv2.THRESH_BINARY)
-    # print(output.shape)
     # # cv2.COLOR_HSV2
-    # # load.display_image(output, color_correct=True)
     # # h, s, v1 = cv2.split(output)
-    # load.display_image(output, colormap="gray")
 
     # mask_inv = cv2.bitwise_not(output)
-    # # load.display_image(mask_inv, colormap="gray")
 
     if hsv_range:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
@@ -92,7 +88,6 @@ def blur_image(image: np.ndarray, dilate=False,
         if reverse:
             output = cv2.bitwise_not(output)
         # output = cv2.bitwise_and(output, mask_inv)
-        # load.display_image(output, colormap="gray")
     elif rgb_range:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
@@ -100,7 +95,6 @@ def blur_image(image: np.ndarray, dilate=False,
         if reverse:
             output = cv2.bitwise_not(output)
         # output = cv2.bitwise_and(output, mask_inv)
-        # load.display_image(output, colormap="gray")
     else:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
@@ -120,28 +114,18 @@ def blur_image(image: np.ndarray, dilate=False,
         blurred = cv2.GaussianBlur(
             image, (neighborhood_size, neighborhood_size), 0)
         output = cv2.Canny(blurred, lower_thresh, upper_thresh, 1)
-    # print("Gaussian")
-    # plt.figure()
-    # plt.imshow(canny)
-    # plt.show()
+    # ("Gaussian")
 
     # blurred = cv2.blur(image, ksize=(neighborhood_size, neighborhood_size))
     # canny = cv2.Canny(blurred, lower_thresh, upper_thresh, 1)
-    # print("blur")
-    # plt.imshow(canny)
-    # plt.show()
+    # ("blur")
 
     # sigmaColor = sigmaSpace = 75.
     # blurred = cv2.bilateralFilter(
     #     image, neighborhood_size, sigmaColor, sigmaSpace)
     # output = cv2.Canny(blurred, lower_thresh, upper_thresh, 1)
-    # print("bilateral")
-    # plt.imshow(canny)
-    # plt.show()
+    # ("bilateral")
 
-    # plt.figure()
-    # plt.imshow(dilate)
-    # plt.show()
     if dilate:
         kernel = np.ones((1, 1), np.uint8)
         return cv2.dilate(output, kernel, iterations=1)
@@ -223,7 +207,7 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, display=None, **blur
     dilate = blur_image(image, **blurKwargs)
 
     if GV.DEBUG:
-        load.display_image(dilate, display=True)
+        load.display_image(dilate)
 
     # Find contours
     import imutils
@@ -252,17 +236,18 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, display=None, **blur
         avg_h_w = ((h+w)/2)
         tolerance = avg_h_w * 0.2
 
-        if GV.DEBUG and display:
-            _idx_coords = (x, y, x+w, y+h)
-            _intersections = list(idx.intersection(_idx_coords))
-            if _intersections:
-                for _collision in _intersections:
-                    print(_collision)
-            else:
-                idx.insert(_index, _idx_coords)
-                cv2.rectangle(image, (x, y), (x+w, y+h), (0, 0, 255), 2)
+        # if GV.DEBUG and display:
+        _idx_coords = (x, y, x+w, y+h)
+        _intersections = list(idx.intersection(_idx_coords))
+        if _intersections:
+            for _collision in _intersections:
+                # print(_collision)
+                pass
+        else:
+            idx.insert(_index, _idx_coords)
+            cv2.rectangle(image, (x, y), (x+w, y+h), (0, 0, 255), 2)
 
-            print("cnt", x, y)
+            # print("cnt", x, y)
             # ROI = image[y:
             #             y+h,
             #             x:
@@ -324,7 +309,7 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, display=None, **blur
                 occurrences += 1
                 # if size not in valid_sizes:
                 #     valid_sizes[size] = []
-                name = "hero_{}x{}_{}x{}".format(
+                name = "{}x{}_{}x{}".format(
                     _coords[0], _coords[1], _coords[2], _coords[3])
 
                 valid_sizes[name] = _coords
@@ -375,48 +360,62 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
     heroes = {}
     valid_sizes = {}
     baseArgs = (original_modifiable, sizeAllowanceBoundary)
-    if maxHeroes:
-        multi_valid = []
-        # multi_valid.append(getHeroContours(*baseArgs, dilate=True))
-        blur_args["hsv_range"] = [
-            np.array([0, 0, 0]), np.array([179, 255, 192])]
-        multi_valid.append(getHeroContours(
-            *baseArgs, **blur_args))
+    multi_valid = []
 
-        # (hMin = 0 , sMin = 0, vMin = 74), (hMax = 27 , sMax = 253, vMax = 255)
-        baseArgs = (image.copy(), sizeAllowanceBoundary)
-        blur_args["hsv_range"] = [
-            np.array([0, 0, 74]), np.array([27, 253, 255])]
-        blur_args["reverse"] = True
-        multi_valid.append(getHeroContours(
-            *baseArgs, display=True, **blur_args))
+    # if maxHeroes:
+    # multi_valid.append(getHeroContours(*baseArgs, dilate=True))
+    blur_args["hsv_range"] = [
+        np.array([0, 0, 0]), np.array([179, 255, 192])]
+    multi_valid.append(getHeroContours(
+        *baseArgs, **blur_args))
 
-        # baseArgs = (image.copy(), sizeAllowanceBoundary)
-        # blur_args["hsv_range"] = [
-        #     np.array([5, 79, 211]), np.array([21, 106, 250])]
-        # blur_args["reverse"] = True
-        # multi_valid.append(getHeroContours(
-        #     *baseArgs, **blur_args))
+    # (hMin = 0 , sMin = 0, vMin = 74), (hMax = 27 , sMax = 253, vMax = 255)
+    baseArgs = (image.copy(), sizeAllowanceBoundary)
+    blur_args["hsv_range"] = [
+        np.array([0, 0, 74]), np.array([27, 253, 255])]
+    blur_args["reverse"] = True
+    multi_valid.append(getHeroContours(
+        *baseArgs, display=True, **blur_args))
 
-        # multi_valid.append(getHeroContours(*baseArgs))
+    # baseArgs = (image.copy(), sizeAllowanceBoundary)
+    # blur_args["hsv_range"] = [
+    #     np.array([5, 79, 211]), np.array([21, 106, 250])]
+    # blur_args["reverse"] = True
+    # multi_valid.append(getHeroContours(
+    #     *baseArgs, **blur_args))
 
-        # multi_valid = sorted(multi_valid, key=lambda x: len(x), reverse=True)
-        # valid_sizes = multi_valid[0]
+    # multi_valid.append(getHeroContours(*baseArgs))
 
-    #     valid_sizes = getHeroContours(*baseArgs)
+    # multi_valid = sorted(multi_valid, key=lambda x: len(x), reverse=True)
+    # valid_sizes = multi_valid[0]
 
-    hero_matrix = stamina.matrix()
-    # print(multi_valid)
+#     valid_sizes = getHeroContours(*baseArgs)
+
+    import statistics
+    hero_widths = []
+    hero_heights = []
+
+    for _heroes_list in multi_valid:
+        for _object_name, _object_dimensions in _heroes_list.items():
+            hero_widths.append(_object_dimensions[2])
+            hero_heights.append(_object_dimensions[3])
+    hero_widths.sort()
+    hero_heights.sort()
+
+    hero_w_median = statistics.median(hero_widths)
+    hero_h_median = statistics.median(hero_heights)
+
+    spacing = round((hero_w_median + hero_h_median)/10)
+    print("spacing", spacing)
+    hero_matrix = stamina.matrix(spacing=spacing)
     for _hero_list in multi_valid:
         for _object_name, _object_dimensions in _hero_list.items():
-            # print(_object_name, _object_dimensions)
             hero_matrix.auto_append(_object_dimensions, _object_name)
-        # print("Matrix\n", hero_matrix)
     # hero_matrix.prune(threshold=5)
     hero_matrix.sort()
 
-    # print(len(hero_matrix))
-    for _row in hero_matrix:
+    for _row_index, _row in enumerate(hero_matrix):
+        print("row({}) length: {}".format(_row_index, len(_row)))
         for _object_index, _object in enumerate(_row):
 
             x = _object[0][0]
@@ -428,6 +427,7 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
             x2 = x + w
 
             _hero_name = _object[1]
+            # print("name", _object)
 
             # x2 = x+w
             # y2 = y+h
@@ -443,7 +443,6 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
 
                 _new_x = max(round(x - x_adjust), 0)
                 _new_y = max(round(y - y_adjust), 0)
-                # print(x*si_adjustment, y*si_adjustment)
                 new_ROI = original_unmodifiable[_new_y:
                                                 y2,
                                                 _new_x:
@@ -504,10 +503,11 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
                 heroes[_hero_name]["image"] = ROI
 
             heroes[_hero_name]["object"] = _object
-
             # heroes[_hero_name]["dimensions"] = {}
             # heroes[_hero_name]["dimensions"]["y"] = (d[3], d[3]+d[0])
             # heroes[_hero_name]["dimensions"]["x"] = (d[2], d[2]+d[1])
+        # load.display_image([heroes[_hero[1]]["image"]
+        #                     for _hero in _row], multiple=True, display=True)
     # row_delete = []
     # for index in range(len(rows)):
     #     if len(rows[index]) < row_elim:
@@ -518,9 +518,9 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
     #         del heroes[name]
     #     del rows[row_num]
 
-    for _row in hero_matrix:
-        load.display_image([heroes[_hero[1]]["image"]
-                           for _hero in _row], multiple=True, display=True)
+    # for _row in hero_matrix:
+    #     load.display_image([heroes[_hero[1]]["image"]
+    #                        for _hero in _row], multiple=True, display=True)
 
         # for _hero in _row:
         #     _name = _hero[1]

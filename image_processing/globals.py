@@ -14,7 +14,7 @@ args = parser.parse_args()
 DEBUG = args.DEBUG
 image_ss = None
 if args.image:
-    multiplier = 2
+    multiplier = 4
     image_ss = cv2.imread(args.image)
     image_ss = cv2.resize(
         image_ss, (image_ss.shape[1]*multiplier, image_ss.shape[0]*multiplier))
@@ -24,10 +24,10 @@ if args.image:
 
 baseDir = os.path.join(os.path.dirname(
     os.path.abspath(__file__)))
-databasePath = os.path.join(baseDir, "database")
-databaseHeroesPath = os.path.join(databasePath, "hero_icon/*jpg")
+database_path = os.path.join(baseDir, "database")
+databaseHeroesPath = os.path.join(database_path, "hero_icon/*jpg")
 
-flannPath = os.path.join(databasePath, "baseHeroes.flann")
+flannPath = os.path.join(database_path, "baseHeroes.flann")
 staminaTemplatesPath = os.path.join(baseDir, "stamina_templates")
 levelTemplatesPath = os.path.join(baseDir, "level_templates")
 
