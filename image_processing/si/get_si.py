@@ -19,9 +19,10 @@ def rollingAverage(avg, newSample, size):
     return avg
 
 
-def get_si(image):
+def get_si(image, imageDB=None):
     # imageDB = BD.buildDB(enrichedDB=True)
-    imageDB = BD.buildDB(enrichedDB=True)
+    if imageDB is None:
+        imageDB = BD.buildDB(enrichedDB=True)
 
     baseImages = collections.defaultdict(dict)
 
@@ -170,99 +171,45 @@ def get_si(image):
                                         digit_height) * digit_freqency
         graded_avg_bin[si_name]["height"] = frequency_height_adjust
 
-    # items = list(heroesDict.items())
     pool = multiprocessing.Pool()
-
-    # chunksize = pool.processing
-    # chunks = [items[i:i + chunksize] for i in range(0, len(items), chunksize)]
 
     all_args = [({"name": _hero_name, "info": _hero_info_dict, "base_images": baseImages,
                  "graded_avg_bin": graded_avg_bin})for _hero_name, _hero_info_dict in heroesDict.items()]
-    # heroes_dict = info_dict["heroes_dict"]
-    # base_images = info_dict["base_images"]
-    # graded_avg_bin = info_dict["graded_avg_bin"]
+
     reduced_values = pool.map(parallel_detect, all_args)
 
     return_dict = {}
     for _hero_data in reduced_values:
         # name = "{}{}".format(_hero_data["si"], _hero_data["fi"])
         name = _hero_data["pseudo_name"]
+        result = _hero_data["result"]
         coords = _hero_data["coords"]
+        # hero_name, baseHeroImage = imageDB.search(v["image"])
+        hero_name, _ = imageDB.search(heroesDict[name]["image"])
+        result = "{} {}".format(hero_name, result)
+        _hero_data["result"] = result
         return_dict[name] = _hero_data
+        if "display" in _hero_data:
+            print("Failed to find fi score")
+            load.display_image(heroesDict[name]["image"], display=True)
 
         cv2.putText(
-            hero_ss, name, coords, font, fontScale, color, thickness,
+            hero_ss, result, coords, font, fontScale, color, thickness,
             cv2.LINE_AA)
     # load.display_image(hero_ss, display=True)
     # test_names = set(_hero_name for _hero_name,
     #                  _hero_info_dict in heroesDict.items())
     # return_names = set(return_dict.keys())
-    # print(test_names - return_names)
 
     return return_dict, rows
 
-    # for k, v in heroesDict.items():
-    #     name, baseHeroImage = imageDB.search(v["image"])
-    #     heroesDict[k]["label"] = name
 
-    #     si_scores = stamina.signatureItemFeatures(
-    #         v["image"], baseImages, graded_avg_bin)
-    #     fi_scores = stamina.furnitureItemFeatures(
-    #         v["image"], baseImages, graded_avg_bin)
-    #     x = heroesDict[k]["object"][0][0]
-    #     y = heroesDict[k]["object"][0][1]
-    #     if fi_scores["9"] > 0.7:
-    #         best_fi = "9"
-    #         fi_score = fi_scores["9"]
-    #     elif fi_scores["3"] > 0.5:
-    #         best_fi = "3"
-    #         fi_score = fi_scores["3"]
-    #     else:
-    #         best_fi = "0"
-    #         fi_score = fi_scores["3"]
-
-    #     if si_scores == -1:
-    #         circle_fail += 1
-    #         best_si = "none"
-    #     else:
-    #         print(si_scores)
-    #         if si_scores["30"] > 0.45:
-    #             best_si = "30"
-    #         elif si_scores["20"] > 0.6:
-    #             best_si = "20"
-    #         elif si_scores["10"] > 0.4:
-    #             best_si = "10"
-    #         else:
-    #             si_label_list = ["0", "10"]
-    #             # key=lambda x: heroes[x[0][1]]["dimensions"]["y"][0]
-    #             best_si = max(si_label_list, key=lambda x: si_scores[x])
-    #             best_si_score = si_scores[best_si]
-    #             if best_si_score < 0.4:
-    #                 # best_si = "n/a"
-    #                 best_si = "00"
-
-    #     coords = (x, y)
-    #     # name = "{},{}".format(name, best_si)
-    #     # name = "{} s:{:.3}".format(best_fi, fi_score)
-    #     name = "{} {}{}".format(name, best_si, best_fi)
-
-    #     print(best_si)
-    #     cv2.putText(
-    #         hero_ss, name, coords, font, fontScale, color, thickness,
-    #         cv2.LINE_AA)
-    # load.display_image(hero_ss, display=True)
-    # return heroesDict, rows
-
-
-# def parallel_detect(heroes_dict, base_images, graded_avg_bin):
 def parallel_detect(info_dict):
     k = info_dict["name"]
     v = info_dict["info"]
     base_images = info_dict["base_images"]
     graded_avg_bin = info_dict["graded_avg_bin"]
-    # print(k)
     # for k, v in heroes_dict.items():
-    # name, baseHeroImage = imageDB.search(v["image"])
     # heroes_dict[k]["label"] = name
     return_dict = {}
     si_scores = stamina.signatureItemFeatures(
@@ -271,45 +218,44 @@ def parallel_detect(info_dict):
         v["image"], base_images, graded_avg_bin)
     x = v["object"][0][0]
     y = v["object"][0][1]
+    if fi_scores["9"] == 0 or fi_scores["3"] == 0:
+        print(fi_scores)
+        return_dict["display"] = True
     if fi_scores["9"] > 0.7:
         best_fi = "9"
-        fi_score = fi_scores["9"]
     elif fi_scores["3"] > 0.5:
         best_fi = "3"
-        fi_score = fi_scores["3"]
     else:
         best_fi = "0"
-        fi_score = fi_scores["3"]
 
     if si_scores == -1:
         # circle_fail += 1
         best_si = "none"
     else:
-        # print(si_scores)
-        if si_scores["30"] > 0.45:
+        if si_scores["30"] > 0.6:
             best_si = "30"
         elif si_scores["20"] > 0.6:
             best_si = "20"
         elif si_scores["10"] > 0.4:
             best_si = "10"
         else:
-            si_label_list = ["0", "10"]
-            # key=lambda x: heroes[x[0][1]]["dimensions"]["y"][0]
-            best_si = max(si_label_list, key=lambda x: si_scores[x])
-            best_si_score = si_scores[best_si]
-            if best_si_score < 0.4:
-                # best_si = "n/a"
-                best_si = "00"
+            # si_label_list = ["0", "10"]
+            # # key=lambda x: heroes[x[0][1]]["dimensions"]["y"][0]
+            # best_si = max(si_label_list, key=lambda x: si_scores[x])
+            # best_si_score = si_scores[best_si]
+            # if best_si_score < 0.4:
+            #     # best_si = "n/a"
+            best_si = "00"
 
     coords = (x, y)
     # name = "{},{}".format(name, best_si)
     # name = "{} s:{:.3}".format(best_fi, fi_score)
-    # name = "{}{}".format(best_si, best_fi)
+    name = "{}{}".format(best_si, best_fi)
     # print("pid: {} name:{} stat:{}".format(
     #     multiprocessing.current_process().pid, k, name))
-    # print(best_si)
     return_dict["si"] = best_si
     return_dict["fi"] = best_fi
+    return_dict["result"] = name
     return_dict["pseudo_name"] = k
     return_dict["coords"] = coords
     # return_dict["name"] = hero
@@ -318,7 +264,6 @@ def parallel_detect(info_dict):
 
 if __name__ == "__main__":
     # pool = multiprocessing.Pool()
-    # print(pool._processes)
     output, rows = get_si(GV.image_ss)
     json_dict = {"test_image": {}}
     json_dict["test_image"]["rows"] = len(rows)
@@ -326,14 +271,12 @@ if __name__ == "__main__":
     json_dict["test_image"]["heroes"] = []
     output_set = set(sorted(output.keys()))
 
-    _temp_set = set()
     for _row in rows:
         temp_list = []
         for _index in range(len(_row)):
-            # temp_list.append(output[_row[_index][1]])
-            _temp_set.add(_row[_index][1])
-        # json_dict["test_image"]["heroes"].append(temp_list)
-    print(output_set - _temp_set)
+            temp = output[_row[_index][1]]["result"]
+            temp_list.append(temp)
+        json_dict["test_image"]["heroes"].append(temp_list)
 
     with open("temp.json", "w") as f:
-        json.dump(output, f)
+        json.dump(json_dict, f)

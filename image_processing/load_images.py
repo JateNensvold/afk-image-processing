@@ -199,7 +199,7 @@ def colorClassify(img: np.ndarray, contour):
     return alpha_img, mask
 
 
-def crop_heroes(images: list, border_width=0.25):
+def crop_heroes(images: list, x_left=None, x_right=None, y_top=None, y_bottom=None, border_width=0.25):
     """
     Args:
         images: list of images to crop frame from
@@ -212,16 +212,25 @@ def crop_heroes(images: list, border_width=0.25):
         dict of name as key and  images as values with 'border_width'
             removed from each side of the images
     """
+    sides = {"x_left": x_left, "x_right": x_right,
+             "y_top": y_top, "y_bottom": y_bottom}
 
     cropHeroes = []
+    for _name, _side in sides.items():
+        if _side is None:
+            sides[_name] = border_width
 
     for image in images:
         shape = image.shape
         x = shape[0]
         y = shape[1]
-        x_30 = round(x * border_width)
-        y_30 = round(y * border_width)
-        crop_img = image[y_30: y-y_30, x_30: x-x_30]
+
+        left = round(sides["x_left"] * x)
+        right = round(sides["x_right"] * x)
+        top = round(sides["y_top"] * y)
+        bottom = round(sides["y_bottom"] * y)
+
+        crop_img = image[top: x-bottom, left: y-right]
         cropHeroes.append(crop_img)
 
     return cropHeroes
@@ -324,7 +333,6 @@ if __name__ == "__main__":
 
     for k, v in cropHeroes.items():
         name, baseHeroImage = imageDB.search(v)
-        # print(heroesDict.keys())
         x = heroesDict[k]["dimensions"]["x"]
         y = heroesDict[k]["dimensions"]["y"]
 

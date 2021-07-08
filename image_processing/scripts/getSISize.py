@@ -32,7 +32,7 @@ def getDigit(image):
 
     height, width = image.shape[:2]
 
-    cropped = image[0:int(height*0.3), int(width*0.25):width]
+    cropped = image[0:round(height*0.3), round(width*0.25):width]
 
     # (hMin = 11 , sMin = 4, vMin = 110), (hMax = 38 , sMax = 191, vMax = 255)
     lowerBound = np.array([11, 4, 167])

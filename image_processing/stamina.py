@@ -131,9 +131,7 @@ class row():
                     name = "{}x{}_{}x{}".format(
                         dimensions[0], dimensions[1], dimensions[2],
                         dimensions[3])
-                    print("1", self._list[_index])
                     self._list[_index] = (dimensions, name)
-                    print("2", self._list[_index])
                     return _index
                 else:
                     print("row: {} Collision failed beteween "
@@ -358,8 +356,6 @@ def get_text(staminaAreas: dict, train: bool = False):
         hsv = cv2.cvtColor(stamina_image, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(hsv, lower, upper)
         result = cv2.bitwise_and(original, original, mask=mask)
-        print("original", original.shape)
-        print("mask", mask.shape)
         result[mask == 0] = (255, 255, 255)
 
         result = cv2.cvtColor(result, cv2.COLOR_BGR2GRAY)
@@ -419,7 +415,6 @@ def signatureItemFeatures(hero: np.array, templates: dict,
             image
     """
     x, y, _ = hero.shape
-    # print(x, y)
     x_div = 2.4
     y_div = 2.0
     offset = 10
@@ -427,8 +422,6 @@ def signatureItemFeatures(hero: np.array, templates: dict,
 
     crop_hero = hero[0: int(y/y_div), 0: int(x/x_div)]
     # crop_hero = hero
-
-    # print("hero", hero.shape)
 
     si_dict = {}
     # baseSIDir = GV.siPath
@@ -455,7 +448,6 @@ def signatureItemFeatures(hero: np.array, templates: dict,
             mask = np.zeros_like(templateImage)
 
             if "morph" in templates[folder] and templates[folder]["morph"]:
-                # print(folder, templates[folder])
                 se = np.ones((2, 2), dtype='uint8')
                 # inverted = cv2.bitwise_not(inverted)
 
@@ -485,7 +477,6 @@ def signatureItemFeatures(hero: np.array, templates: dict,
                 inverted, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
             siCont = imutils.grab_contours(siCont)
             if folder == "0":
-                # load.display_image(thresh, display=True)
 
                 siCont = sorted(siCont, key=cv2.contourArea, reverse=True)[
                     1:templates[folder]["contourNum"]+1]
@@ -495,8 +486,6 @@ def signatureItemFeatures(hero: np.array, templates: dict,
 
             # cv2.drawContours(mask, siCont, -1, (255, 255, 255))
             cv2.fillPoly(mask, siCont, [255, 255, 255])
-            # load.display_image([mask, templateImage],
-            #                    multiple=True, display=True)
 
             if folder not in si_dict:
                 si_dict[folder] = {}
@@ -505,7 +494,6 @@ def signatureItemFeatures(hero: np.array, templates: dict,
             si_dict[folder]["template"] = templateImage
 
             si_dict[folder]["mask"] = mask
-            # load.display_image(si_dict[folder]["mask"], display=True)
 
     numberScore = {}
 
@@ -524,7 +512,6 @@ def signatureItemFeatures(hero: np.array, templates: dict,
             base_new_height = round(
                 lvlRatioDict[folder_name]["height"]) + pixel_offset
             new_height = round(base_new_height * base_height_ratio)
-            # print("folder", folder_name, "offset", pixel_offset, base_new_height, new_height)
             scale_ratio = new_height/si_height
             new_width = round(original_width * scale_ratio)
 
@@ -542,47 +529,18 @@ def signatureItemFeatures(hero: np.array, templates: dict,
 
             # sizedROI = cv2.resize(
             #     hero, (int(x * image_ratio), int(y * image_ratio)))
-            # print(siImage.shape, imageDict["mask"].shape)\
             if folder_name != "0":
                 mask_gray = cv2.bitwise_not(mask_gray)
-            # if folder_name == "30":
-            #     # load.display_image(
-            #     #     [si_image_gray, mask_gray], multiple=True, display=True)
-            #     # load.display_image(
-            #     #     hero_gray, display=True)
-            #     print(mask_gray.shape)
-            #     print(si_image_gray.shape)
-            #     print(hero_gray.shape)
-            #     print(hero.shape[0] < si_image.shape[0],
-            #           hero.shape[1] < si_image.shape[1])
-            #     if crop_hero.shape[0] < si_image.shape[0] or crop_hero.shape[1] < si_image.shape[1]:
-            #         _height, _width = si_image.shape[:2]
-            #         print(_height, _width)
-            #         print(max(int(y/y_div), int(_height*1.3)))
-            #         print(max(int(x/x_div), int(_width*1.3)))
-            #         crop_hero = hero[0: max(int(y/y_div), int(_height*1.2)),
-            #                          0: max(int(x/x_div), int(_width*1.2))]
-            #         # load.display_image(
-            #         #     crop_hero, display=True)
-
-            #         hero_gray = cv2.cvtColor(crop_hero, cv2.COLOR_BGR2GRAY)
 
             try:
                 templateMatch = cv2.matchTemplate(
                     hero_gray, si_image_gray, cv2.TM_CCOEFF_NORMED,
                     mask=mask_gray)
             except Exception:
-                load.display_image([crop_hero, si_image],
-                                   multiple=True, display=True)
                 if crop_hero.shape[0] < si_image.shape[0] or crop_hero.shape[1] < si_image.shape[1]:
                     _height, _width = si_image.shape[:2]
-                    # print(_height, _width)
-                    # print(max(int(y/y_div), int(_height*1.3)))
-                    # print(max(int(x/x_div), int(_width*1.3)))
                     crop_hero = hero[0: max(int(y/y_div), int(_height*1.2)),
                                      0: max(int(x/x_div), int(_width*1.2))]
-                    # load.display_image(
-                    #     crop_hero, display=True)
 
                     hero_gray = cv2.cvtColor(crop_hero, cv2.COLOR_BGR2GRAY)
                 templateMatch = cv2.matchTemplate(
@@ -601,9 +559,6 @@ def signatureItemFeatures(hero: np.array, templates: dict,
             #     hero_copy, folder_name, coords, font, fontScale, color, thickness,
             #     cv2.LINE_AA)
 
-            # load.display_image(
-            #     [sizedROI, siImage], multiple=True,
-            #     display=True)
             if folder_name not in numberScore:
                 numberScore[folder_name] = []
             numberScore[folder_name].append(
@@ -611,7 +566,6 @@ def signatureItemFeatures(hero: np.array, templates: dict,
     best_score = {}
     for _folder, _si_scores in numberScore.items():
         numberScore[_folder] = sorted(_si_scores, key=lambda x: x[0])
-        # print(_folder, numberScore[_folder][-1], numberScore[_folder])
         _best_match = numberScore[_folder][-1]
         _score_loc = _best_match[2][0]
         _coords = _best_match[2][1]
@@ -650,7 +604,6 @@ def furnitureItemFeatures(hero: np.array, templates: dict,
     """
     # variable_multiplier =
     x, y, _ = hero.shape
-    # print(x, y)
     x_div = 2.4
     y_div = 2.0
     x_offset = int(x*0.1)
@@ -679,7 +632,6 @@ def furnitureItemFeatures(hero: np.array, templates: dict,
             mask = np.zeros_like(template_image)
 
             if "morph" in templates[folder] and templates[folder]["morph"]:
-                # print(folder, templates[folder])
                 se = np.ones((2, 2), dtype='uint8')
                 # inverted = cv2.bitwise_not(inverted)
 
@@ -731,10 +683,6 @@ def furnitureItemFeatures(hero: np.array, templates: dict,
             fi_dict[folder]["template"] = template_image
 
             fi_dict[folder]["mask"] = mask
-            # load.display_image(fi_dict[folder]["mask"], display=True)
-            # load.display_image(template_image, display=True)
-            # load.display_image(
-            #     [template_image, fi_dict[folder]["mask"]], multiple=True, display=True)
 
             # fi_gray = cv2.cvtColor(fi_image, cv2.COLOR_BGR2GRAY)
             # fi_dict[folder]["image"] = fi_gray
@@ -773,9 +721,6 @@ def furnitureItemFeatures(hero: np.array, templates: dict,
 
     blur_hero = processing.blur_image(crop_hero, rgb_range=rgb_range)
 
-    # load.display_image([crop_hero, clean_hero, default_blur, blur_hero],
-    #                    display=True, multiple=True, color_correct=True)
-
     fi_color_contours = cv2.findContours(
         blur_hero, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     fi_color_contours = imutils.grab_contours(fi_color_contours)
@@ -798,7 +743,6 @@ def furnitureItemFeatures(hero: np.array, templates: dict,
         cv2.drawContours(crop_hero_mask, [
             hull], -1, (255, 255, 255), thickness=cv2.FILLED)
         # cv2.drawContours(crop_hero_mask, [_cont], -1, (255, 0, 0))
-    # load.display_image(crop_hero_mask, display=True)
 
     # cv2.drawContours(blur_hero_mask, fi_color_contours, -1,
     #                  (255, 255, 255))
@@ -818,8 +762,6 @@ def furnitureItemFeatures(hero: np.array, templates: dict,
     blur_hero[np.where((blur_hero == [0, 0, 0]).all(axis=2))] = [255, 255, 255]
     old_crop_hero = cv2.bitwise_and(crop_hero_mask, old_crop_hero)
 
-    # load.display_image([blur_hero, old_crop_hero],
-    #                    display=True, multiple=True, color_correct=True)
     # blur_hero = crop_hero
     for pixel_offset in range(-5, 15, 1):
 
@@ -840,14 +782,12 @@ def furnitureItemFeatures(hero: np.array, templates: dict,
             new_height = round(base_new_height * base_height_ratio)
             scale_ratio = new_height/original_height
             new_width = round(original_width * scale_ratio)
-            # print(new_width, new_height)
             fi_image = cv2.resize(
                 fi_image, (new_width, new_height))
             fi_gray = cv2.cvtColor(fi_image, cv2.COLOR_BGR2GRAY)
 
             #   Min = 0, BMin = 0), (RMax = 255 , GMax = 246, BMax = 255)
 
-            # load.display_image(merge_hero, display=True, color_correct=True)
             mask = cv2.resize(
                 imageDict["mask"], (new_width, new_height))
             # mask_gray = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
@@ -859,8 +799,6 @@ def furnitureItemFeatures(hero: np.array, templates: dict,
             #     hero, (int(x * image_ratio), int(y * image_ratio)))
             # if folder_name != "0":
             #     mask_gray = cv2.bitwise_not(mask_gray)
-            # load.display_image(
-            #     [fi_image, mask_gray], multiple=True, display=True)
 
             try:
                 templateMatch = cv2.matchTemplate(
@@ -869,13 +807,8 @@ def furnitureItemFeatures(hero: np.array, templates: dict,
             except Exception:
                 if blur_hero.shape[0] < fi_image.shape[0] or blur_hero.shape[1] < fi_image.shape[1]:
                     _height, _width = fi_image.shape[:2]
-                    # print(_height, _width)
-                    # print(max(int(y/y_div), int(_height*1.3)))
-                    # print(max(int(x/x_div), int(_width*1.3)))
                     blur_hero = hero[y_offset: max(int(y/y_div), int(_height * 1.2)+y_offset),
                                      x_offset: max(int(x/x_div), int(_width * 1.2)+x_offset), ]
-                    # load.display_image(
-                    #     crop_hero, display=True)
                     # blur_hero = crop_hero
                     # hero_gray = cv2.cvtColor(crop_hero, cv2.COLOR_BGR2GRAY)
                 templateMatch = cv2.matchTemplate(
@@ -903,11 +836,17 @@ def furnitureItemFeatures(hero: np.array, templates: dict,
     import math
     for _folder, _fi_scores in numberScore.items():
         numberScore[_folder] = sorted(_fi_scores, key=lambda x: x[0])
-        _best_match = [_num for _num in numberScore[_folder]
-                       if not math.isinf(_num[0])][-1]
+        _t = [_num for _num in numberScore[_folder]
+              if not math.isinf(_num[0])]
+        if len(_t) == 0:
+            print("Failed to find FI", _folder,  numberScore[_folder])
+            _best_match = (0, 0, ((0, 0), (0, 0)))
+            # load.display_image([hero, blur_hero], display=True, multiple=True)
+        else:
+            _best_match = _t[-1]
+
         _score_loc = _best_match[2][0]
         _coords = _best_match[2][1]
-        # print(_score_loc, _coords)
         cv2.rectangle(blur_hero, _score_loc, _coords, (255, 0, 0), 1)
         # font = cv2.FONT_HERSHEY_SIMPLEX
         # fontScale = 0.2
@@ -1019,4 +958,3 @@ if __name__ == "__main__":
         output[label]["stamina"] = text
 
     outputJson = json.dumps(output)
-    print(outputJson)

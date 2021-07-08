@@ -317,8 +317,8 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, display=None, **blur
     length = len(cnts)
     # for i in sizes.values():
     #     length += len(i)
-    print("occurrences: {}/{} {}%".format(occurrences,
-          length, occurrences/length * 100))
+    # print("occurrences: {}/{} {}%".format(occurrences,
+    #       length, occurrences/length * 100))
     # print("sizes", sorted(valid_sizes))
     return valid_sizes
 
@@ -406,7 +406,6 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
     hero_h_median = statistics.median(hero_heights)
 
     spacing = round((hero_w_median + hero_h_median)/10)
-    print("spacing", spacing)
     hero_matrix = stamina.matrix(spacing=spacing)
     for _hero_list in multi_valid:
         for _object_name, _object_dimensions in _hero_list.items():
@@ -415,7 +414,7 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
     hero_matrix.sort()
 
     for _row_index, _row in enumerate(hero_matrix):
-        print("row({}) length: {}".format(_row_index, len(_row)))
+        # print("row({}) length: {}".format(_row_index, len(_row)))
         for _object_index, _object in enumerate(_row):
 
             x = _object[0][0]
@@ -470,8 +469,9 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
 
                 cv2.fillPoly(new_ROI, new_contours, [255, 0, 0])
                 # (dimensions, name)
-                output = _row.check_collision(
+                _collision_index = _row.check_collision(
                     ((x2-new_w, y2-new_h, new_w, new_h), _hero_name))
+                _hero_name = _row[_collision_index][1]
 
                 x = _row[_object_index][0][0]
                 y = _row[_object_index][0][1]
@@ -483,11 +483,10 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
                 w_border_offset = max(round(0.03 * w), 2)
                 h_border_offset = max(round(0.03 * h), 2)
 
-                ROI = original_unmodifiable[y - h_border_offset:
+                ROI = original_unmodifiable[max(y - h_border_offset, 0):
                                             y2,
-                                            x - w_border_offset:
+                                            max(x - w_border_offset, 0):
                                             x2]
-
             # staminaLib.signatureItemFeatures(ROI)
             # cv2.imwrite("./tempHero/{}".format(_hero_name), ROI)
 
@@ -519,6 +518,11 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
     #     del rows[row_num]
 
     # for _row in hero_matrix:
+    #     print(_row)
+    #     temp = [(heroes[_hero[1]]["image"].shape, _hero)
+    #             for _hero in _row]
+    #     for i in temp:
+    #         print(i)
     #     load.display_image([heroes[_hero[1]]["image"]
     #                        for _hero in _row], multiple=True, display=True)
 

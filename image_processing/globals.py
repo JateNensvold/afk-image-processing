@@ -25,7 +25,9 @@ if args.image:
 baseDir = os.path.join(os.path.dirname(
     os.path.abspath(__file__)))
 database_path = os.path.join(baseDir, "database")
-databaseHeroesPath = os.path.join(database_path, "hero_icon/*jpg")
+database_icon_path = os.path.join(database_path, "hero_icon")
+# database_png_path = os.path.join(database_path, "hero_icon/*png")
+
 
 flannPath = os.path.join(database_path, "baseHeroes.flann")
 staminaTemplatesPath = os.path.join(baseDir, "stamina_templates")
