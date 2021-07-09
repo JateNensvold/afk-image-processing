@@ -9,9 +9,14 @@ parser.add_argument("-d", "--DEBUG", help="Runs the program in debug mode,"
 
 parser.add_argument("-i", "--image", help="Path to Hero Roster Screen shot")
 
+parser.add_argument("-r", "--rebuild", help="Rebuild hero database from"
+                    "source images", action="store_true")
+
+
 args = parser.parse_args()
 
 DEBUG = args.DEBUG
+REBUILD = args.REBUILD
 image_ss = None
 if args.image:
     multiplier = 4
@@ -26,10 +31,10 @@ baseDir = os.path.join(os.path.dirname(
     os.path.abspath(__file__)))
 database_path = os.path.join(baseDir, "database")
 database_icon_path = os.path.join(database_path, "hero_icon")
-# database_png_path = os.path.join(database_path, "hero_icon/*png")
-
-
+# database_png_path = os.path.join(database_path, "hero_icon/*png"
 flannPath = os.path.join(database_path, "baseHeroes.flann")
+database_pickle = os.path.join(database_path, 'imageDB.pickle')
+
 staminaTemplatesPath = os.path.join(baseDir, "stamina_templates")
 levelTemplatesPath = os.path.join(baseDir, "level_templates")
 

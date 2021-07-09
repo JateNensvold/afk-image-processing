@@ -1,10 +1,12 @@
 import cv2
 import os
-import pickle
 
 import image_processing.load_images as load
 import image_processing.globals as GV
 import dill
+import pickle
+import time
+import image_processing.database.imageDB as imageSearchDB
 
 
 def pickle_trick(obj, max_depth=10):
@@ -38,7 +40,8 @@ def recurse_dir(path: str, file_dict: dict):
     folder = os.path.basename(os.path.basename(path))
     for _file in os.listdir(path):
         _file_path = os.path.join(path, _file)
-        if os.path.isdir(_file_path) and _file_path[0] != "_" and "other" not in _file_path:
+        if os.path.isdir(_file_path) and _file_path[0] != "_" and "other" not \
+                in _file_path:
             recurse_dir(_file_path, file_dict)
         elif os.path.isfile(_file_path) and not _file_path.endswith(".py"):
             if folder not in file_dict:
@@ -46,18 +49,18 @@ def recurse_dir(path: str, file_dict: dict):
             file_dict[folder].add(_file_path)
 
 
-def buildDB(enrichedDB: bool = False):
+def buildDB(enrichedDB: bool = False) -> imageSearchDB.imageSearch:
     """
     Build and save a new hero database
     Args:
         enrichedDB: flag to add every hero to the database a second time with
-            0.15 of their image removed one each side
+            parts of the the image border removed from each side
     Return:
-        a load.imageSearch() object filled with heroes
+        imageSearchDB.imageSearch database object
     """
     file_dict = {}
     print("Building database!")
-
+    start_time = time.time()
     recurse_dir(GV.database_icon_path, file_dict)
     baseImages = []
     for _hero_name, _hero_paths in file_dict.items():
@@ -71,7 +74,7 @@ def buildDB(enrichedDB: bool = False):
             # name = os.path.basename(_hero_path)
             baseImages.append((_hero_name, hero))
 
-    imageDB = load.build_flann(baseImages)
+    imageDB: imageSearchDB.imageSearch = load.build_flann(baseImages)
 
     if enrichedDB:
         croppedImages = load.crop_heroes(
@@ -80,27 +83,42 @@ def buildDB(enrichedDB: bool = False):
             # load.display_image(cropIMG, display=True)
             imageDB.add_image(baseImages[index][0], cropIMG)
         imageDB.matcher.train()
-
-    with open('imageDB.pickle', 'wb') as handle:
+    end_time = time.time()
+    with open(GV.database_pickle, 'wb') as handle:
         dill.dump(imageDB, handle)
-    # print(len(imageDB.names))
-    print("Database built!")
+
+    print("Database built! Built in {} seconds".format(end_time-start_time))
     return imageDB
 
 
-def loadDB(Refresh: bool):
+def loadDB() -> imageSearchDB.imageSearch:
     """
-    Load/Refresh hero database
+    Load hero database from pickle file.
 
     Return:
-        load.
+        imageSearchDB.imageSearch database object
     """
-    db = None
-    with open('imageDB.pickle', 'rb') as handle:
-        db = pickle.load(handle)
-    print(dir(db))
+    if os.path.exists(GV.database_pickle):
+        print("Loading database!")
+        start_time = time.time()
+        with open(GV.database_pickle, 'rb') as handle:
+            db: imageSearchDB.imageSearch = pickle.load(handle)
+        end_time = time.time()
+        print("Database loaded! Loaded in {} seconds".format(
+            end_time - start_time))
+    else:
+        raise FileNotFoundError(
+            "Unable to find {}. Please call image_processing.build_db.buildDB "
+            "to generate a new database".format(GV.database_pickle))
     return db
 
 
+def get_db(rebuild=GV.REBUILD, enrichedDB=True):
+    if rebuild:
+        return buildDB(enrichedDB=enrichedDB)
+    else:
+        loadDB()
+
+
 if __name__ == "__main__":
-    buildDB()
+    get_db()

@@ -20,9 +20,8 @@ def rollingAverage(avg, newSample, size):
 
 
 def get_si(image, imageDB=None):
-    # imageDB = BD.buildDB(enrichedDB=True)
     if imageDB is None:
-        imageDB = BD.buildDB(enrichedDB=True)
+        imageDB = BD.get_db(enrichedDB=True)
 
     baseImages = collections.defaultdict(dict)
 
@@ -189,9 +188,9 @@ def get_si(image, imageDB=None):
         result = "{} {}".format(hero_name, result)
         _hero_data["result"] = result
         return_dict[name] = _hero_data
-        if "display" in _hero_data:
-            print("Failed to find fi score")
-            load.display_image(heroesDict[name]["image"], display=True)
+        # if "display" in _hero_data:
+        #     print("Failed to find fi score")
+        #     load.display_image(heroesDict[name]["image"], display=True)
 
         cv2.putText(
             hero_ss, result, coords, font, fontScale, color, thickness,

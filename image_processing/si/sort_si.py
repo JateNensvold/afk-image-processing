@@ -23,7 +23,7 @@ def sortTrainHeroImage(name: str, image: np.array):
 
 if __name__ == "__main__":
 
-    imageDB = BD.buildDB()
+    imageDB = BD.get_db()
     siPath = GV.siPath
 
     siTempPath = os.path.join(siPath, "temp")

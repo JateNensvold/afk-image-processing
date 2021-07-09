@@ -6,7 +6,7 @@ import image_processing.scripts.getSISize as siScript
 
 
 if __name__ == "__main__":
-    imageDB = BD.buildDB(enrichedDB=True)
+    imageDB = BD.get_db(enrichedDB=True)
 
     hero_ss = GV.image_ss
 

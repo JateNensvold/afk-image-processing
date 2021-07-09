@@ -535,7 +535,7 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
 
 if __name__ == "__main__":
 
-    imageDB = BD.buildDB(enrichedDB=True)
+    imageDB = BD.get_db(enrichedDB=True)
     siPath = GV.siPath
 
     siTempPath = os.path.join(siPath, "temp")
