@@ -117,7 +117,7 @@ def get_db(rebuild=GV.REBUILD, enrichedDB=True):
     if rebuild:
         return buildDB(enrichedDB=enrichedDB)
     else:
-        loadDB()
+        return loadDB()
 
 
 if __name__ == "__main__":

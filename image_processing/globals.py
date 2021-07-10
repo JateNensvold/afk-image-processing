@@ -16,7 +16,7 @@ parser.add_argument("-r", "--rebuild", help="Rebuild hero database from"
 args = parser.parse_args()
 
 DEBUG = args.DEBUG
-REBUILD = args.REBUILD
+REBUILD = args.rebuild
 image_ss = None
 if args.image:
     multiplier = 4

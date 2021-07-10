@@ -1,0 +1,1230 @@
+{
+    "/home/nate/projects/afk-image-processing/tests/data/images/image0.png": {
+        "rows": 2,
+        "columns": 5,
+        "heroes": [
+            [
+                "solise 103",
+                "oscar 000",
+                "anoki 100",
+                "drez 103",
+                "theowyn 100"
+            ],
+            [
+                "kren 000",
+                "raspen 000",
+                "peggy 000",
+                "food 000",
+                "food 000"
+            ]
+        ]
+    },
+    "/home/nate/projects/afk-image-processing/tests/data/images/image1.png": {
+        "rows": 2,
+        "columns": 5,
+        "heroes": [
+            [
+                "eluard 000",
+                "kren 000",
+                "peggy 003",
+                "anoki 000",
+                "seirus 000"
+            ],
+            [
+                "food 000",
+                "food 000",
+                "desira 000",
+                "orthros 000",
+                "torne 000"
+            ]
+        ]
+    },
+    "/home/nate/projects/afk-image-processing/tests/data/images/image2.png": {
+        "rows": 7,
+        "columns": 1,
+        "heroes": [
+            [
+                "flora 203",
+                "mortas 000",
+                "thane 000",
+                "rigby 000",
+                "raspen 003"
+            ],
+            [
+                "fawkes 100",
+                "peggy 000",
+                "zaphrael 000",
+                "vurk 203",
+                "desira 000"
+            ],
+            [
+                "antandra 000",
+                "moreal 000",
+                "orthros 000",
+                "eluard 000",
+                "lyca 000"
+            ],
+            [
+                "vurk 000",
+                "vurk 000",
+                "vurk 000",
+                "vurk 000",
+                "vurk 000"
+            ],
+            [
+                "vurk 000",
+                "vurk 000",
+                "gwyneth 000",
+                "eironn 000",
+                "desira 000"
+            ],
+            [
+                "desira 000",
+                "mezoth 000",
+                "antandra 000",
+                "antandra 000",
+                "antandra 000"
+            ]
+        ]
+    },
+    "/home/nate/projects/afk-image-processing/tests/data/images/image3.png": {
+        "rows": 6,
+        "columns": 5,
+        "heroes": [
+            [
+                "kren 103",
+                "wukong 203",
+                "shemira 000",
+                "skriath 103",
+                "ukyo 000"
+            ],
+            [
+                "grezhul 309",
+                "theowyn 309",
+                "drez 209",
+                "daimon 203",
+                "cecilia 203"
+            ],
+            [
+                "kelthur 200",
+                "raine 103",
+                "numisu 100",
+                "oden 000",
+                "twins 203"
+            ],
+            [
+                "nemora 103",
+                "skreg 209",
+                "satrana 003",
+                "rosaline 000",
+                "hendrik 000"
+            ],
+            [
+                "lorsan 000",
+                "athalia 309",
+                "raku 303",
+                "mehira 303",
+                "pippa 200"
+            ],
+            [
+                "lucretia 309",
+                "zolrath 303",
+                "talene 309",
+                "ezizh 209",
+                "alna 309"
+            ]
+        ]
+    },
+    "/home/nate/projects/afk-image-processing/tests/data/images/image4.png": {
+        "rows": 6,
+        "columns": 5,
+        "heroes": [
+            [
+                "eironn 309",
+                "lyca 209",
+                "farael 309",
+                "ezio 209",
+                "gwyneth 203"
+            ],
+            [
+                "tasi 209",
+                "ainz 309",
+                "tidus 203",
+                "nara 309",
+                "albedo 303"
+            ],
+            [
+                "rowan 300",
+                "safiya 300",
+                "thoran 300",
+                "arthur 303",
+                "saurus 300"
+            ],
+            [
+                "joker 100",
+                "gorvo 200",
+                "nakoruru 100",
+                "lucius 100",
+                "kaz 000"
+            ],
+            [
+                "estrilda 103",
+                "brutus 100",
+                "oscar 000",
+                "belinda 100",
+                "queen 103"
+            ],
+            [
+                "khasos 000",
+                "dastan 000",
+                "warek 000",
+                "silas 303",
+                "izold 309"
+            ]
+        ]
+    },
+    "/home/nate/projects/afk-image-processing/tests/data/images/image5.png": {
+        "rows": 3,
+        "columns": 5,
+        "heroes": [
+            [
+                "baden 303",
+                "theowyn 200",
+                "thane 000",
+                "peggy 000",
+                "kelthur 000"
+            ],
+            [
+                "gorvo 000",
+                "flora 000",
+                "eluard 000",
+                "leofric 200",
+                "walker 200"
+            ],
+            [
+                "ulmus 000",
+                "torne 000",
+                "mezoth 000",
+                "kren 000",
+                "kren 000"
+            ]
+        ]
+    },
+    "/home/nate/projects/afk-image-processing/tests/data/images/image6.png": {
+        "rows": 6,
+        "columns": 5,
+        "heroes": [
+            [
+                "rigby 000",
+                "orthros 000",
+                "baden 000",
+                "peggy 000",
+                "ulmus 000"
+            ],
+            [
+                "gorvo 000",
+                "food 000",
+                "food 000",
+                "food 000",
+                "kaz 000"
+            ],
+            [
+                "kaz 000",
+                "kaz 000",
+                "kaz 000",
+                "fawkes 000",
+                "theowyn 000"
+            ],
+            [
+                "oscar 000",
+                "kelthur 000",
+                "kelthur 000",
+                "kelthur 000",
+                "kelthur 000"
+            ],
+            [
+                "silas 000",
+                "rosaline 000",
+                "rosaline 000",
+                "antandra 000",
+                "antandra 000"
+            ],
+            [
+                "ulmus 000",
+                "ulmus 000",
+                "lucius 000",
+                "lucius 000",
+                "gorvo 000"
+            ]
+        ]
+    },
+    "/home/nate/projects/afk-image-processing/tests/data/images/image7.png": {
+        "rows": 6,
+        "columns": 5,
+        "heroes": [
+            [
+                "ainz 309",
+                "eironn 309",
+                "ezio 209",
+                "drez 209",
+                "farael 303"
+            ],
+            [
+                "vurk 203",
+                "thoran 303",
+                "rowan 303",
+                "albedo 303",
+                "rosaline 303"
+            ],
+            [
+                "fawkes 200",
+                "nakoruru 203",
+                "dastan 200",
+                "lucius 200",
+                "nemora 109"
+            ],
+            [
+                "khasos 200",
+                "arthur 203",
+                "belinda 200",
+                "queen 000",
+                "gwyneth 303"
+            ],
+            [
+                "lyca 203",
+                "joker 203",
+                "tasi 203",
+                "nara 103",
+                "warek 100"
+            ],
+            [
+                "numisu 100",
+                "brutus 100",
+                "oden 200",
+                "skriath 103",
+                "skreg 100"
+            ]
+        ]
+    },
+    "/home/nate/projects/afk-image-processing/tests/data/images/image8.png": {
+        "rows": 6,
+        "columns": 5,
+        "heroes": [
+            [
+                "daimon 203",
+                "safiya 303",
+                "saurus 300",
+                "lorsan 000",
+                "izold 303"
+            ],
+            [
+                "tidus 203",
+                "estrilda 203",
+                "pippa 200",
+                "wukong 000",
+                "hendrik 000"
+            ],
+            [
+                "lucretia 309",
+                "grezhul 209",
+                "talene 309",
+                "athalia 303",
+                "raku 300"
+            ],
+            [
+                "twins 203",
+                "cecilia 200",
+                "raine 203",
+                "ezizh 203",
+                "kren 100"
+            ],
+            [
+                "silas 200",
+                "alna 000",
+                "flora 100",
+                "eluard 000",
+                "kelthur 000"
+            ],
+            [
+                "mehira 000",
+                "mortas 000",
+                "thane 200",
+                "raspen 103",
+                "ukyo 000"
+            ]
+        ]
+    },
+    "/home/nate/projects/afk-image-processing/tests/data/images/image9.png": {
+        "rows": 7,
+        "columns": 5,
+        "heroes": [
+            [
+                "daimon 303",
+                "eironn 309",
+                "lyca 309",
+                "ezio 309",
+                "ainz 309"
+            ],
+            [
+                "grezhul 309",
+                "tasi 309",
+                "gwyneth 303",
+                "joker 203",
+                "albedo 309"
+            ],
+            [
+                "nakoruru 303",
+                "thoran 303",
+                "fawkes 200",
+                "arthur 303",
+                "safiya 303"
+            ],
+            [
+                "skreg 209",
+                "shemira 203",
+                "rowan 303",
+                "rosaline 303",
+                "dastan 203"
+            ],
+            [
+                "raine 203",
+                "saurus 303",
+                "belinda 200",
+                "numisu 100",
+                "nemora 103"
+            ],
+            [
+                "kelthur 100",
+                "satrana 100",
+                "nara 203",
+                "queen 203",
+                "khasos 100"
+            ],
+            [
+                "isabella 100",
+                "lorsan 100",
+                "ukyo 100",
+                "izold 309",
+                "farael 309"
+            ]
+        ]
+    },
+    "/home/nate/projects/afk-image-processing/tests/data/images/image10.png": {
+        "rows": 6,
+        "columns": 5,
+        "heroes": [
+            [
+                "mortas 000",
+                "zaphrael 000",
+                "oscar 100",
+                "theowyn 100",
+                "kaz 100"
+            ],
+            [
+                "rigby 100",
+                "satrana 100",
+                "solise 100",
+                "raspen 100",
+                "eluard 100"
+            ],
+            [
+                "torne 000",
+                "seirus 000",
+                "food 000",
+                "food 000",
+                "food 000"
+            ],
+            [
+                "food 000",
+                "food 000",
+                "food 000",
+                "khazard 000",
+                "leofric 000"
+            ],
+            [
+                "rosaline 000",
+                "alna 000",
+                "raspen 000",
+                "orthros 000",
+                "khasos 000"
+            ],
+            [
+                "mezoth 000",
+                "lucius 000",
+                "eluard 000",
+                "torne 000",
+                "anoki 000"
+            ]
+        ]
+    },
+    "/home/nate/projects/afk-image-processing/tests/data/images/image11.png": {
+        "rows": 7,
+        "columns": 5,
+        "heroes": [
+            [
+                "twins 203",
+                "kren 203",
+                "numisu 100",
+                "skriath 203",
+                "brutus 000"
+            ],
+            [
+                "nemora 000",
+                "gorvo 000",
+                "nara 103",
+                "warek 100",
+                "wukong 000"
+            ],
+            [
+                "lorsan 000",
+                "alna 200",
+                "pippa 200",
+                "mehira 100",
+                "flora 000"
+            ],
+            [
+                "mortas 000",
+                "fawkes 000",
+                "vurk 100",
+                "thoran 000",
+                "baden 100"
+            ],
+            [
+                "rigby 000",
+                "thane 000",
+                "theowyn 000",
+                "hendrik 000",
+                "athalia 000"
+            ],
+            [
+                "oscar 000",
+                "peggy 000",
+                "antandra 000",
+                "food 000",
+                "food 000"
+            ],
+            [
+                "food 000",
+                "desira 000",
+                "zolrath 000",
+                "khazard 000",
+                "kaz 000"
+            ]
+        ]
+    },
+    "/home/nate/projects/afk-image-processing/tests/data/images/image12.png": {
+        "rows": 7,
+        "columns": 5,
+        "heroes": [
+            [
+                "athalia 309",
+                "lyca 209",
+                "ezio 309",
+                "eironn 309",
+                "izold 309"
+            ],
+            [
+                "farael 309",
+                "rowan 303",
+                "nakoruru 203",
+                "gwyneth 203",
+                "kaz 203"
+            ],
+            [
+                "tasi 203",
+                "numisu 200",
+                "daimon 303",
+                "grezhul 309",
+                "ainz 309"
+            ],
+            [
+                "rosaline 203",
+                "joker 200",
+                "antandra 203",
+                "albedo 303",
+                "arthur 203"
+            ],
+            [
+                "estrilda 103",
+                "khasos 100",
+                "lucius 100",
+                "nara 100",
+                "warek 100"
+            ],
+            [
+                "baden 100",
+                "thoran 100",
+                "brutus 100",
+                "ulmus 100",
+                "lorsan 100"
+            ],
+            [
+                "kren 309",
+                "cecilia 209",
+                "saurus 303",
+                "tidus 203",
+                "thane 103"
+            ]
+        ]
+    },
+    "/home/nate/projects/afk-image-processing/tests/data/images/image13.png": {
+        "rows": 7,
+        "columns": 5,
+        "heroes": [
+            [
+                "seirus 000",
+                "isabella 000",
+                "food 000",
+                "food 000",
+                "leofric 000"
+            ],
+            [
+                "peggy 000",
+                "orthros 000",
+                "eluard 000",
+                "vurk 003",
+                "vurk 003"
+            ],
+            [
+                "vurk 000",
+                "vurk 000",
+                "vurk 000",
+                "drez 000",
+                "rosaline 000"
+            ],
+            [
+                "rowan 000",
+                "torne 000",
+                "lucius 000",
+                "mezoth 000",
+                "torne 000"
+            ],
+            [
+                "torne 000",
+                "torne 000",
+                "torne 000",
+                "anoki 000",
+                "baden 000"
+            ],
+            [
+                "isabella 000",
+                "isabella 000",
+                "isabella 000",
+                "isabella 000",
+                "isabella 000"
+            ],
+            [
+                "satrana 000",
+                "satrana 000",
+                "baden 000",
+                "baden 000",
+                "baden 000"
+            ]
+        ]
+    },
+    "/home/nate/projects/afk-image-processing/tests/data/images/image14.png": {
+        "rows": 7,
+        "columns": 5,
+        "heroes": [
+            [
+                "nemora 100",
+                "belinda 100",
+                "queen 100",
+                "dastan 100",
+                "raspen 309"
+            ],
+            [
+                "fawkes 100",
+                "safiya 300",
+                "skreg 100",
+                "silas 303",
+                "drez 209"
+            ],
+            [
+                "theowyn 303",
+                "vurk 103",
+                "talene 309",
+                "raku 303",
+                "wukong 100"
+            ],
+            [
+                "skriath 100",
+                "lucretia 309",
+                "mortas 303",
+                "raine 203",
+                "ezizh 203"
+            ],
+            [
+                "twins 203",
+                "alna 203",
+                "flora 000",
+                "mehira 000",
+                "gorvo 000"
+            ],
+            [
+                "kelthur 000",
+                "desira 100",
+                "shemira 100",
+                "oscar 100",
+                "rigby 200"
+            ],
+            [
+                "peggy 000",
+                "pippa 000",
+                "rowan 000",
+                "solise 000",
+                "zolrath 000"
+            ]
+        ]
+    },
+    "/home/nate/projects/afk-image-processing/tests/data/images/image15.png": {
+        "rows": 7,
+        "columns": 5,
+        "heroes": [
+            [
+                "talene 309",
+                "cecilia 200",
+                "flora 203",
+                "pippa 200",
+                "skreg 000"
+            ],
+            [
+                "estrilda 103",
+                "ezizh 309",
+                "athalia 303",
+                "tidus 203",
+                "mehira 303"
+            ],
+            [
+                "wukong 203",
+                "oden 103",
+                "lucretia 309",
+                "silas 303",
+                "zolrath 303"
+            ],
+            [
+                "raku 300",
+                "alna 209",
+                "raine 103",
+                "twins 203",
+                "drez 100"
+            ],
+            [
+                "kren 100",
+                "mortas 000",
+                "nakoruru 103",
+                "ulmus 000",
+                "antandra 100"
+            ],
+            [
+                "ukyo 000",
+                "solise 000",
+                "kaz 000",
+                "raspen 000",
+                "thane 000"
+            ],
+            [
+                "oscar 000",
+                "rigby 000",
+                "vurk 000",
+                "theowyn 100",
+                "desira 000"
+            ]
+        ]
+    },
+    "/home/nate/projects/afk-image-processing/tests/data/images/image16.png": {
+        "rows": 7,
+        "columns": 5,
+        "heroes": [
+            [
+                "gwyneth 309",
+                "grezhul 309",
+                "farael 309",
+                "lyca 209",
+                "ainz 309"
+            ],
+            [
+                "eironn 303",
+                "ezio 203",
+                "izold 303",
+                "daimon 203",
+                "rowan 303"
+            ],
+            [
+                "tasi 203",
+                "safiya 303",
+                "albedo 309",
+                "nara 309",
+                "thoran 309"
+            ],
+            [
+                "arthur 303",
+                "shemira 203",
+                "rosaline 203",
+                "fawkes 100",
+                "belinda 200"
+            ],
+            [
+                "joker 100",
+                "khasos 100",
+                "lucius 100",
+                "nemora 100",
+                "gorvo 000"
+            ],
+            [
+                "dastan 200",
+                "warek 000",
+                "queen 100",
+                "numisu 103",
+                "saurus 303"
+            ],
+            [
+                "lorsan 100",
+                "skriath 203",
+                "brutus 100",
+                "kelthur 000",
+                "hendrik 000"
+            ]
+        ]
+    },
+    "/home/nate/projects/afk-image-processing/tests/data/images/image17.png": {
+        "rows": 7,
+        "columns": 5,
+        "heroes": [
+            [
+                "ainz 309",
+                "lyca 203",
+                "ezio 209",
+                "albedo 303",
+                "farael 303"
+            ],
+            [
+                "tasi 203",
+                "dastan 203",
+                "rosaline 203",
+                "daimon 303",
+                "saurus 303"
+            ],
+            [
+                "rowan 303",
+                "izold 309",
+                "gwyneth 203",
+                "arthur 303",
+                "lucius 100"
+            ],
+            [
+                "joker 103",
+                "estrilda 103",
+                "belinda 100",
+                "queen 000",
+                "grezhul 309"
+            ],
+            [
+                "eironn 309",
+                "drez 203",
+                "raspen 203",
+                "talene 309",
+                "nakoruru 203"
+            ],
+            [
+                "tidus 203",
+                "ezizh 203",
+                "raine 203",
+                "cecilia 203",
+                "safiya 200"
+            ],
+            [
+                "skreg 209",
+                "shemira 100",
+                "lucretia 309",
+                "silas 309",
+                "raku 303"
+            ]
+        ]
+    },
+    "/home/nate/projects/afk-image-processing/tests/data/images/image18.png": {
+        "rows": 8,
+        "columns": 5,
+        "heroes": [
+            [
+                "tidus 203",
+                "twins 200",
+                "antandra 100",
+                "fawkes 100",
+                "hendrik 100"
+            ],
+            [
+                "skreg 103",
+                "lucretia 303",
+                "talene 303",
+                "ezizh 200",
+                "athalia 200"
+            ],
+            [
+                "numisu 000",
+                "flora 000",
+                "mortas 000",
+                "lorsan 100",
+                "thane 203"
+            ],
+            [
+                "theowyn 103",
+                "raspen 103",
+                "rigby 100",
+                "queen 100",
+                "eluard 100"
+            ],
+            [
+                "wukong 000",
+                "seirus 000",
+                "food 000",
+                "food 100",
+                "food 000"
+            ],
+            [
+                "food 000",
+                "food 000",
+                "food 000",
+                "food 000",
+                "kren 000"
+            ],
+            [
+                "kren 000",
+                "kren 000",
+                "oscar 000",
+                "kelthur 000",
+                "kelthur 000"
+            ],
+            [
+                "kelthur 000",
+                "khasos 000",
+                "zolrath 000",
+                "ulmus 000",
+                "ulmus 000"
+            ]
+        ]
+    },
+    "/home/nate/projects/afk-image-processing/tests/data/images/image19.png": {
+        "rows": 6,
+        "columns": 5,
+        "heroes": [
+            [
+                "drez 209",
+                "cecilia 209",
+                "wukong 309",
+                "daimon 203",
+                "rosaline 303"
+            ],
+            [
+                "silas 309",
+                "theowyn 303",
+                "flora 203",
+                "hendrik 000",
+                "lorsan 100"
+            ],
+            [
+                "raku 309",
+                "ezizh 309",
+                "thoran 303",
+                "raine 203",
+                "numisu 100"
+            ],
+            [
+                "skreg 209",
+                "pippa 203",
+                "warek 100",
+                "lucretia 309",
+                "athalia 303"
+            ],
+            [
+                "talene 309",
+                "twins 203",
+                "alna 203",
+                "oscar 000",
+                "oden 100"
+            ],
+            [
+                "skriath 003",
+                "mehira 300",
+                "mortas 000",
+                "kaz 100",
+                "baden 203"
+            ]
+        ]
+    },
+    "/home/nate/projects/afk-image-processing/tests/data/images/image20.png": {
+        "rows": 7,
+        "columns": 5,
+        "heroes": [
+            [
+                "lyca 309",
+                "ainz 309",
+                "daimon 303",
+                "eironn 309",
+                "safiya 303"
+            ],
+            [
+                "rowan 303",
+                "thoran 303",
+                "albedo 303",
+                "shemira 203",
+                "tasi 103"
+            ],
+            [
+                "arthur 303",
+                "ezio 203",
+                "nakoruru 203",
+                "lucius 100",
+                "gorvo 100"
+            ],
+            [
+                "oden 203",
+                "brutus 100",
+                "dastan 200",
+                "belinda 100",
+                "hendrik 100"
+            ],
+            [
+                "joker 100",
+                "grezhul 309",
+                "gwyneth 303",
+                "rosaline 203",
+                "fawkes 100"
+            ],
+            [
+                "saurus 303",
+                "numisu 100",
+                "cecilia 200",
+                "nemora 100",
+                "skriath 103"
+            ],
+            [
+                "farael 309",
+                "drez 203",
+                "silas 303",
+                "talene 303",
+                "izold 203"
+            ]
+        ]
+    },
+    "/home/nate/projects/afk-image-processing/tests/data/images/image21.png": {
+        "rows": 7,
+        "columns": 5,
+        "heroes": [
+            [
+                "skriath 103",
+                "hendrik 100",
+                "nara 103",
+                "warek 100",
+                "queen 000"
+            ],
+            [
+                "raspen 100",
+                "gorvo 203",
+                "lucius 000",
+                "raku 309",
+                "raine 203"
+            ],
+            [
+                "theowyn 300",
+                "zolrath 309",
+                "drez 203",
+                "cecilia 200",
+                "oden 309"
+            ],
+            [
+                "mehira 303",
+                "twins 309",
+                "athalia 309",
+                "ezizh 309",
+                "kelthur 000"
+            ],
+            [
+                "eluard 103",
+                "wukong 000",
+                "talene 309",
+                "mortas 309",
+                "leofric 309"
+            ],
+            [
+                "orthros 309",
+                "desira 303",
+                "zaphrael 309",
+                "moreal 300",
+                "flora 203"
+            ],
+            [
+                "belinda 200",
+                "satrana 000",
+                "kaz 000",
+                "kren 100",
+                "rigby 000"
+            ]
+        ]
+    },
+    "/home/nate/projects/afk-image-processing/tests/data/images/image22.png": {
+        "rows": 7,
+        "columns": 5,
+        "heroes": [
+            [
+                "izold 309",
+                "lyca 209",
+                "ainz 309",
+                "grezhul 209",
+                "farael 309"
+            ],
+            [
+                "ezio 209",
+                "nakoruru 209",
+                "thoran 303",
+                "joker 203",
+                "rowan 303"
+            ],
+            [
+                "albedo 303",
+                "tasi 203",
+                "saurus 303",
+                "arthur 303",
+                "safiya 200"
+            ],
+            [
+                "rosaline 203",
+                "shemira 203",
+                "dastan 200",
+                "belinda 203",
+                "lucius 100"
+            ],
+            [
+                "estrilda 103",
+                "vurk 100",
+                "gorvo 00",
+                "nara 100",
+                "queen 000"
+            ],
+            [
+                "ukyo 000",
+                "silas 309",
+                "daimon 303",
+                "numisu 100",
+                "fawkes 100"
+            ],
+            [
+                "warek 100",
+                "khasos 000",
+                "eironn 309",
+                "tidus 303",
+                "cecilia 203"
+            ]
+        ]
+    },
+    "/home/nate/projects/afk-image-processing/tests/data/images/image23.png": {
+        "rows": 7,
+        "columns": 5,
+        "heroes": [
+            [
+                "numisu 203",
+                "gorvo 000",
+                "daimon 303",
+                "skreg 109",
+                "pippa 203"
+            ],
+            [
+                "hendrik 000",
+                "silas 309",
+                "raku 303",
+                "cecilia 209",
+                "raine 203"
+            ],
+            [
+                "rosaline 203",
+                "wukong 203",
+                "oden 109",
+                "athalia 309",
+                "talene 309"
+            ],
+            [
+                "raspen 203",
+                "skriath 003",
+                "lucretia 309",
+                "ezizh 309",
+                "zolrath 303"
+            ],
+            [
+                "twins 203",
+                "alna 309",
+                "mortas 203",
+                "moreal 303",
+                "mehira 303"
+            ],
+            [
+                "flora 200",
+                "thane 003",
+                "ulmus 000",
+                "baden 100",
+                "vurk 003"
+            ],
+            [
+                "torne 000",
+                "antandra 000",
+                "satrana 000",
+                "khasos 100",
+                "rigby 000"
+            ]
+        ]
+    },
+    "/home/nate/projects/afk-image-processing/tests/data/images/image24.png": {
+        "rows": 7,
+        "columns": 5,
+        "heroes": [
+            [
+                "silas 309",
+                "grezhul 309",
+                "izold 309",
+                "ainz 309",
+                "lyca 209"
+            ],
+            [
+                "eironn 309",
+                "albedo 309",
+                "farael 309",
+                "rowan 303",
+                "saurus 303"
+            ],
+            [
+                "tasi 103",
+                "shemira 200",
+                "brutus 200",
+                "ezio 203",
+                "lucius 100"
+            ],
+            [
+                "kaz 100",
+                "cecilia 200",
+                "arthur 200",
+                "estrilda 103",
+                "thane 100"
+            ],
+            [
+                "rosaline 203",
+                "gwyneth 103",
+                "nemora 100",
+                "nakoruru 200",
+                "kelthur 100"
+            ],
+            [
+                "hendrik 100",
+                "fawkes 000",
+                "seirus 100",
+                "queen 100",
+                "dastan 000"
+            ],
+            [
+                "belinda 200",
+                "safiya 200",
+                "thoran 200",
+                "baden 100",
+                "ulmus 100"
+            ]
+        ]
+    }
+}
