@@ -106,6 +106,8 @@ def loadDB() -> imageSearchDB.imageSearch:
         end_time = time.time()
         print("Database loaded! Loaded in {} seconds".format(
             end_time - start_time))
+        db.matcher.train()
+
     else:
         raise FileNotFoundError(
             "Unable to find {}. Please call image_processing.build_db.buildDB "
@@ -115,9 +117,13 @@ def loadDB() -> imageSearchDB.imageSearch:
 
 def get_db(rebuild=GV.REBUILD, enrichedDB=True):
     if rebuild:
-        return buildDB(enrichedDB=enrichedDB)
+        DB = buildDB(enrichedDB=enrichedDB)
     else:
-        return loadDB()
+        try:
+            DB = loadDB()
+        except FileNotFoundError:
+            DB = buildDB(enrichedDB=enrichedDB)
+    return DB
 
 
 if __name__ == "__main__":

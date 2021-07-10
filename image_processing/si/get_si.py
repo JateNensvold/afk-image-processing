@@ -195,7 +195,6 @@ def get_si(image, imageDB=None):
         cv2.putText(
             hero_ss, result, coords, font, fontScale, color, thickness,
             cv2.LINE_AA)
-    # load.display_image(hero_ss, display=True)
     # test_names = set(_hero_name for _hero_name,
     #                  _hero_info_dict in heroesDict.items())
     # return_names = set(return_dict.keys())
@@ -269,6 +268,7 @@ if __name__ == "__main__":
     json_dict["test_image"]["columns"] = len(rows[0])
     json_dict["test_image"]["heroes"] = []
     output_set = set(sorted(output.keys()))
+    load.display_image(GV.image_ss, display=True)
 
     for _row in rows:
         temp_list = []
@@ -276,6 +276,6 @@ if __name__ == "__main__":
             temp = output[_row[_index][1]]["result"]
             temp_list.append(temp)
         json_dict["test_image"]["heroes"].append(temp_list)
-
-    with open("temp.json", "w") as f:
-        json.dump(json_dict, f)
+    print(json_dict)
+    # with open("temp.json", "w") as f:
+    #     json.dump(json_dict, f)
