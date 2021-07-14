@@ -24,28 +24,17 @@ except ImportError:
 HERO_SELECTION_RATIO = 0.05
 
 
-def generate_data(json_dict: dict, image_name: str, image: np.array, imageDB):
+def generate_data(json_dict: dict, image_name: str, image: np.array, imageDB,
+                  debug_raw=True):
 
     print("Starting processing {}".format(image_name))
 
     start_time = time.time()
-    output, rows = si.get_si(image, imageDB=imageDB)
-    json_dict[image_name] = {}
-    json_dict[image_name]["rows"] = len(rows)
-    json_dict[image_name]["columns"] = len(rows[0])
-    json_dict[image_name]["heroes"] = []
-    # output_set = set(sorted(output.keys()))
-
-    for _row in rows:
-        temp_list = []
-        for _index in range(len(_row)):
-            temp = output[_row[_index][1]]["result"]
-            # print(temp)
-            temp_list.append(temp)
-        json_dict[image_name]["heroes"].append(temp_list)
+    output_dict = si.get_si(
+        image, image_name, imageDB=imageDB, debug_raw=debug_raw)
+    json_dict[image_name] = output_dict[image_name]
     end_time = time.time()
     print("Image: {} Elapsed: {}".format(image_name, end_time - start_time))
-
     return json_dict
 
 
@@ -81,7 +70,7 @@ if __name__ == "__main__":
         print(new_image_name)
         shutil.copy(_file_name, new_image_name)
         # json_data[_file_name]["path"] = new_image_name
-        with open(os.path.join(CUR_DIR, "validation_data.json"), "w") as f:
+        with open(os.path.join(CUR_DIR, "temp_validation_data.json"), "w") as f:
             json.dump(json_dict, f)
 
     # print("min", sizes[5:10])

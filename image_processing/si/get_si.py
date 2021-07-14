@@ -19,7 +19,7 @@ def rollingAverage(avg, newSample, size):
     return avg
 
 
-def get_si(image, imageDB=None):
+def get_si(image, image_name, debug_raw=False, imageDB=None):
     if imageDB is None:
         imageDB = BD.get_db(enrichedDB=True)
 
@@ -52,8 +52,8 @@ def get_si(image, imageDB=None):
     newx = int(x*0.7)
     newy = int(y*0.6)
     baseImages["10"]["image"] = image_10
-    baseImages["10"]["crop"] = image_10[0:, 0:newx]
-    baseImages["10"]["contourNum"] = 2
+    baseImages["10"]["crop"] = image_10[0:, 0:]
+    baseImages["10"]["contourNum"] = 3
     baseImages["10"]["morph"] = True
     # baseImages["10"]["height"] = 63
     # baseImages["10"]["width"] = 63.52173913043478
@@ -170,12 +170,29 @@ def get_si(image, imageDB=None):
                                         digit_height) * digit_freqency
         graded_avg_bin[si_name]["height"] = frequency_height_adjust
 
-    pool = multiprocessing.Pool()
+    si_dict = stamina.signature_template_mask(baseImages)
+    fi_dict = stamina.furniture_template_mask(baseImages)
 
-    all_args = [({"name": _hero_name, "info": _hero_info_dict, "base_images": baseImages,
-                 "graded_avg_bin": graded_avg_bin})for _hero_name, _hero_info_dict in heroesDict.items()]
+    if not GV.DEBUG and GV.PARALLEL:
 
-    reduced_values = pool.map(parallel_detect, all_args)
+        pool = multiprocessing.Pool()
+
+        all_args = [({"name": _hero_name, "info": _hero_info_dict,
+                      "si_dict": si_dict,
+                      "graded_avg_bin": graded_avg_bin,
+                      "fi_dict": fi_dict, }
+                     )for _hero_name, _hero_info_dict in heroesDict.items()]
+
+        reduced_values = pool.map(parallel_detect, all_args)
+    else:
+        reduced_values = []
+        for _hero_name, _hero_info_dict in heroesDict.items():
+            reduced_values.append(parallel_detect(
+                {"name": _hero_name,
+                 "info": _hero_info_dict,
+                 "si_dict": si_dict,
+                 "fi_dict": fi_dict,
+                 "graded_avg_bin": graded_avg_bin}))
 
     return_dict = {}
     for _hero_data in reduced_values:
@@ -187,10 +204,14 @@ def get_si(image, imageDB=None):
         hero_name, _ = imageDB.search(heroesDict[name]["image"])
         result = "{} {}".format(hero_name, result)
         _hero_data["result"] = result
+        print(_hero_data)
         return_dict[name] = _hero_data
         # if "display" in _hero_data:
         #     print("Failed to find fi score")
         #     load.display_image(heroesDict[name]["image"], display=True)
+        text_size = cv2.getTextSize(result, font, fontScale, thickness)
+        height = text_size[0][1]
+        coords = (coords[0], coords[1] + height)
 
         cv2.putText(
             hero_ss, result, coords, font, fontScale, color, thickness,
@@ -198,22 +219,42 @@ def get_si(image, imageDB=None):
     # test_names = set(_hero_name for _hero_name,
     #                  _hero_info_dict in heroesDict.items())
     # return_names = set(return_dict.keys())
+    json_dict = {}
+    json_dict[image_name] = {}
+    json_dict[image_name]["rows"] = len(rows)
+    json_dict[image_name]["columns"] = max([len(_row) for _row in rows])
 
-    return return_dict, rows
+    json_dict[image_name]["heroes"] = []
+    # output_set = set(sorted(output.keys()))
+
+    for _row in rows:
+        temp_list = []
+        for _index in range(len(_row)):
+            hero_data = []
+            temp = return_dict[_row[_index][1]]["result"]
+            hero_data.append(temp)
+            if debug_raw:
+                _raw_score = return_dict[_row[_index][1]]["score"]
+                hero_data.append(_raw_score)
+            temp_list.append(hero_data)
+        json_dict[image_name]["heroes"].append(temp_list)
+    return json_dict
 
 
 def parallel_detect(info_dict):
     k = info_dict["name"]
     v = info_dict["info"]
-    base_images = info_dict["base_images"]
+    si_dict = info_dict["si_dict"]
+    fi_dict = info_dict["fi_dict"]
+
     graded_avg_bin = info_dict["graded_avg_bin"]
     # for k, v in heroes_dict.items():
     # heroes_dict[k]["label"] = name
     return_dict = {}
     si_scores = stamina.signatureItemFeatures(
-        v["image"], base_images, graded_avg_bin)
+        v["image"], si_dict, graded_avg_bin)
     fi_scores = stamina.furnitureItemFeatures(
-        v["image"], base_images, graded_avg_bin)
+        v["image"], fi_dict, graded_avg_bin)
     x = v["object"][0][0]
     y = v["object"][0][1]
     if fi_scores["9"] == 0 or fi_scores["3"] == 0:
@@ -232,9 +273,9 @@ def parallel_detect(info_dict):
     else:
         if si_scores["30"] > 0.6:
             best_si = "30"
-        elif si_scores["20"] > 0.6:
+        elif si_scores["20"] > 0.7:
             best_si = "20"
-        elif si_scores["10"] > 0.4:
+        elif si_scores["10"] > 0.50:
             best_si = "10"
         else:
             # si_label_list = ["0", "10"]
@@ -253,6 +294,7 @@ def parallel_detect(info_dict):
     #     multiprocessing.current_process().pid, k, name))
     return_dict["si"] = best_si
     return_dict["fi"] = best_fi
+    return_dict["score"] = si_scores
     return_dict["result"] = name
     return_dict["pseudo_name"] = k
     return_dict["coords"] = coords
@@ -262,20 +304,9 @@ def parallel_detect(info_dict):
 
 if __name__ == "__main__":
     # pool = multiprocessing.Pool()
-    output, rows = get_si(GV.image_ss)
-    json_dict = {"test_image": {}}
-    json_dict["test_image"]["rows"] = len(rows)
-    json_dict["test_image"]["columns"] = len(rows[0])
-    json_dict["test_image"]["heroes"] = []
-    output_set = set(sorted(output.keys()))
+    json_dict = get_si(GV.image_ss, GV.image_ss_name, debug_raw=True,)
     load.display_image(GV.image_ss, display=True)
 
-    for _row in rows:
-        temp_list = []
-        for _index in range(len(_row)):
-            temp = output[_row[_index][1]]["result"]
-            temp_list.append(temp)
-        json_dict["test_image"]["heroes"].append(temp_list)
     print(json_dict)
     # with open("temp.json", "w") as f:
     #     json.dump(json_dict, f)

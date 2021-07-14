@@ -168,6 +168,7 @@ if __name__ == "__main__":
         image = cv2.imread(IMAGE)
 
     if COLOR:
+        print("color")
         multiplier = 4
         image = cv2.resize(
             image, (image.shape[1]*multiplier, image.shape[0]*multiplier))

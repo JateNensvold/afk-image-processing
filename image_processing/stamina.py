@@ -1,3 +1,4 @@
+from functools import lru_cache
 import os
 import json
 import cv2
@@ -134,9 +135,10 @@ class row():
                     self._list[_index] = (dimensions, name)
                     return _index
                 else:
-                    print("row: {} Collision failed beteween "
-                          "({}) and ({})".format(self, _row_object,
-                                                 collision_object))
+                    if GV.VERBOSE_LEVEL >= 1:
+                        print("row: {} Collision failed beteween "
+                              "({}) and ({})".format(self, _row_object,
+                                                     collision_object))
         return -1
 
     def sort(self):
@@ -240,14 +242,38 @@ class matrix():
             if len(_row_object) < threshold:
                 _prune_list.append(_index)
         if len(_prune_list) > 0:
-            print("Deleting ({}) row objects({}) from matrix. Ensure that "
-                  "getHeroes was successful".format(
-                      len(_prune_list), _prune_list))
+            if GV.VERBOSE_LEVEL >= 1:
+                print("Deleting ({}) row objects({}) from matrix. Ensure that "
+                      "getHeroes was successful".format(
+                          len(_prune_list), _prune_list))
             for _index in sorted(_prune_list, reverse=True):
-                print("Deleted row object ({}) of len ({})".format(
-                    self._row_list[_index], len(self._row_list[_index])))
+                if GV.VERBOSE_LEVEL >= 1:
+                    print("Deleted row object ({}) of len ({})".format(
+                        self._row_list[_index], len(self._row_list[_index])))
                 self._row_list.pop(_index)
                 del self._heads[_index]
+
+
+def cachedproperty(func):
+    """
+        Used on methods to convert them to methods that replace themselves
+        with their return value once they are called.
+    """
+    if func.__name__ in GV.CACHED:
+        return GV.CACHED[func.__name__]
+
+    def cache(*args):
+        result = func(*args)
+        GV.CACHED[func.__name__] = result
+        return result
+    #     self = args[0]  # Reference to the class who owns the method
+    #     funcname = func.__name__
+    #     ret_value = func(self)
+    #     # Replace the function with its value
+    #     setattr(self, funcname, ret_value)
+    #     return ret_value  # Return the result of the function
+
+    return cache
 
 
 def generate_rows(heroes: dict, spacing: int = 10):
@@ -397,7 +423,75 @@ def get_text(staminaAreas: dict, train: bool = False):
     return output
 
 
-def signatureItemFeatures(hero: np.array, templates: dict,
+@cachedproperty
+def signature_template_mask(templates: dict):
+    siFolders = os.listdir(GV.siBasePath)
+    si_dict = {}
+
+    for folder in siFolders:
+        SIDir = os.path.join(GV.siBasePath, folder)
+        SIPhotos = os.listdir(SIDir)
+        if folder == "40":
+            continue
+        for imageName in SIPhotos:
+
+            siImage = templates[folder]["image"]
+            # siImage = cv2.imread(os.path.join(
+            #     GV.siBasePath, folder, imageName))
+            # SIGray = cv2.cvtColor(siImage, cv2.COLOR_BGR2GRAY)
+
+            templateImage = templates[folder].get(
+                "crop", templates[folder].get("image"))
+            mask = np.zeros_like(templateImage)
+
+            if "morph" in templates[folder] and templates[folder]["morph"]:
+
+                # (hMin = 0 , sMin = 0, vMin = 206), (hMax = 159 , sMax = 29, vMax = 255)
+                hsv_range = [np.array([0, 0, 206]), np.array([159, 29, 255])]
+
+                thresh = processing.blur_image(
+                    templateImage, hsv_range=hsv_range, reverse=True)
+
+            else:
+                templateGray = cv2.cvtColor(templateImage, cv2.COLOR_BGR2GRAY)
+
+                thresh = cv2.threshold(
+                    templateGray, 0, 255,
+                    cv2.THRESH_OTSU + cv2.THRESH_BINARY)[1]
+
+            inverted = cv2.bitwise_not(thresh)
+            x, y = inverted.shape[:2]
+            cv2.rectangle(inverted, (0, 0), (y, x), (255, 0, 0), 1)
+
+            if folder == "0" or folder == "10":
+                pass
+            else:
+                inverted = cv2.bitwise_not(inverted)
+
+            siCont = cv2.findContours(
+                inverted, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+            siCont = imutils.grab_contours(siCont)
+            if folder == "0":
+
+                siCont = sorted(siCont, key=cv2.contourArea, reverse=True)[
+                    1:templates[folder]["contourNum"]+1]
+            else:
+                siCont = sorted(siCont, key=cv2.contourArea, reverse=True)[
+                    :templates[folder]["contourNum"]]
+            cv2.fillPoly(mask, siCont, [255, 255, 255])
+
+            if folder not in si_dict:
+                si_dict[folder] = {}
+            # si_dict[folder]["image"] = SIGray
+            si_dict[folder]["template"] = templateImage
+            si_dict[folder]["source"] = siImage
+            si_dict[folder]["mask"] = mask
+
+    return si_dict
+
+
+def signatureItemFeatures(hero: np.array,
+                          si_dict: dict,
                           lvlRatioDict: dict = None):
     """
     Runs template matching SI identification against the 'hero' passed in.
@@ -421,87 +515,13 @@ def signatureItemFeatures(hero: np.array, templates: dict,
     hero_copy = hero.copy()
 
     crop_hero = hero[0: int(y/y_div), 0: int(x/x_div)]
-    # crop_hero = hero
-
-    si_dict = {}
-    # baseSIDir = GV.siPath
-
-    siFolders = os.listdir(GV.siBasePath)
-
-    # imgCopy1 = newHero.copy()
-    # grayCopy = cv2.cvtColor(imgCopy1, cv2.COLOR_BGR2GRAY)
-    # count = 0
-    for folder in siFolders:
-        SIDir = os.path.join(GV.siBasePath, folder)
-        SIPhotos = os.listdir(SIDir)
-        if folder == "40":
-            continue
-        for imageName in SIPhotos:
-
-            siImage = templates[folder]["image"]
-            # siImage = cv2.imread(os.path.join(
-            #     GV.siBasePath, folder, imageName))
-            SIGray = cv2.cvtColor(siImage, cv2.COLOR_BGR2GRAY)
-
-            templateImage = templates[folder].get(
-                "crop", templates[folder].get("image"))
-            mask = np.zeros_like(templateImage)
-
-            if "morph" in templates[folder] and templates[folder]["morph"]:
-                se = np.ones((2, 2), dtype='uint8')
-                # inverted = cv2.bitwise_not(inverted)
-
-                lower = np.array([0, 8, 0])
-                upper = np.array([179, 255, 255])
-                hsv = cv2.cvtColor(templateImage, cv2.COLOR_BGR2HSV)
-                thresh = cv2.inRange(hsv, lower, upper)
-                thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, se)
-                thresh = cv2.bitwise_not(thresh)
-
-            else:
-                templateGray = cv2.cvtColor(templateImage, cv2.COLOR_BGR2GRAY)
-
-                thresh = cv2.threshold(
-                    templateGray, 0, 255,
-                    cv2.THRESH_OTSU + cv2.THRESH_BINARY)[1]
-            inverted = cv2.bitwise_not(thresh)
-            x, y = inverted.shape[:2]
-            cv2.rectangle(inverted, (0, 0), (y, x), (255, 0, 0), 1)
-
-            if folder == "0":
-                pass
-            else:
-                inverted = cv2.bitwise_not(inverted)
-
-            siCont = cv2.findContours(
-                inverted, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-            siCont = imutils.grab_contours(siCont)
-            if folder == "0":
-
-                siCont = sorted(siCont, key=cv2.contourArea, reverse=True)[
-                    1:templates[folder]["contourNum"]+1]
-            else:
-                siCont = sorted(siCont, key=cv2.contourArea, reverse=True)[
-                    :templates[folder]["contourNum"]]
-
-            # cv2.drawContours(mask, siCont, -1, (255, 255, 255))
-            cv2.fillPoly(mask, siCont, [255, 255, 255])
-
-            if folder not in si_dict:
-                si_dict[folder] = {}
-            si_dict[folder]["image"] = SIGray
-
-            si_dict[folder]["template"] = templateImage
-
-            si_dict[folder]["mask"] = mask
-
     numberScore = {}
 
-    for pixel_offset in range(-5, 15, 2):
+    for pixel_offset in range(-5, 50, 2):
         for folder_name, imageDict in si_dict.items():
             si_image = imageDict["template"]
 
-            sourceSIImage = templates[folder_name]["image"]
+            sourceSIImage = imageDict["source"]
             hero_h, hero_w = sourceSIImage.shape[:2]
 
             si_height, original_width = si_image.shape[:2]
@@ -531,6 +551,8 @@ def signatureItemFeatures(hero: np.array, templates: dict,
             #     hero, (int(x * image_ratio), int(y * image_ratio)))
             if folder_name != "0":
                 mask_gray = cv2.bitwise_not(mask_gray)
+            # if folder_name == "10":
+            # load.display_image(mask_gray, display=True)
 
             try:
                 templateMatch = cv2.matchTemplate(
@@ -549,16 +571,6 @@ def signatureItemFeatures(hero: np.array, templates: dict,
             (_, score, _, scoreLoc) = cv2.minMaxLoc(templateMatch)
             coords = (scoreLoc[0] + width, scoreLoc[1] + height)
 
-            # cv2.rectangle(hero_copy, scoreLoc, coords, (255, 0, 0), 1)
-            # font = cv2.FONT_HERSHEY_SIMPLEX
-            # fontScale = 0.5
-            # color = (255, 0, 0)
-            # thickness = 2
-
-            # cv2.putText(
-            #     hero_copy, folder_name, coords, font, fontScale, color, thickness,
-            #     cv2.LINE_AA)
-
             if folder_name not in numberScore:
                 numberScore[folder_name] = []
             numberScore[folder_name].append(
@@ -571,62 +583,31 @@ def signatureItemFeatures(hero: np.array, templates: dict,
         _coords = _best_match[2][1]
 
         cv2.rectangle(hero_copy, _score_loc, _coords, (255, 0, 0), 1)
-        # font = cv2.FONT_HERSHEY_SIMPLEX
-        # fontScale = 0.5
-        # color = (255, 0, 0)
-        # thickness = 2
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        fontScale = 0.5
+        color = (255, 0, 0)
+        thickness = 2
 
-        # cv2.putText(
-        #     hero_copy, _folder, _coords, font, fontScale, color, thickness,
-        #     cv2.LINE_AA)
-        best_score[_folder] = _best_match[0]
-
+        cv2.putText(
+            hero_copy, _folder, _coords, font, fontScale, color, thickness,
+            cv2.LINE_AA)
+        best_score[_folder] = round(_best_match[0], 3)
+    # print(best_score)
     # load.display_image(hero_copy, display=True)
     return best_score
 
 
-def furnitureItemFeatures(hero: np.array, templates: dict,
-                          lvlRatioDict: dict = None):
-    """
-    Runs template matching FI identification against the 'hero' passed in.
-        When lvlRatioDict is passed in the templates will be rescaled to
-        attempt and find the best template size for detecting FI objects
-
-    Args:
-        hero: np.array(x,y.3) representing an rgb image
-        templates: dictionary of information about each FI template to get ran
-            against the image
-        lvlRatioDict: dictionary that contains the predicted height of each
-            signature item based on precomputed text to si scaling calculations
-    Returns:
-        dictionary with best "score" that each template achieved on the 'hero'
-            image
-    """
-    # variable_multiplier =
-    x, y, _ = hero.shape
-    x_div = 2.4
-    y_div = 2.0
-    x_offset = int(x*0.1)
-    y_offset = int(y*0.30)
-    hero_copy = hero.copy()
-
-    crop_hero = hero[y_offset: int(y*0.6), x_offset: int(x*0.4)]
+@cachedproperty
+def furniture_template_mask(templates: dict):
 
     fi_dict = {}
-    # baseSIDir = GV.siPath
-
     fi_folders = os.listdir(GV.fi_base_path)
 
-    # imgCopy1 = newHero.copy()
-    # grayCopy = cv2.cvtColor(imgCopy1, cv2.COLOR_BGR2GRAY)
-    # count = 0
     for folder in fi_folders:
         fi_dir = os.path.join(GV.fi_base_path, folder)
         fi_photos = os.listdir(fi_dir)
         for image_name in fi_photos:
             fi_image = templates[folder]["image"]
-            # fi_image = cv2.imread(os.path.join(
-            #     GV.siBasePath, folder, image_name))
             template_image = templates[folder].get(
                 "crop", templates[folder]["image"])
             mask = np.zeros_like(template_image)
@@ -662,30 +643,44 @@ def furnitureItemFeatures(hero: np.array, templates: dict,
                                      folder]["contourNum"]]
             cv2.drawContours(mask, fi_contours, -1,
                              (255, 255, 255), thickness=cv2.FILLED)
-            # cv2.fillPoly(mask, fi_contours, [255, 255, 255])
-
-            # if folder == "3":
-            #     master_contour = [
-            #         _cont for _cont_list in fi_contours for _cont in _cont_list]
-            #     hull = cv2.convexHull(np.array(master_contour))
-            #     # cv2.drawContours(mask, [hull], -1, (255, 255, 255))
-            #     cv2.fillPoly(mask, [hull], [255, 255, 255])
-
-            # else:
-            #     for _cont in fi_contours:
-            #         hull = cv2.convexHull(np.array(_cont))
-            #         # cv2.drawContours(mask, [hull], -1, (255, 255, 255))
-            #         cv2.fillPoly(mask, [hull], [255, 255, 255])
 
             if folder not in fi_dict:
                 fi_dict[folder] = {}
             # si_dict[folder][imageName] = siImage
             fi_dict[folder]["template"] = template_image
+            fi_dict[folder]["source"] = fi_image
 
             fi_dict[folder]["mask"] = mask
 
-            # fi_gray = cv2.cvtColor(fi_image, cv2.COLOR_BGR2GRAY)
-            # fi_dict[folder]["image"] = fi_gray
+    return fi_dict
+
+
+def furnitureItemFeatures(hero: np.array, fi_dict: dict,
+                          lvlRatioDict: dict = None):
+    """
+    Runs template matching FI identification against the 'hero' passed in.
+        When lvlRatioDict is passed in the templates will be rescaled to
+        attempt and find the best template size for detecting FI objects
+
+    Args:
+        hero: np.array(x,y.3) representing an rgb image
+        fi_dict: dictionary of information about each FI template to get ran
+            against the image
+        lvlRatioDict: dictionary that contains the predicted height of each
+            signature item based on precomputed text to si scaling calculations
+    Returns:
+        dictionary with best "score" that each template achieved on the 'hero'
+            image
+    """
+    # variable_multiplier =
+    x, y, _ = hero.shape
+    x_div = 2.4
+    y_div = 2.0
+    x_offset = int(x*0.1)
+    y_offset = int(y*0.30)
+    hero_copy = hero.copy()
+
+    crop_hero = hero[y_offset: int(y*0.6), x_offset: int(x*0.4)]
 
     numberScore = {}
     neighborhood_size = 7
@@ -768,7 +763,7 @@ def furnitureItemFeatures(hero: np.array, templates: dict,
         for folder_name, imageDict in fi_dict.items():
             fi_image = imageDict["template"]
 
-            sourceSIImage = templates[folder_name]["image"]
+            sourceSIImage = imageDict["source"]
             hero_h, hero_w = sourceSIImage.shape[:2]
 
             original_height, original_width = fi_image.shape[:2]
@@ -805,10 +800,14 @@ def furnitureItemFeatures(hero: np.array, templates: dict,
                     blur_hero, fi_image, cv2.TM_CCOEFF_NORMED,
                     mask=mask)
             except Exception:
-                if blur_hero.shape[0] < fi_image.shape[0] or blur_hero.shape[1] < fi_image.shape[1]:
+                if blur_hero.shape[0] < fi_image.shape[0] or blur_hero.shape[1] \
+                        < fi_image.shape[1]:
                     _height, _width = fi_image.shape[:2]
-                    blur_hero = hero[y_offset: max(int(y/y_div), int(_height * 1.2)+y_offset),
-                                     x_offset: max(int(x/x_div), int(_width * 1.2)+x_offset), ]
+                    blur_hero = hero[
+                        y_offset: max(int(y/y_div),
+                                      int(_height * 1.2)+y_offset),
+                        x_offset: max(int(x/x_div),
+                                      int(_width * 1.2)+x_offset), ]
                     # blur_hero = crop_hero
                     # hero_gray = cv2.cvtColor(crop_hero, cv2.COLOR_BGR2GRAY)
                 templateMatch = cv2.matchTemplate(
@@ -839,26 +838,16 @@ def furnitureItemFeatures(hero: np.array, templates: dict,
         _t = [_num for _num in numberScore[_folder]
               if not math.isinf(_num[0])]
         if len(_t) == 0:
-            print("Failed to find FI", _folder,  numberScore[_folder])
+            if GV.VERBOSE_LEVEL >= 1:
+                print("Failed to find FI", _folder,  numberScore[_folder])
             _best_match = (0, 0, ((0, 0), (0, 0)))
-            # load.display_image([hero, blur_hero], display=True, multiple=True)
         else:
             _best_match = _t[-1]
 
         _score_loc = _best_match[2][0]
         _coords = _best_match[2][1]
         cv2.rectangle(blur_hero, _score_loc, _coords, (255, 0, 0), 1)
-        # font = cv2.FONT_HERSHEY_SIMPLEX
-        # fontScale = 0.2
-        # color = (255, 0, 0)
-        # thickness = 2
-
-        # cv2.putText(
-        #     blur_hero, _folder, _coords, font, fontScale, color, thickness,
-        #     cv2.LINE_AA)
         best_score[_folder] = _best_match[0]
-
-    # load.display_image(blur_hero, display=True)
 
     return best_score
 

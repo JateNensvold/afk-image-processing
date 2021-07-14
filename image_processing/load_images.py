@@ -11,7 +11,8 @@ import image_processing.database.imageDB as imageSearchDB
 import image_processing.globals as GV
 
 
-def display_image(image, multiple=False, display=GV.DEBUG, color_correct=True, colormap=None):
+def display_image(image, multiple=False, display=GV.DEBUG, color_correct=True,
+                  colormap=None):
     if not display:
         return
 
@@ -199,7 +200,8 @@ def colorClassify(img: np.ndarray, contour):
     return alpha_img, mask
 
 
-def crop_heroes(images: list, x_left=None, x_right=None, y_top=None, y_bottom=None, border_width=0.25):
+def crop_heroes(images: list, x_left=None, x_right=None, y_top=None,
+                y_bottom=None, border_width=0.25):
     """
     Args:
         images: list of images to crop frame from
@@ -293,7 +295,8 @@ def build_flann(image_list: list, ratio=0.8):
     Build database of heroes to match to
 
     Args:
-        image_list: list of (image(np.array):name(str)) tuples to build database from
+        image_list: list of (image(np.array):name(str)) tuples to build
+             database from
 
     Return:
         An instance of imageSearch() with image_list added to it with the

@@ -85,16 +85,18 @@ def blur_image(image: np.ndarray, dilate=False,
         image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
         output = cv2.inRange(image, hsv_range[0], hsv_range[1])
+
         if reverse:
             output = cv2.bitwise_not(output)
+
         # output = cv2.bitwise_and(output, mask_inv)
     elif rgb_range:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
         output = cv2.inRange(image, rgb_range[0], rgb_range[1])
         if reverse:
             output = cv2.bitwise_not(output)
         # output = cv2.bitwise_and(output, mask_inv)
+
     else:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
@@ -254,7 +256,6 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, display=None, **blur
             #             x+w]
             # cv2.drawContours(image, [c], -1, (0, 0, 255), thickness=2)
 
-            # load.display_image(image, display=True)
             # cv2.rectangle(image, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
         if diff < tolerance and (h*w) > 2500:
@@ -364,19 +365,28 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
 
     # if maxHeroes:
     # multi_valid.append(getHeroContours(*baseArgs, dilate=True))
-    blur_args["hsv_range"] = [
+    del blur_args["hsv_range"]
+    hsv_range = [
         np.array([0, 0, 0]), np.array([179, 255, 192])]
     multi_valid.append(getHeroContours(
-        *baseArgs, **blur_args))
+        *baseArgs, hsv_range=hsv_range, **blur_args))
 
     # (hMin = 0 , sMin = 0, vMin = 74), (hMax = 27 , sMax = 253, vMax = 255)
     baseArgs = (image.copy(), sizeAllowanceBoundary)
-    blur_args["hsv_range"] = [
-        np.array([0, 0, 74]), np.array([27, 253, 255])]
-    blur_args["reverse"] = True
-    multi_valid.append(getHeroContours(
-        *baseArgs, display=True, **blur_args))
 
+    # (RMin = 67 , GMin = 55, BMin = 31), (RMax = 255 , GMax = 223, BMax = 169)
+    blur_args["reverse"] = True
+
+    # rgb_range = [np.array([67, 55, 31]), np.array([255, 223, 169])]
+    # multi_valid.append(getHeroContours(
+    #     *baseArgs, rgb_range=rgb_range, **blur_args))
+
+    hsv_range = [
+        np.array([0, 0, 74]), np.array([27, 253, 255])]
+    multi_valid.append(getHeroContours(
+        *baseArgs, hsv_range=hsv_range, **blur_args))
+
+    # (RMin = 0 , GMin = 103, BMin = 134), (RMax = 210 , GMax = 255, BMax = 255)
     # baseArgs = (image.copy(), sizeAllowanceBoundary)
     # blur_args["hsv_range"] = [
     #     np.array([5, 79, 211]), np.array([21, 106, 250])]
@@ -410,7 +420,7 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
     for _hero_list in multi_valid:
         for _object_name, _object_dimensions in _hero_list.items():
             hero_matrix.auto_append(_object_dimensions, _object_name)
-    # hero_matrix.prune(threshold=5)
+    hero_matrix.prune(threshold=5)
     hero_matrix.sort()
 
     for _row_index, _row in enumerate(hero_matrix):
@@ -502,33 +512,18 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
                 heroes[_hero_name]["image"] = ROI
 
             heroes[_hero_name]["object"] = _object
-            # heroes[_hero_name]["dimensions"] = {}
-            # heroes[_hero_name]["dimensions"]["y"] = (d[3], d[3]+d[0])
-            # heroes[_hero_name]["dimensions"]["x"] = (d[2], d[2]+d[1])
+
         # load.display_image([heroes[_hero[1]]["image"]
         #                     for _hero in _row], multiple=True, display=True)
-    # row_delete = []
-    # for index in range(len(rows)):
-    #     if len(rows[index]) < row_elim:
-    #         row_delete.append(index)
-    # for row_num in row_delete[::-1]:
-    #     for heroTuple in rows[row_num]:
-    #         name = heroTuple[1]
-    #         del heroes[name]
-    #     del rows[row_num]
 
     # for _row in hero_matrix:
-    #     print(_row)
-    #     temp = [(heroes[_hero[1]]["image"].shape, _hero)
-    #             for _hero in _row]
-    #     for i in temp:
-    #         print(i)
+    #     # print(_row)
+    #     # temp = [(heroes[_hero[1]]["image"].shape, _hero)
+    #     #         for _hero in _row]
+    #     # for i in temp:
+    #     #     print(i)
     #     load.display_image([heroes[_hero[1]]["image"]
     #                        for _hero in _row], multiple=True, display=True)
-
-        # for _hero in _row:
-        #     _name = _hero[1]
-        #     load.display_image(heroes[_name]["image"])
 
     return heroes, hero_matrix
 

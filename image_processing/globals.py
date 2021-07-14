@@ -12,17 +12,30 @@ parser.add_argument("-i", "--image", help="Path to Hero Roster Screen shot")
 parser.add_argument("-r", "--rebuild", help="Rebuild hero database from"
                     "source images", action="store_true")
 
-
+parser.add_argument("-v", "--verbose", help="Increase verbosity of output"
+                    "from image processing", action='count', default=0)
+parser.add_argument("-p", "--parallel", help="Utilize as many cores as"
+                    "possible while processing",
+                    choices=["True", "False"], default="True")
 args = parser.parse_args()
 
 DEBUG = args.DEBUG
 REBUILD = args.rebuild
+PARALLEL = True if args.parallel.lower() in ["true"] else False
 image_ss = None
+image_ss_name = None
+
+VERBOSE_LEVEL = args.verbose
+
+# Stores cached function results
+CACHED = {}
+
 if args.image:
     multiplier = 4
     image_ss = cv2.imread(args.image)
     image_ss = cv2.resize(
         image_ss, (image_ss.shape[1]*multiplier, image_ss.shape[0]*multiplier))
+    image_ss_name = os.path.basename(args.image)
 # DEBUG = True
 # DEBUG = False
 

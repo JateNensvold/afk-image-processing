@@ -59,7 +59,8 @@ def buildDB(enrichedDB: bool = False) -> imageSearchDB.imageSearch:
         imageSearchDB.imageSearch database object
     """
     file_dict = {}
-    print("Building database!")
+    if GV.VERBOSE_LEVEL >= 1:
+        print("Building database!")
     start_time = time.time()
     recurse_dir(GV.database_icon_path, file_dict)
     baseImages = []
@@ -86,8 +87,9 @@ def buildDB(enrichedDB: bool = False) -> imageSearchDB.imageSearch:
     end_time = time.time()
     with open(GV.database_pickle, 'wb') as handle:
         dill.dump(imageDB, handle)
-
-    print("Database built! Built in {} seconds".format(end_time-start_time))
+    if GV.VERBOSE_LEVEL >= 1:
+        print("Database built! Built in {} seconds".format(
+            end_time-start_time))
     return imageDB
 
 
@@ -99,13 +101,15 @@ def loadDB() -> imageSearchDB.imageSearch:
         imageSearchDB.imageSearch database object
     """
     if os.path.exists(GV.database_pickle):
-        print("Loading database!")
+        if GV.VERBOSE_LEVEL >= 1:
+            print("Loading database!")
         start_time = time.time()
         with open(GV.database_pickle, 'rb') as handle:
             db: imageSearchDB.imageSearch = pickle.load(handle)
         end_time = time.time()
-        print("Database loaded! Loaded in {} seconds".format(
-            end_time - start_time))
+        if GV.VERBOSE_LEVEL >= 1:
+            print("Database loaded! Loaded in {} seconds".format(
+                end_time - start_time))
         db.matcher.train()
 
     else:
