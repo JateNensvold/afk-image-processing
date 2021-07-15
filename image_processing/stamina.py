@@ -265,13 +265,8 @@ def cachedproperty(func):
     def cache(*args):
         result = func(*args)
         GV.CACHED[func.__name__] = result
+
         return result
-    #     self = args[0]  # Reference to the class who owns the method
-    #     funcname = func.__name__
-    #     ret_value = func(self)
-    #     # Replace the function with its value
-    #     setattr(self, funcname, ret_value)
-    #     return ret_value  # Return the result of the function
 
     return cache
 

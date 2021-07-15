@@ -123,10 +123,6 @@ def get_si(image, image_name, debug_raw=False, imageDB=None):
     heroesDict, rows = processing.getHeroes(
         hero_ss, blur_args=blur_args)
 
-    font = cv2.FONT_HERSHEY_SIMPLEX
-    fontScale = 3
-    color = (255, 0, 0)
-    thickness = 2
     circle_fail = 0
 
     digit_bins = {}
@@ -174,7 +170,6 @@ def get_si(image, image_name, debug_raw=False, imageDB=None):
     fi_dict = stamina.furniture_template_mask(baseImages)
 
     if not GV.DEBUG and GV.PARALLEL:
-
         pool = multiprocessing.Pool()
 
         all_args = [({"name": _hero_name, "info": _hero_info_dict,
@@ -195,6 +190,12 @@ def get_si(image, image_name, debug_raw=False, imageDB=None):
                  "graded_avg_bin": graded_avg_bin}))
 
     return_dict = {}
+
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    fontScale = 3
+    color = (255, 255, 0)
+    thickness = 2
+
     for _hero_data in reduced_values:
         # name = "{}{}".format(_hero_data["si"], _hero_data["fi"])
         name = _hero_data["pseudo_name"]
@@ -204,15 +205,15 @@ def get_si(image, image_name, debug_raw=False, imageDB=None):
         hero_name, _ = imageDB.search(heroesDict[name]["image"])
         result = "{} {}".format(hero_name, result)
         _hero_data["result"] = result
-        print(_hero_data)
         return_dict[name] = _hero_data
         # if "display" in _hero_data:
         #     print("Failed to find fi score")
         #     load.display_image(heroesDict[name]["image"], display=True)
+        fontScale = 0.5 * (rows[0][0][0][-1]/100)
+
         text_size = cv2.getTextSize(result, font, fontScale, thickness)
         height = text_size[0][1]
         coords = (coords[0], coords[1] + height)
-
         cv2.putText(
             hero_ss, result, coords, font, fontScale, color, thickness,
             cv2.LINE_AA)
@@ -258,7 +259,6 @@ def parallel_detect(info_dict):
     x = v["object"][0][0]
     y = v["object"][0][1]
     if fi_scores["9"] == 0 or fi_scores["3"] == 0:
-        print(fi_scores)
         return_dict["display"] = True
     if fi_scores["9"] > 0.7:
         best_fi = "9"

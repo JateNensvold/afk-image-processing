@@ -24,14 +24,13 @@ REBUILD = args.rebuild
 PARALLEL = True if args.parallel.lower() in ["true"] else False
 image_ss = None
 image_ss_name = None
-
 VERBOSE_LEVEL = args.verbose
 
 # Stores cached function results
 CACHED = {}
 
 if args.image:
-    multiplier = 4
+    multiplier = 1
     image_ss = cv2.imread(args.image)
     image_ss = cv2.resize(
         image_ss, (image_ss.shape[1]*multiplier, image_ss.shape[0]*multiplier))

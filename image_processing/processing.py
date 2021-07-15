@@ -287,6 +287,7 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, display=None, **blur
             widths.append(w)
 
         image_number += 1
+    load.display_image(image, display=(True and GV.DEBUG))
 
     # mean = np.mean([i for i in sizes.keys()])
     h_mean = np.median(heights)
@@ -324,7 +325,7 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, display=None, **blur
     return valid_sizes
 
 
-def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
+def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
               maxHeroes: bool = True,
               #   hsv_range: bool = False,
               removeBG: bool = False,
@@ -370,7 +371,11 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
         np.array([0, 0, 0]), np.array([179, 255, 192])]
     multi_valid.append(getHeroContours(
         *baseArgs, hsv_range=hsv_range, **blur_args))
-
+    # (hMin = 19 , sMin = 0, vMin = 36), (hMax = 179 , sMax = 255, vMax = 208)
+    hsv_range = [
+        np.array([19, 0, 36]), np.array([179, 255, 208])]
+    multi_valid.append(getHeroContours(
+        *baseArgs, hsv_range=hsv_range, **blur_args))
     # (hMin = 0 , sMin = 0, vMin = 74), (hMax = 27 , sMax = 253, vMax = 255)
     baseArgs = (image.copy(), sizeAllowanceBoundary)
 
@@ -381,6 +386,8 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
     # multi_valid.append(getHeroContours(
     #     *baseArgs, rgb_range=rgb_range, **blur_args))
 
+    # (hMin = 0 , sMin = 0, vMin = 162), (hMax = 159 , sMax = 77, vMax = 255)
+    # (hMin = 19 , sMin = 0, vMin = 36), (hMax = 179 , sMax = 255, vMax = 208)
     hsv_range = [
         np.array([0, 0, 74]), np.array([27, 253, 255])]
     multi_valid.append(getHeroContours(
@@ -436,12 +443,7 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
             x2 = x + w
 
             _hero_name = _object[1]
-            # print("name", _object)
 
-            # x2 = x+w
-            # y2 = y+h
-            # x = max(0, x-x_adjust)
-            # y = max(0, y-y_adjust)
             ROI = original_unmodifiable[y:
                                         y2,
                                         x:
@@ -514,16 +516,7 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.25,
             heroes[_hero_name]["object"] = _object
 
         # load.display_image([heroes[_hero[1]]["image"]
-        #                     for _hero in _row], multiple=True, display=True)
-
-    # for _row in hero_matrix:
-    #     # print(_row)
-    #     # temp = [(heroes[_hero[1]]["image"].shape, _hero)
-    #     #         for _hero in _row]
-    #     # for i in temp:
-    #     #     print(i)
-    #     load.display_image([heroes[_hero[1]]["image"]
-    #                        for _hero in _row], multiple=True, display=True)
+        #                    for _hero in _row], multiple=True, display=True)
 
     return heroes, hero_matrix
 
