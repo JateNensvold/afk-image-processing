@@ -197,7 +197,8 @@ def remove_background(img):
     return out, bestapprox
 
 
-def getHeroContours(image: np.array, sizeAllowanceBoundary, display=None, **blurKwargs):
+def getHeroContours(image: np.array, sizeAllowanceBoundary, display=None,
+                    **blurKwargs):
     """
     Args:
         image: hero roster screenshot
@@ -316,7 +317,7 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, display=None, **blur
 
                 valid_sizes[name] = _coords
 
-    length = len(cnts)
+    # length = len(cnts)
     # for i in sizes.values():
     #     length += len(i)
     # print("occurrences: {}/{} {}%".format(occurrences,

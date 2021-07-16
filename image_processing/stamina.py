@@ -2,6 +2,7 @@ from functools import lru_cache
 import os
 import json
 import cv2
+import rtree
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,67 +13,191 @@ import imutils
 # Need this import to use imutils.contours.sort_contours,
 #   without it Module raises AttributeError
 from imutils import contours  # noqa
+# from __future__ import annotations
+from typing import TypedDict
 
 
-def sort_row(row: list, heroes: dict):
-    return sorted(row, key=lambda x: heroes[x[1]]["dimensions"]["x"][0])
+class DimensionsObject:
+
+    def __str__(self):
+        return "({},{},{},{})".format(
+            self.x, self.y, self.w, self.h)
+
+    def __init__(self, dimensions):
+        """
+            Create a Dimensions object to hold x,y coordinates as well as
+                width and height
+            Args:
+                dimensions: tuple containing (x,y, width, height)
+        """
+        self.x = dimensions[0]
+        self.y = dimensions[1]
+        self.w = dimensions[2]
+        self.h = dimensions[3]
+
+    def __getitem__(self, index: int) -> int:
+        """
+        Return dimension attribute found at 'index'
+
+        Return:
+            x on 0
+            y on 1
+            w on 2
+            h on 3
+        Raise:
+            indexError on other
+        """
+        dimension_index = [self.x, self.y, self.w, self.h]
+        try:
+            return dimension_index[index]
+        except IndexError:
+            raise IndexError(
+                "DimensionObject index({}) out of range({})".format(
+                    index, len(dimension_index)))
+
+    def merge(self, dimensions_object: "DimensionsObject"):
+        """
+        Combine two DimensionsObject into the existing DimensionsObject object
+        Args:
+            dimensions_object: DimensionsObject to absorb
+        """
+        self.x = min(self.x, dimensions_object.x)
+        self.y = min(self.y, dimensions_object.y)
+        self.w = max(self.w, dimensions_object.w)
+        self.h = max(self.h, dimensions_object.h)
+
+    def coords(self, single=True) -> tuple:
+        """
+        return top left and bottom right coordinate pairs
+
+        Args:
+            single: flag to return coordinates as single tuple or
+                pair of tuples
+        Return:
+            tuple(TopLeft(x,y), BottomRight(x,y))
+        """
+        x2 = self.x + self.w
+        y2 = self.y + self.h
+        if single:
+            return (self.x, self.y, x2, y2)
+        else:
+            return ((self.x, self.y)(x2, y2))
+
+
+class RowItem():
+    def __str__(self):
+        return "({} {})".join(self.name, self.dimensions)
+
+    def __init__(self, dimensions: tuple, name: str):
+        """
+        Create RowItem object from dimensions and name
+
+        Args:
+            dimensions: tuple containing (x,y, width, height)
+            name: name of RowItem
+        """
+        self.dimensions = DimensionsObject(dimensions)
+        self.name = name
+        self.alias = set()
+        self.column = None
+
+    def __getitem__(self, index: int) -> int:
+        """
+        Return dimension attribute found at 'index'
+
+        Return:
+            x on 0
+            y on 1
+            w on 2
+            h on 3
+        Raise:
+            indexError on other
+        """
+        return self.dimensions[index]
+
+    def merge(self, row_item: "RowItem"):
+        """
+        Combine two RowItem into the existing RowItem object
+        Args:
+            row_item: RowItem to absorb
+        """
+        self.dimensions.merge(row_item.dimensions)
+        self.alias.add(row_item.name)
+        self.alias.update(row_item.alias)
 
 
 class row():
-    """
-    """
 
     def __str__(self):
-        return "".join([str(_row) for _row in self._list])
+        return "".join([_row_item for _row_item in self._row_items])
 
     def __iter__(self):
         return self
 
-    def __next__(self) -> tuple:
+    def __next__(self) -> RowItem:
+        """
+        Iterate over all RowItems in row
+        """
         self._idx += 1
         try:
-            return self._list[self._idx - 1]
+            return self._row_items[self._idx - 1]
         except IndexError:
             self._idx = 0
             raise StopIteration
 
     def __len__(self):
-        return len(self._list)
+        return len(self._row_items)
 
     def __init__(self):
-        self._items = {}
-        self._list = []
+        """
+        Create Row used to hold objects that have dimensions
+        """
+        self._row_items_by_name = {}
+        self._row_items: list[RowItem] = []
         self._idx = 0
+        self.rtree = rtree.index.Index()
+        self.head: int = None
 
-        self.head = None
+    def get_head(self) -> int:
+        """
+        Gets top y coordinate of first item added to row, this y coordinate is
+        used to anchor the top of the row to a fixed location
 
-    def get_head(self):
+        Return:
+            top y coordinate of original item added to row
+        """
         return self.head
 
-    def get(self, name: str):
+    def get(self, name: str) -> int:
         """
         Get an item by its associated name
         Args:
-            name: name of image that is associated with location in row
-
-        Returns tuple(x_coord, y_coord, image_name), index
+            name: name of RowItem index to get
+        Returns:
+            (RowItem, index)
         """
-        _index = self._items[name]
-        return self._list[_index], _index
+        try:
+            return self._row_items_by_name[name]
+        except KeyError:
+            for _row_item in self._row_items:
+                if name in _row_item.alias:
+                    return self._row_items_by_name[_row_item.name]
+            raise KeyError("{} not found in row {}".format(
+                name, self.get_head()))
 
-    def __getitem__(self, index: int):
+    def __getitem__(self, index: int) -> RowItem:
         """
         Get an item by its index
         Args:
             index: position of item in row
-
-        Returns tuple(coords, image_name)
+        Returns:
+            image_processing.stamina.RowItem
         """
-        return self._list[index]
+        return self._row_items[index]
 
     def append(self, dimensions, name, detect_collision=True):
         """
-        Adds a new entry to Row
+        Adds a new RowItem to Row
         Args:
             dimensions: x,y,w,h of object
             name: identifier for row item, can be used for lookup later
@@ -81,91 +206,82 @@ class row():
         Return:
             None
         """
-        if len(self._list) == 0:
-            self.head = dimensions[1]
-        self._items[name] = len(self._items)
+        _temp_RowItem = RowItem(dimensions, name)
+        if len(self._row_items) == 0:
+            self.head = _temp_RowItem.dimensions.y
         if detect_collision:
-            if self.check_collision((dimensions, name)) == -1:
-                self._list.append((dimensions, name))
-        else:
-            self._list.append((dimensions, name))
+            if self.check_collision(_temp_RowItem) != 0:
+                return
 
-    def check_collision(self, collision_object: tuple,
+        self._row_items_by_name[name] = len(self._row_items_by_name)
+        self._row_items_by_name[id(_temp_RowItem)] = len(
+            self._row_items_by_name)
+
+        self._row_items.append(_temp_RowItem)
+        self.rtree.insert(id(_temp_RowItem),
+                          _temp_RowItem.dimensions.coords())
+
+    def check_collision(self, new_row_item: RowItem,
                         size_allowance_boundary: int = 0.25) -> int:
         """
-        Check if collision_object's dimensions overlap with any of the objects
+        Check if row_item's dimensions overlap with any of the objects
             in the row object, and merge collision_object with overlaping
             object if collisions is detected
-
         Args:
-            collision_object: new row object to check against existing row
-                objects
+            row_item: new RowItem to check against existing RowItems
             size_allowance_boundary: percent size that collision image must be
                 within the average of all other images in row
-
-        Return: index of updated row object when collisions occurs, -1
-            otherwise
+        Return:
+            index of updated row object when collisions occurs, 0 otherwise
         """
 
-        for _index, _row_object in enumerate(self._list):
-            ax1 = _row_object[0][0]
-            ax2 = _row_object[0][0] + _row_object[0][2]
-            ay1 = _row_object[0][1]
-            ay2 = _row_object[0][1] + _row_object[0][3]
+        _new_item_coords = new_row_item.dimensions.coords()
+        _intersections_list = self.rtree.intersection(_new_item_coords)
 
-            bx1 = collision_object[0][0]
-            bx2 = collision_object[0][0] + collision_object[0][2]
-            by1 = collision_object[0][1]
-            by2 = collision_object[0][1] + collision_object[0][3]
-
-            if ax1 < bx2 and ax2 > bx1 and ay1 < by2 and ay2 > by1:
-                new_x = min(ax1, bx1)
-                new_y = min(ay1, by1)
-                new_w = (max(ax2, bx2) - new_x)
-                new_h = (max(ay2, by2) - new_y)
-                avg_w = np.mean([_object[0][2] for _object in self._list])
-                avg_h = np.mean([_object[0][3] for _object in self._list])
-                if (abs(avg_w - new_w) < avg_w * size_allowance_boundary) and \
-                        (abs(avg_h - new_h) < avg_h * size_allowance_boundary):
-                    dimensions = (new_x, new_y, new_w, new_h)
-
-                    name = "{}x{}_{}x{}".format(
-                        dimensions[0], dimensions[1], dimensions[2],
-                        dimensions[3])
-                    self._list[_index] = (dimensions, name)
-                    return _index
-                else:
-                    if GV.VERBOSE_LEVEL >= 1:
-                        print("row: {} Collision failed beteween "
-                              "({}) and ({})".format(self, _row_object,
-                                                     collision_object))
-        return -1
+        if len(_intersections_list) == 1:
+            _coordinates_list = []
+            for _intersection in _intersections_list:
+                _cordinates = self.rtree.get_bounds(
+                    _intersection, coordinate_interleaved=True)
+                _coordinates_list.append(_cordinates)
+                self.rtree.delete(_intersection, _cordinates)
+            _index = self._row_items_by_name[_intersections_list[0]]
+            _collision_row_item = self._row_items[_index]
+            _collision_row_item.merge(new_row_item)
+            self.rtree.insert(id(_collision_row_item),
+                              _collision_row_item.dimensions.coords())
+            return self._row_items_by_name[_collision_row_item.name]
+        elif len(_intersections_list) > 1:
+            raise Exception("Collided with multiple row items while attempting"
+                            " to add the following row_item {}".format(
+                                new_row_item))
+        else:
+            return 0
 
     def sort(self):
         '''
-        Sort the internal data structure by x coordinate of each item
-
-        Args:
-            None
-        Return:
-            None
+        Sort row by x coordinate of each RowItem
         '''
-        self._list.sort(key=lambda x: x[0][0])
-        for _index, _entry in enumerate(self._list):
-            self._items[_entry[1]] = _index
+        self._row_items.sort(key=lambda x: x.dimension.x)
+        for _index, _row_item in enumerate(self._row_items):
+            self._row_items_by_name[_row_item.name] = _index
 
 
 class matrix():
-    """
-    """
 
     def __str__(self):
-        return "\n".join([str(_row) for _row in self._row_list])
+        return "\n".join([_row for _row in self._row_list])
 
     def __iter__(self):
+        """
+        Return self
+        """
         return self
 
-    def __next__(self) -> row:
+    def __next__(self):
+        """
+        Iterate over all rows in self._row_list
+        """
         self._idx += 1
         try:
             return self._row_list[self._idx - 1]
@@ -178,21 +294,28 @@ class matrix():
 
     def __getitem__(self, index: int):
         """
-        Get an item by its index
+        Get a row by its index
         Args:
-            index: position of item in row
+            index: position of row in matrix
 
-        Returns tuple(x_coord, y_coord, image_name)
+        Returns:
+            image_processing.stamina.row
         """
         return self._row_list[index]
 
-    def __init__(self, spacing=10):
+    def __init__(self, spacing: int = 10):
+        """
+        Create matrix object to track list of image_processing.stamina.row
+
+        Args:
+            spacing: minimum number of pixels between each row without merging
+        """
         self.spacing = spacing
-        self._heads = {}
-        self._row_list = []
+        self._heads: dict[int, function] = {}
+        self._row_list: list[row] = []
         self._idx = 0
 
-    def auto_append(self, dimensions, name, detect_collision=True):
+    def auto_append(self, dimensions: tuple, name: str, detect_collision: bool = True):
         """
         Add a new entry into the matrix, either creating a new row or adding to
             an existing row depending on `spacing` settings and distance.
@@ -204,8 +327,8 @@ class matrix():
         Return:
             None
         """
-        # self._lists.append(row)
-        y = dimensions[1]
+        _temp_dimensions = DimensionsObject(dimensions)
+        y = _temp_dimensions.y
         _row_index = None
         for _index, _head in self._heads.items():
             # If there are no close rows set flag to create new row
@@ -223,24 +346,34 @@ class matrix():
             self._row_list.append(_temp_row)
 
     def sort(self):
+        """
+        Sort Matrix by y coordinate of each row
+        """
         for _row in self._row_list:
             _row.sort()
         self._row_list.sort(key=lambda _row: _row.head)
 
-    def prune(self, threshold):
+    def prune(self, threshold: int, fill_hero: bool = True):
         """
         Remove all rows that have a length less than the `threshold`
 
         Args:
             threshold: limit that determines if a row should be pruned when
                 its length is less than this
+            fill_hero: flag to attempt to fill missing hero locations in each
+                row that is below the threshold
         Return:
             None
         """
+        #TODO
         _prune_list = []
+
         for _index, _row_object in enumerate(self._row_list):
             if len(_row_object) < threshold:
-                _prune_list.append(_index)
+                if fill_hero:
+                    pass
+                else:
+                    _prune_list.append(_index)
         if len(_prune_list) > 0:
             if GV.VERBOSE_LEVEL >= 1:
                 print("Deleting ({}) row objects({}) from matrix. Ensure that "
@@ -252,6 +385,8 @@ class matrix():
                         self._row_list[_index], len(self._row_list[_index])))
                 self._row_list.pop(_index)
                 del self._heads[_index]
+
+    def detect_missing(self, index):
 
 
 def cachedproperty(func):
@@ -269,54 +404,6 @@ def cachedproperty(func):
         return result
 
     return cache
-
-
-def generate_rows(heroes: dict, spacing: int = 10):
-    """
-    Args:
-        heroes: dictionary of image data to use as a lookup table
-        spacing: number of pixels an image has to be away from an existing row
-            to signal for the creation of a new row
-
-    Return:
-        list of lists of tuples(label, name, image)
-    """
-    rows = []
-    heads = {}
-    for k, v in heroes.items():
-        y = v["dimensions"]["y"][0]
-        x = v["dimensions"]["x"][0]
-
-        closeRow = False
-        index = None
-        for head, headIndex in heads.items():
-            # If there are no close rows set flag to create new row
-            if abs(head - y) < spacing:
-                closeRow = True
-                index = headIndex
-                break
-
-        if not closeRow:
-            rows.append(row())
-            heads[y] = len(rows) - 1
-            index = heads[y]
-        rows[index].append(x, y, k)
-    rows = sorted(rows, key=lambda x: heroes[x[0][1]]["dimensions"]["y"][0])
-    for i in range(len(rows)):
-        newRow = sort_row(rows[i], heroes)
-        rows[i] = newRow
-
-    return rows
-
-
-# def merge_rows(*args):
-#     master_row = []
-#     for head, headIndex in heads.items():
-#         # If there are no close rows set flag to create new row
-#         if abs(head - y) < spacing:
-#             closeRow = True
-#             index = headIndex
-#             break
 
 
 def get_stamina_area(rows: list, heroes: dict, sourceImage: np.array):
@@ -418,7 +505,7 @@ def get_text(staminaAreas: dict, train: bool = False):
     return output
 
 
-@cachedproperty
+@ cachedproperty
 def signature_template_mask(templates: dict):
     siFolders = os.listdir(GV.siBasePath)
     si_dict = {}
@@ -592,7 +679,7 @@ def signatureItemFeatures(hero: np.array,
     return best_score
 
 
-@cachedproperty
+@ cachedproperty
 def furniture_template_mask(templates: dict):
 
     fi_dict = {}
@@ -930,7 +1017,6 @@ if __name__ == "__main__":
         name, baseHeroImage = imageDB.search(v, display=False)
         heroesDict[k]["label"] = name
 
-    rows = generate_rows(heroesDict)
     staminaAreas = get_stamina_area(rows, heroesDict, stamina_image)
     staminaOutput = get_text(staminaAreas)
     output = {}
