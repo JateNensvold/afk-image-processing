@@ -127,7 +127,8 @@ class ColumnObjects:
             _intersection_id = _intersections_list[0]
             index = self.column_id_to_index[_intersection_id]
             if update_rtree:
-                self.update_column()
+                _column = self.columns[index]
+                self.update_column(_column, row_item)
             return index
         elif _intersections_list == 0:
             if auto_add:
@@ -163,10 +164,9 @@ class ColumnObjects:
             row_item: RowItem object to build new column around
         """
 
-        column_dimensions_object = DimensionsObject((row_item.dimensions.x,
-                                                     0,
-                                                     row_item.dimensions.w,
-                                                     self.matrix.get_height()))
+        column_dimensions_object = DimensionsObject(
+            (row_item.dimensions.x, 0,
+             row_item.dimensions.w, self.matrix.source_height))
         new_column_id = id(column_dimensions_object)
         self.column_rtree.insert(
             new_column_id, column_dimensions_object.coords())
@@ -251,6 +251,22 @@ class RowItem():
 
 class row():
 
+    def __init__(self, columns: "ColumnObjects"):
+        """
+        Create Row used to hold objects that have dimensions
+
+        Args:
+            columns: columnsObject used to calculate what column each rowItem
+                is in
+        """
+        self._row_items_by_name = {}
+        self._row_items: list[RowItem] = []
+        self._idx = 0
+        self.rtree = rtree.index.Index()
+        self.columns = columns
+        self.head: int = None
+        self.avg_width = 0
+
     def __str__(self):
         return "".join([_row_item for _row_item in self._row_items])
 
@@ -270,22 +286,6 @@ class row():
 
     def __len__(self):
         return len(self._row_items)
-
-    def __init__(self, columns: "ColumnObjects"):
-        """
-        Create Row used to hold objects that have dimensions
-
-        Args:
-            columns: columnsObject used to calculate what column each rowItem
-                is in
-        """
-        self._row_items_by_name = {}
-        self._row_items: list[RowItem] = []
-        self._idx = 0
-        self.rtree = rtree.index.Index()
-        self.columns = columns
-        self.head: int = None
-        self.avg_width = 0
 
     def get_head(self) -> int:
         """
@@ -397,6 +397,7 @@ class row():
         self._row_items.append(_temp_RowItem)
         self.rtree.insert(id(_temp_RowItem),
                           _temp_RowItem.dimensions.coords())
+        self.columns.find_column(_temp_RowItem)
 
     def check_collision(self, new_row_item: RowItem,
                         size_allowance_boundary: int = 0.25) -> int:
@@ -454,20 +455,23 @@ class row():
 
 class matrix():
 
-    def __init__(self, image_height: int, image_width: int, spacing: int = 10):
+    def __init__(self, source_height: int, source_width: int,
+                 spacing: int = 10):
         """
         Create matrix object to track list of image_processing.stamina.row
 
         Args:
-            spacing: minimum number of pixels between each row without merging
+            source_height: maximum height of source
+            source_width: maximum width of source
+            spacing: minimum distance between each row without merging
         """
-        self.image_height = image_height
-        self.image_width = image_width
+        self.source_height = source_height
+        self.source_height = source_width
         self.spacing = spacing
         self._heads: dict[int, callable[[], int]] = {}
         self._row_list: list[row] = []
         self._idx = 0
-        self.columns = []
+        self.columns = ColumnObjects(self)
 
     def __str__(self):
         return "\n".join([_row for _row in self._row_list])
@@ -555,7 +559,7 @@ class matrix():
             self._row_list[_row_index].append(
                 dimensions, name, detect_collision=detect_collision)
         else:
-            _temp_row = row()
+            _temp_row = row(self.columns)
             _temp_row.append(dimensions, name,
                              detect_collision=detect_collision)
             self._heads[len(self._row_list)] = _temp_row.get_head
@@ -743,7 +747,6 @@ def signature_template_mask(templates: dict):
 
             if "morph" in templates[folder] and templates[folder]["morph"]:
 
-                # (hMin = 0 , sMin = 0, vMin = 206), (hMax = 159 , sMax = 29, vMax = 255)
                 hsv_range = [np.array([0, 0, 206]), np.array([159, 29, 255])]
 
                 thresh = processing.blur_image(
@@ -808,7 +811,6 @@ def signatureItemFeatures(hero: np.array,
     x, y, _ = hero.shape
     x_div = 2.4
     y_div = 2.0
-    offset = 10
     hero_copy = hero.copy()
 
     crop_hero = hero[0: int(y/y_div), 0: int(x/x_div)]
@@ -856,7 +858,8 @@ def signatureItemFeatures(hero: np.array,
                     hero_gray, si_image_gray, cv2.TM_CCOEFF_NORMED,
                     mask=mask_gray)
             except Exception:
-                if crop_hero.shape[0] < si_image.shape[0] or crop_hero.shape[1] < si_image.shape[1]:
+                if crop_hero.shape[0] < si_image.shape[0] or \
+                        crop_hero.shape[1] < si_image.shape[1]:
                     _height, _width = si_image.shape[:2]
                     crop_hero = hero[0: max(int(y/y_div), int(_height*1.2)),
                                      0: max(int(x/x_div), int(_width*1.2))]
@@ -975,7 +978,7 @@ def furnitureItemFeatures(hero: np.array, fi_dict: dict,
     y_div = 2.0
     x_offset = int(x*0.1)
     y_offset = int(y*0.30)
-    hero_copy = hero.copy()
+    # hero_copy = hero.copy()
 
     crop_hero = hero[y_offset: int(y*0.6), x_offset: int(x*0.4)]
 
@@ -985,13 +988,10 @@ def furnitureItemFeatures(hero: np.array, fi_dict: dict,
 
     # size_multiplier = 4
 
-    # size_crop_hero = cv2.resize(
-    #     crop_hero, (crop_hero.shape[0]*size_multiplier, crop_hero.shape[1]*size_multiplier))
     old_crop_hero = crop_hero
     crop_hero = cv2.bilateralFilter(
         crop_hero, neighborhood_size, sigmaColor, sigmaSpace)
 
-    # # (RMin = 190 , GMin = 34, BMin = 0), (RMax = 255 , GMax = 184, BMax = 157)
     # rgb_range = [
     #     np.array([190, 34, 0]), np.array([255, 184, 157])]
     # rgb_range = [
@@ -1004,8 +1004,8 @@ def furnitureItemFeatures(hero: np.array, fi_dict: dict,
     #     default_blur, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     # hero_crop_contours = imutils.grab_contours(hero_crop_contours)
 
-    # # TODO add contour detection instead of template matching for low resolution images
-    # # (hMin = 0 , sMin = 50, vMin = 124), (hMax = 49 , sMax = 225, vMax = 255)
+    # # TODO add contour detection instead of template matching for low
+    #   resolution images
     # hsv_range = [
     #     np.array([0, 50, 124]), np.array([49, 255, 255])]
 # (RMin = 133 , GMin = 61, BMin = 35), (RMax = 255 , GMax = 151, BMax = 120)
@@ -1023,8 +1023,8 @@ def furnitureItemFeatures(hero: np.array, fi_dict: dict,
     crop_hero_mask = np.zeros_like(crop_hero)
     # hsv_rgb_mask = np.zeros_like(blur_hero)
 
-    master_contour = [
-        _cont for _cont_list in fi_color_contours for _cont in _cont_list]
+    # master_contour = [
+    #     _cont for _cont_list in fi_color_contours for _cont in _cont_list]
     # hull = cv2.convexHull(np.array(master_contour))
 
     # cv2.drawContours(crop_hero_mask, [
@@ -1076,7 +1076,7 @@ def furnitureItemFeatures(hero: np.array, fi_dict: dict,
             new_width = round(original_width * scale_ratio)
             fi_image = cv2.resize(
                 fi_image, (new_width, new_height))
-            fi_gray = cv2.cvtColor(fi_image, cv2.COLOR_BGR2GRAY)
+            # fi_gray = cv2.cvtColor(fi_image, cv2.COLOR_BGR2GRAY)
 
             #   Min = 0, BMin = 0), (RMax = 255 , GMax = 246, BMax = 255)
 
@@ -1097,8 +1097,8 @@ def furnitureItemFeatures(hero: np.array, fi_dict: dict,
                     blur_hero, fi_image, cv2.TM_CCOEFF_NORMED,
                     mask=mask)
             except Exception:
-                if blur_hero.shape[0] < fi_image.shape[0] or blur_hero.shape[1] \
-                        < fi_image.shape[1]:
+                if blur_hero.shape[0] < fi_image.shape[0] or \
+                        blur_hero.shape[1] < fi_image.shape[1]:
                     _height, _width = fi_image.shape[:2]
                     blur_hero = hero[
                         y_offset: max(int(y/y_div),
@@ -1115,15 +1115,6 @@ def furnitureItemFeatures(hero: np.array, fi_dict: dict,
             scoreLoc = (scoreLoc[0], scoreLoc[1])
             coords = (scoreLoc[0] + width, scoreLoc[1] + height)
 
-            # cv2.rectangle(hero_copy, scoreLoc, coords, (255, 0, 0), 1)
-            # font = cv2.FONT_HERSHEY_SIMPLEX
-            # fontScale = 0.5
-            # color = (255, 0, 0)
-            # thickness = 2
-
-            # cv2.putText(
-            #     hero_copy, folder_name, coords, font, fontScale, color, thickness,
-            #     cv2.LINE_AA)
             if folder_name not in numberScore:
                 numberScore[folder_name] = []
             numberScore[folder_name].append(
@@ -1147,29 +1138,6 @@ def furnitureItemFeatures(hero: np.array, fi_dict: dict,
         best_score[_folder] = _best_match[0]
 
     return best_score
-
-
-# def getLevel(image: np.array, train=True):
-#     # (hMin = 16 , sMin = 95, vMin = 129), (hMax = 27 , sMax = 138, vMax = 255)
-
-#     digitFeatures(, baseDir)
-#     if train:
-#         result = cv2.cvtColor(result, cv2.COLOR_BGR2GRAY)
-#         result = cv2.threshold(
-#             result, 0, 255, cv2.THRESH_OTSU + cv2.THRESH_BINARY)[1]
-
-#         digitCnts = cv2.findContours(
-#             mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-#         digitCnts = imutils.grab_contours(digitCnts)
-#         digitCnts = imutils.contours.sort_contours(digitCnts,
-#                                                    method="left-to-right")[0]
-#         digitText = []
-#         for digit in digitCnts:
-#             x, y, w, h = cv2.boundingRect(digit)
-#             if w > 6 and h > 12:
-#                 ROI = stamina_image[y:y+h, x:x+w]
-#                 # sizedROI = cv2.resize(ROI, (57, 88))
-#                 digitFeatures(ROI)
 
 
 def digitFeatures(digit: np.array, saveDir=None):
@@ -1222,7 +1190,7 @@ if __name__ == "__main__":
 
     # load in screenshot of heroes
     stamina_image = cv2.imread("./stamina.jpg")
-    heroesDict = processing.getHeroes(stamina_image)
+    heroesDict, rows = processing.getHeroes(stamina_image)
 
     cropHeroes = load.crop_heroes(heroesDict)
     imageDB = load.build_flann(baseImages)
