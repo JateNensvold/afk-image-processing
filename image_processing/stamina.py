@@ -1,4 +1,3 @@
-from functools import lru_cache
 import os
 import json
 import cv2
@@ -13,8 +12,6 @@ import imutils
 # Need this import to use imutils.contours.sort_contours,
 #   without it Module raises AttributeError
 from imutils import contours  # noqa
-# from __future__ import annotations
-from typing import TypedDict
 
 
 class DimensionsObject:
@@ -34,6 +31,8 @@ class DimensionsObject:
         self.y = dimensions[1]
         self.w = dimensions[2]
         self.h = dimensions[3]
+        self.x2 = self.x + self.w
+        self.y2 = self.y + self.h
 
     def __getitem__(self, index: int) -> int:
         """
@@ -66,22 +65,84 @@ class DimensionsObject:
         self.w = max(self.w, dimensions_object.w)
         self.h = max(self.h, dimensions_object.h)
 
-    def coords(self, single=True) -> tuple:
+    def coords(self, single=True) -> list:
         """
         return top left and bottom right coordinate pairs
 
         Args:
-            single: flag to return coordinates as single tuple or
-                pair of tuples
+            single: flag to return coordinates as single list
         Return:
-            tuple(TopLeft(x,y), BottomRight(x,y))
+            On single=True
+
+            list(x1,y2,x2,y2)
+
+            otherwise list of tuples
+
+            list(TopLeft(x1,y1), BottomRight(x2,y2))
         """
-        x2 = self.x + self.w
-        y2 = self.y + self.h
         if single:
-            return (self.x, self.y, x2, y2)
+            return [self.x, self.y, self.x2, self.y2]
         else:
-            return ((self.x, self.y)(x2, y2))
+            return [(self.x, self.y)(self.x2, self.y2)]
+
+
+class ColumnObjects:
+
+    def __init__(self, matrix: "matrix"):
+        """
+        Create a Columns object used to track the different columns in a
+            'image_processing.stamina.matrix'
+        Args:
+            matrix: reference to partent matrix object
+        """
+        self.column_rtree = rtree.index.Index()
+        self.matrix = matrix
+        self.columns: list[DimensionsObject] = []
+        self.column_id_to_index: dict[int, int] = {}
+
+    def find_column(self, row_item: "RowItem", auto_add: bool = True):
+        """
+        Find the column that row_item would fall under
+
+        Args:
+            row_item: RowItem object to find column for
+            auto_add: flag to automatically create and add a column to
+                'ColumnObjects' when one is not found for row_item
+        Return:
+            an int representing the index of the column
+        """
+        pass
+
+    def add_column(self, row_item: "RowItem"):
+        """
+        Add a new column to the ColumnObjects instance
+
+        Args:
+            row_item: RowItem object to build new column around
+        """
+
+        column_dimensions_object = DimensionsObject((row_item.dimensions.x,
+                                                     0,
+                                                     row_item.dimensions.w,
+                                                     self.matrix.get_height()))
+        column_id = id(column_dimensions_object)
+        self.column_rtree.insert(
+            column_id, column_dimensions_object.coords())
+        self.column_id_to_index[column_id] = self._find_index(
+            column_dimensions_object)
+
+    def _find_index(self, column_dimensions: int) -> int:
+        """
+        Find the would be column index of an 'x_coord'
+
+        Args:
+            column_dimensions: DimensionObject to find would be column index of
+
+        Return:
+            index of column_dimensions
+        """
+        for _index in len()
+        pass
 
 
 class RowItem():
@@ -148,15 +209,21 @@ class row():
     def __len__(self):
         return len(self._row_items)
 
-    def __init__(self):
+    def __init__(self, columns: ColumnObjects):
         """
         Create Row used to hold objects that have dimensions
+
+        Args:
+            columns: columnsObject used to calculate what column each rowItem
+                is in
         """
         self._row_items_by_name = {}
         self._row_items: list[RowItem] = []
         self._idx = 0
         self.rtree = rtree.index.Index()
+        self.columns = columns
         self.head: int = None
+        self.avg_width = 0
 
     def get_head(self) -> int:
         """
@@ -194,6 +261,54 @@ class row():
             image_processing.stamina.RowItem
         """
         return self._row_items[index]
+
+    def get_item_gap(self):
+        """
+        Get avg gap between each item in row that is known to be consecutive
+            i.e. there are no missing row_items between two existing row_items
+        Return:
+            Returns avg gap width between row_items when enough _row_items
+                exist
+
+            Otherwise returns None
+        """
+        item_gaps = []
+        self.sort()
+        for _row_item_index in range(len(self._row_items) - 1):
+            _row_item1 = self._row_items[_row_item_index]
+            _row_item2 = self._row_items[_row_item_index + 1]
+            _temp_gap = (_row_item1.dimensions.x2 - _row_item2.dimensions.x)
+            if _temp_gap < self.avg_width:
+                item_gaps.append(_temp_gap)
+        if len(item_gaps) > 0:
+            avg_gap: int = np.mean(item_gaps)
+            return avg_gap
+        else:
+            return None
+
+    def add_average(self, new_num: int) -> int:
+        """
+        Calculate running average width of row with 'new_num' updating the
+            avg_width.
+        Arg:
+            new_num: number to update average with
+        Return:
+            Updated avg_width with 'new_num' added
+        """
+        return self.avg_width + ((
+            new_num - self.avg_width) / (len(self._row_items) + 1))
+
+    def remove_average(self, remove_num: int) -> int:
+        """
+        Calculate running average width of row with 'remove_num' removed from
+            the avg_width.
+        Arg:
+            new_num: number to update average with
+        Return:
+            Updated avg_width with 'remove_num' removed
+        """
+        return self.avg_width + ((
+            self.avg_width - remove_num) / (len(self._row_items) - 1))
 
     def append(self, dimensions, name, detect_collision=True):
         """
@@ -247,7 +362,15 @@ class row():
                 self.rtree.delete(_intersection, _cordinates)
             _index = self._row_items_by_name[_intersections_list[0]]
             _collision_row_item = self._row_items[_index]
+            old_width = _collision_row_item.dimensions.w
             _collision_row_item.merge(new_row_item)
+            new_width = _collision_row_item.dimensions.w
+            if old_width != new_width:
+                removed_width = self.remove_average(old_width)
+                self.avg_width = removed_width
+                removed_width = self.add_average(new_width)
+                self.avg_width = removed_width
+
             self.rtree.insert(id(_collision_row_item),
                               _collision_row_item.dimensions.coords())
             return self._row_items_by_name[_collision_row_item.name]
@@ -268,6 +391,21 @@ class row():
 
 
 class matrix():
+
+    def __init__(self, image_height: int, image_width: int, spacing: int = 10):
+        """
+        Create matrix object to track list of image_processing.stamina.row
+
+        Args:
+            spacing: minimum number of pixels between each row without merging
+        """
+        self.image_height = image_height
+        self.image_width = image_width
+        self.spacing = spacing
+        self._heads: dict[int, callable[[], int]] = {}
+        self._row_list: list[row] = []
+        self._idx = 0
+        self.columns = []
 
     def __str__(self):
         return "\n".join([_row for _row in self._row_list])
@@ -303,19 +441,35 @@ class matrix():
         """
         return self._row_list[index]
 
-    def __init__(self, spacing: int = 10):
+    def get_avg_width(self) -> int:
         """
-        Create matrix object to track list of image_processing.stamina.row
-
-        Args:
-            spacing: minimum number of pixels between each row without merging
+        Return the Average width of RowItems in the matrix
         """
-        self.spacing = spacing
-        self._heads: dict[int, function] = {}
-        self._row_list: list[row] = []
-        self._idx = 0
+        avg_width = [_row.avg_width for _row in self._row_list]
+        return np.mean(avg_width)
 
-    def auto_append(self, dimensions: tuple, name: str, detect_collision: bool = True):
+    def get_avg_row_gap(self):
+        """
+        Get the average width gap between RowItems in each row
+
+        Return:
+            Average width gap(int) between RowItems when matrix contains rows
+
+            Otherwise returns (None)
+        """
+        gap_list: list[int] = []
+        for _row in self._row_list:
+            _temp_gap = _row.get_item_gap()
+            if _temp_gap is not None:
+                gap_list.append(_temp_gap)
+        avg_gap = np.mean(gap_list)
+        if avg_gap == 0:
+            return None
+        else:
+            return avg_gap
+
+    def auto_append(self, dimensions: tuple, name: str,
+                    detect_collision: bool = True):
         """
         Add a new entry into the matrix, either creating a new row or adding to
             an existing row depending on `spacing` settings and distance.
@@ -365,7 +519,7 @@ class matrix():
         Return:
             None
         """
-        #TODO
+        # TODO
         _prune_list = []
 
         for _index, _row_object in enumerate(self._row_list):
@@ -387,6 +541,7 @@ class matrix():
                 del self._heads[_index]
 
     def detect_missing(self, index):
+        pass
 
 
 def cachedproperty(func):
@@ -400,9 +555,7 @@ def cachedproperty(func):
     def cache(*args):
         result = func(*args)
         GV.CACHED[func.__name__] = result
-
         return result
-
     return cache
 
 
