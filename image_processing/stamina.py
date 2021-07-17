@@ -100,7 +100,8 @@ class ColumnObjects:
         self.columns: list[DimensionsObject] = []
         self.column_id_to_index: dict[int, int] = {}
 
-    def find_column(self, row_item: "RowItem", auto_add: bool = True):
+    def find_column(self, row_item: "RowItem", auto_add: bool = True,
+                    update_rtree: bool = True):
         """
         Find the column that row_item would fall under
 
@@ -108,10 +109,51 @@ class ColumnObjects:
             row_item: RowItem object to find column for
             auto_add: flag to automatically create and add a column to
                 'ColumnObjects' when one is not found for row_item
+            update_rtree: flag to automatically expand column sizes on
+                intersections to the union of the column and 'row_item'
+                dimensions
         Return:
-            an int representing the index of the column
+            an (int) representing the index of the column if one is
+                found/created
+
+            otherwise (None)
+        Raise:
+            Exception when multiple columns are intersected with
         """
-        pass
+        _intersections_list = self.column_rtree.intersection(
+            row_item.dimensions.coords())
+
+        if _intersections_list == 1:
+            _intersection_id = _intersections_list[0]
+            index = self.column_id_to_index[_intersection_id]
+            if update_rtree:
+                self.update_column()
+            return index
+        elif _intersections_list == 0:
+            if auto_add:
+                self.add_column(row_item)
+            else:
+                return None
+        else:
+            _intersection_objects = [
+                self.column_id_to_index[_intersection_id]
+                for _intersection_id in _intersections_list]
+            raise Exception("More than one intersection occurred between {}"
+                            " and {}".format(row_item, _intersection_objects))
+
+    def update_column(self, column: DimensionsObject, row_item: "RowItem"):
+        """
+        Update 'column' with the x_coordinate union between 'row_item'
+            and itself
+        Args:
+            column: column to update
+            row_item: row_item to take x_coordinate union with
+        """
+        column_id = id(column)
+
+        self.column_rtree.delete(column_id, column.coords())
+        column.merge(row_item.dimensions)
+        self.column_rtree.insert(column_id, column.coords())
 
     def add_column(self, row_item: "RowItem"):
         """
@@ -125,24 +167,44 @@ class ColumnObjects:
                                                      0,
                                                      row_item.dimensions.w,
                                                      self.matrix.get_height()))
-        column_id = id(column_dimensions_object)
+        new_column_id = id(column_dimensions_object)
         self.column_rtree.insert(
-            column_id, column_dimensions_object.coords())
-        self.column_id_to_index[column_id] = self._find_index(
-            column_dimensions_object)
+            new_column_id, column_dimensions_object.coords())
+        new_index = self._find_index(column_dimensions_object)
+        if len(self.columns) > new_index:
+            for _column in self.columns[(new_index+1)::]:
+                _column_id = id(_column)
+                self.column_id_to_index[_column_id] = \
+                    self.column_id_to_index[_column_id] + 1
+        self.columns.insert(new_index, column_dimensions_object)
+        self.column_id_to_index[new_column_id] = new_index
 
-    def _find_index(self, column_dimensions: int) -> int:
+    def _find_index(self, column_dimensions: DimensionsObject) -> int:
         """
-        Find the would be column index of an 'x_coord'
+        *Only call to find index of dimensions in empty areas
+        Find the forcasted index of an 'x_coord'
 
         Args:
-            column_dimensions: DimensionObject to find would be column index of
-
+            column_dimensions: DimensionObject to find
+                forcasted column index of
         Return:
-            index of column_dimensions
+            forcasted index of column_dimensions
         """
-        for _index in len()
-        pass
+        past_column_x = 0
+        if len(self.columns) > 0:
+            _index = 0
+            while _index <= len(self.columns - 1):
+                curr_x_coord = self.columns[_index].dimensions.x
+                if column_dimensions.x > past_column_x and \
+                        column_dimensions.x2 < curr_x_coord:
+                    return _index
+                past_column_x = self.columns[_index].dimensions.x2
+                _index += 1
+            return _index
+            # raise IndexError(f"Unable to find index of "
+            #                  f"column_dimensions {column_dimensions}")
+        else:
+            return 0
 
 
 class RowItem():
@@ -209,7 +271,7 @@ class row():
     def __len__(self):
         return len(self._row_items)
 
-    def __init__(self, columns: ColumnObjects):
+    def __init__(self, columns: "ColumnObjects"):
         """
         Create Row used to hold objects that have dimensions
 
