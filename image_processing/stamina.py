@@ -194,9 +194,9 @@ class ColumnObjects:
         if len(self.columns) > 0:
             _index = 0
             while _index <= len(self.columns - 1):
-                curr_x_coord = self.columns[_index].dimensions.x
+                current_x_coord = self.columns[_index].dimensions.x
                 if column_dimensions.x > past_column_x and \
-                        column_dimensions.x2 < curr_x_coord:
+                        column_dimensions.x2 < current_x_coord:
                     return _index
                 past_column_x = self.columns[_index].dimensions.x2
                 _index += 1
@@ -419,10 +419,10 @@ class row():
         if len(_intersections_list) == 1:
             _coordinates_list = []
             for _intersection in _intersections_list:
-                _cordinates = self.rtree.get_bounds(
+                _coordinates = self.rtree.get_bounds(
                     _intersection, coordinate_interleaved=True)
-                _coordinates_list.append(_cordinates)
-                self.rtree.delete(_intersection, _cordinates)
+                _coordinates_list.append(_coordinates)
+                self.rtree.delete(_intersection, _coordinates)
             _index = self._row_items_by_name[_intersections_list[0]]
             _collision_row_item = self._row_items[_index]
             old_width = _collision_row_item.dimensions.w
@@ -689,13 +689,14 @@ def get_text(staminaAreas: dict, train: bool = False):
         result = cv2.threshold(
             result, 0, 255, cv2.THRESH_OTSU + cv2.THRESH_BINARY)[1]
 
-        digitCnts = cv2.findContours(
+        digit_contours = cv2.findContours(
             mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        digitCnts = imutils.grab_contours(digitCnts)
-        digitCnts = imutils.contours.sort_contours(digitCnts,
-                                                   method="left-to-right")[0]
+        digit_contours = imutils.grab_contours(digit_contours)
+        digit_contours = imutils.contours.sort_contours(
+            digit_contours,
+            method="left-to-right")[0]
         digitText = []
-        for digit in digitCnts:
+        for digit in digit_contours:
             x, y, w, h = cv2.boundingRect(digit)
             if w > 6 and h > 12:
                 ROI = stamina_image[y:y+h, x:x+w]
@@ -703,9 +704,7 @@ def get_text(staminaAreas: dict, train: bool = False):
                 if train:
                     digitFeatures(sizedROI)
                 else:
-
                     numberScore = []
-
                     for digitName, digitDICT in digits.items():
                         scores = []
                         for digitIteration, digitImage in digitDICT.items():

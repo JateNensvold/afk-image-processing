@@ -67,20 +67,6 @@ def blur_image(image: np.ndarray, dilate=False,
         Image with gaussianBlur/threshold applied to it
     """
 
-    # # (hMin = 0 , sMin = 0, vMin = 150), (hMax = 179 , sMax = 255, vMax = 255)
-    # lower_hsv_filter = np.array([0, 121, 79])
-    # upper_hsv_filter = np.array([16, 252, 175])
-    # # (hMin = 0 , sMin = 121, vMin = 79), (hMax = 16 , sMax = 252, vMax = 175)
-
-    # hvs_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    # output = cv2.inRange(hvs_image, lower_hsv_filter, upper_hsv_filter)
-    # # output = cv2.cvtColor(output, cv2.COLOR_BGR2GRAY)
-    # _, hsv_mask = cv2.threshold(output, 3, 255, cv2.THRESH_BINARY)
-    # # cv2.COLOR_HSV2
-    # # h, s, v1 = cv2.split(output)
-
-    # mask_inv = cv2.bitwise_not(output)
-
     if hsv_range:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
@@ -153,7 +139,7 @@ def remove_background(img):
     image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     # convert to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-    # create a binary thresholded image
+    # create a binary image from threshold
     _, binary = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY_INV)
 
     # Find the contours
@@ -215,13 +201,14 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, display=None,
     # Find contours
     import imutils
     import imutils.contours
-    cnts = cv2.findContours(dilate, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    # cnts = cnts[0] if len(cnts) == 2 else cnts[1]
-    cnts = imutils.grab_contours(cnts)
-    # cnts = imutils.contours.sort_contours(cnts,
+    contours = cv2.findContours(
+        dilate, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # contours = contours[0] if len(contours) == 2 else contours[1]
+    contours = imutils.grab_contours(contours)
+    # contours = imutils.contours.sort_contours(contours,
     #                                       method="left-to-right")[0]
-    cnts = sorted(cnts, key=cv2.contourArea,
-                  reverse=True)
+    contours = sorted(contours, key=cv2.contourArea,
+                      reverse=True)
 
     # Iterate through contours and filter for ROI
     image_number = 0
@@ -232,7 +219,7 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, display=None,
 
     idx = rtree.index.Index()
 
-    for _index, c in enumerate(cnts):
+    for _index, c in enumerate(contours):
 
         x, y, w, h = cv2.boundingRect(c)
         diff = abs(h-w)
@@ -317,7 +304,7 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, display=None,
 
                 valid_sizes[name] = _coords
 
-    # length = len(cnts)
+    # length = len(contours)
     # for i in sizes.values():
     #     length += len(i)
     # print("occurrences: {}/{} {}%".format(occurrences,
@@ -331,7 +318,7 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
               #   hsv_range: bool = False,
               removeBG: bool = False,
               si_adjustment: int = 0.2,
-              row_elim: int = 3,
+              row_eliminate: int = 5,
               blur_args: dict = {}):
     """
     Parse a screenshot or image of an AFK arena hero roster into sub
@@ -348,9 +335,9 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
         si_adjustment: percent of the image dimensions to take on the left and
             top side of the image to ensure si30/40 capture during hero
             detection(False/None for no adjustment)
-        row_elim: minimum row size to allow (helps eliminate false positives
-            i.e. similar size shapes as median hero shape) that are near the
-            same size as the median hero detection)
+        row_eliminate: minimum row size to allow (helps eliminate false
+            positives i.e. similar size shapes as median hero shape) that are
+            near the same size as the median hero detection)
         blur_args: keyword arguments for `processing.blur_image` method
 
     Return:
@@ -361,7 +348,6 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
     original_unmodifiable = image.copy()
 
     heroes = {}
-    valid_sizes = {}
     baseArgs = (original_modifiable, sizeAllowanceBoundary)
     multi_valid = []
 
@@ -387,14 +373,11 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
     # multi_valid.append(getHeroContours(
     #     *baseArgs, rgb_range=rgb_range, **blur_args))
 
-    # (hMin = 0 , sMin = 0, vMin = 162), (hMax = 159 , sMax = 77, vMax = 255)
-    # (hMin = 19 , sMin = 0, vMin = 36), (hMax = 179 , sMax = 255, vMax = 208)
     hsv_range = [
         np.array([0, 0, 74]), np.array([27, 253, 255])]
     multi_valid.append(getHeroContours(
         *baseArgs, hsv_range=hsv_range, **blur_args))
 
-    # (RMin = 0 , GMin = 103, BMin = 134), (RMax = 210 , GMax = 255, BMax = 255)
     # baseArgs = (image.copy(), sizeAllowanceBoundary)
     # blur_args["hsv_range"] = [
     #     np.array([5, 79, 211]), np.array([21, 106, 250])]
@@ -428,7 +411,7 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
     for _hero_list in multi_valid:
         for _object_name, _object_dimensions in _hero_list.items():
             hero_matrix.auto_append(_object_dimensions, _object_name)
-    hero_matrix.prune(threshold=5)
+    hero_matrix.prune(threshold=row_eliminate)
     hero_matrix.sort()
 
     for _row_index, _row in enumerate(hero_matrix):
@@ -460,7 +443,6 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
                                                 _new_x:
                                                 x2]
                 new_ROI = new_ROI.copy()
-                # lyca # (hMin = 4 , sMin = 69, vMin = 83), (hMax = 23 , sMax = 255, vMax = 255)
                 blurred = blur_image(new_ROI, reverse=True, hsv_range=[
                     np.array([4, 69, 83]), np.array([23, 255, 355])])
 
@@ -470,10 +452,6 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
                 new_contours = imutils.grab_contours(new_contours)
                 new_contours = sorted(new_contours, key=cv2.contourArea,
                                       reverse=True)[0]
-                # save_input = input("Press any key to continue, or enter s to save this image")
-                # if save_input == "s":
-                #     import image_processing.scripts.threshscript as thresh
-                #     thresh.threshold(new_ROI)
                 new_x, new_y, new_w, new_h = cv2.boundingRect(new_contours)
                 # cv2.rectangle(new_ROI, (new_x, new_y),
                 #               (new_x+new_w, new_y+new_h), (0, 0, 255), 2)

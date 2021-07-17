@@ -10,7 +10,6 @@ import collections
 import numpy as np
 import image_processing.scripts.getSISize as siScript
 import multiprocessing
-import json
 
 
 def rollingAverage(avg, newSample, size):
@@ -30,8 +29,6 @@ def get_si(image, image_name, debug_raw=False, imageDB=None):
     image_20 = cv2.imread(os.path.join(GV.siBasePath, "20", "20.png"))
     image_30 = cv2.imread(os.path.join(GV.siBasePath, "30", "30.png"))
 
-    fi_base_images = collections.defaultdict(dict)
-
     fi_3_image = cv2.imread(os.path.join(GV.fi_base_path, "3", "3fi.png"))
     fi_9_image = cv2.imread(os.path.join(GV.fi_base_path, "9", "9fi.png"))
 
@@ -48,9 +45,9 @@ def get_si(image, image_name, debug_raw=False, imageDB=None):
     # baseImages["0"]["height"] = 52.6
     # baseImages["0"]["width"] = 52.06666666666667
 
-    x, y, _ = image_10.shape
-    newx = int(x*0.7)
-    newy = int(y*0.6)
+    # x, y, _ = image_10.shape
+    # new_x = int(x*0.7)
+    # new_y = int(y*0.6)
     baseImages["10"]["image"] = image_10
     baseImages["10"]["crop"] = image_10[0:, 0:]
     baseImages["10"]["contourNum"] = 3
@@ -60,30 +57,31 @@ def get_si(image, image_name, debug_raw=False, imageDB=None):
 
     x, y, _ = image_20.shape
 
-    starty = int(y*0.45)
-    endx = int(x*0.5)
+    # start_y = int(y*0.45)
+    end_x = int(x*0.5)
     baseImages["20"]["image"] = image_20
-    baseImages["20"]["crop"] = image_20[0:, 0:endx]
+    baseImages["20"]["crop"] = image_20[0:, 0:end_x]
     baseImages["20"]["contourNum"] = 2
     # baseImages["20"]["height"] = 75.1891891891892
     # baseImages["20"]["width"] = 64.27027027027027
 
-    # newx = int(x*0.5)
-    # newy = int(y*0.2)
+    # new_x = int(x*0.5)
+    # new_y = int(y*0.2)
     # baseImages["30"]["image"] = image_30
-    # baseImages["30"]["crop"] = image_30[0:newy, 0:]
+    # baseImages["30"]["crop"] = image_30[0:new_y, 0:]
     # baseImages["30"]["contourNum"] = 1
     x, y, _ = image_30.shape
-    newx = int(x*0.3)
-    newy = int(y*0.7)
+    new_x = int(x*0.3)
+    new_y = int(y*0.7)
     baseImages["30"]["image"] = image_30
-    baseImages["30"]["crop"] = image_30[0:newy, 0:newx]
+    baseImages["30"]["crop"] = image_30[0:new_y, 0:new_x]
     baseImages["30"]["contourNum"] = 1
     # baseImages["30"]["height"] = 78.23076923076923
     # baseImages["30"]["width"] = 79.94871794871794
 
     csvfile = open(
-        "/home/nate/projects/afk-image-processing/image_processing/scripts/lvl_txt_si_scale.txt",
+        "/home/nate/projects/afk-image-processing/image_processing/scripts/"
+        "lvl_txt_si_scale.txt",
         "r")
 
     header = ["digitName", "si_name", "v_scale"]
@@ -122,8 +120,6 @@ def get_si(image, image_name, debug_raw=False, imageDB=None):
     blur_args = {"hsv_range": hsv_range}
     heroesDict, rows = processing.getHeroes(
         hero_ss, blur_args=blur_args)
-
-    circle_fail = 0
 
     digit_bins = {}
 

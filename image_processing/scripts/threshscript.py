@@ -58,8 +58,8 @@ def threshold(image):
         output = cv2.bitwise_and(image, image, mask=mask)
 
         # Print if there is a change in HSV value
-        if((phMin != hMin) | (psMin != sMin) | (pvMin != vMin) | (phMax != hMax) |
-           (psMax != sMax) | (pvMax != vMax)):
+        if((phMin != hMin) | (psMin != sMin) | (pvMin != vMin) |
+                (phMax != hMax) | (psMax != sMax) | (pvMax != vMax)):
             print("(hMin = %d , sMin = %d, vMin = %d), (hMax = %d , sMax = %d,"
                   " vMax = %d)" % (
                       hMin, sMin, vMin, hMax, sMax, vMax))
@@ -125,8 +125,8 @@ def color_threshold(image):
         output = cv2.bitwise_and(image, image, mask=mask)
 
         # Print if there is a change in HSV value
-        if((pRMin != RMin) | (pGMin != GMin) | (pBMin != BMin) | (pRMax != RMax) |
-           (pGMax != GMax) | (pBMax != BMax)):
+        if((pRMin != RMin) | (pGMin != GMin) | (pBMin != BMin) |
+           (pRMax != RMax) | (pGMax != GMax) | (pBMax != BMax)):
             print("(RMin = %d , GMin = %d, BMin = %d), (RMax = %d , GMax = %d,"
                   " BMax = %d)" % (
                       RMin, GMin, BMin, RMax, GMax, BMax))

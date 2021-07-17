@@ -59,7 +59,8 @@ def hero_data():
 
                     if isinstance(test_heroes[
                             _row_index][_hero_index], list):
-                        test_hero_data = test_heroes[_row_index][_hero_index][0]
+                        test_hero_data = test_heroes[
+                            _row_index][_hero_index][0]
                     else:
                         test_hero_data = test_heroes[_row_index][_hero_index]
 
@@ -92,9 +93,12 @@ def hero_data():
         except IndexError as e:
             # print("Gen heroes: {}".format(gen_heroes))
             for _i in gen_heroes:
-                print([_hero_object[0] for  _hero_object in _i])
+                print([_hero_object[0] for _hero_object in _i])
             raise IndexError("{} len gen: {} len test: {} index: {}".format(
-                image_name, len(gen_heroes), len(test_heroes), _row_index,)) from e
+                image_name,
+                len(gen_heroes),
+                len(test_heroes),
+                _row_index)) from e
 
 
 def get_id():

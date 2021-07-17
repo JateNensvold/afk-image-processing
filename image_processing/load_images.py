@@ -63,7 +63,8 @@ def closest_node(node, nodes):
     return np.argmin(dist_2)
 
 
-def clean_hero(img: np.array, lowerb: int, upperb: int, size, img_contour):
+def clean_hero(img: np.array, lower_boundary: int, upper_boundary: int,
+               size, img_contour):
     EDGE_TOLERANCE = 0.1
     width = abs(size[0] - size[1])
     height = abs(size[2] - size[3])
@@ -73,7 +74,7 @@ def clean_hero(img: np.array, lowerb: int, upperb: int, size, img_contour):
     # convert to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 
-    binary = cv2.inRange(gray, lowerb, upperb, 255)
+    binary = cv2.inRange(gray, lower_boundary, upper_boundary, 255)
     contours, hierarchy = cv2.findContours(
         binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
 
@@ -249,17 +250,17 @@ def get_good_features(matches: list, ratio: int):
 
 def concat_resize(img_list, interpolation=cv2.INTER_CUBIC):
     # take minimum width
-    w_max = max(img.shape[1]
-                for img in img_list)
+    # w_max = max(img.shape[1]
+    #             for img in img_list)
     h_max = max(img.shape[0]
                 for img in img_list)
     # resizing images
     im_list_resize = []
     for img in img_list:
         height, width = img.shape[:2]
-        ratio = width/height
-        width_dist = w_max - int(width/ratio)
-        height_dist = h_max - height
+        # ratio = width/height
+        # width_dist = w_max - int(width/ratio)
+        # height_dist = h_max - height
 
         scale = h_max/height
         resize = cv2.resize(img, (int(width * scale), int(height * scale)),
