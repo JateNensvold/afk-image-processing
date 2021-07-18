@@ -1,11 +1,11 @@
 
 # from skimage.feature import canny
-from skimage import io
-from skimage.color import rgb2gray, rgba2rgb
+from typing import Sequence
+
 import numpy as np
 import cv2
 import os
-
+import imutils
 import rtree
 
 import image_processing.build_db as BD
@@ -14,33 +14,20 @@ import image_processing.processing as pr
 import image_processing.load_images as load
 import image_processing.stamina as stamina
 
-from typing import Sequence
-
-
-def grayscale(rgb_image: str) -> np.ndarray:
-    """
-    Turns rgb images into grayscale images
-
-    Args:
-        rgb_image: np.ndarray of rgb elements representing an image
-
-    Returns:
-        an numpy.ndarray that is the same size as 'rgb_image' but with the
-            channel dimension removed
-    """
-    return rgb2gray(rgba2rgb(rgb_image))
-
 
 def load_image(image_path: str) -> np.ndarray:
     """
     Loads image from image path
     Args:
-        rgb_image: np.ndarray of rgb elements representing an image
-
+        image_path: path to image on disk
+        check_path: flag to raise an error if 'image_path' is not found
     Returns:
         numpy.ndarray of rgb elements
     """
-    return io.imread(image_path)
+    if os.path.exists(image_path):
+        return cv2.imread(image_path)
+    else:
+        raise FileNotFoundError(image_path)
 
 
 def blur_image(image: np.ndarray, dilate=False,
@@ -359,10 +346,10 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
     multi_valid.append(getHeroContours(
         *baseArgs, hsv_range=hsv_range, **blur_args))
     # (hMin = 19 , sMin = 0, vMin = 36), (hMax = 179 , sMax = 255, vMax = 208)
-    hsv_range = [
-        np.array([19, 0, 36]), np.array([179, 255, 208])]
-    multi_valid.append(getHeroContours(
-        *baseArgs, hsv_range=hsv_range, **blur_args))
+    # hsv_range = [
+    #     np.array([19, 0, 36]), np.array([179, 255, 208])]
+    # multi_valid.append(getHeroContours(
+    #     *baseArgs, hsv_range=hsv_range, **blur_args))
     # (hMin = 0 , sMin = 0, vMin = 74), (hMax = 27 , sMax = 253, vMax = 255)
     baseArgs = (image.copy(), sizeAllowanceBoundary)
 
@@ -407,7 +394,8 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
     hero_h_median = statistics.median(hero_heights)
 
     spacing = round((hero_w_median + hero_h_median)/10)
-    hero_matrix = stamina.matrix(spacing=spacing)
+    image_width, image_height = image.shape[:2]
+    hero_matrix = stamina.matrix(image_height, image_width, spacing=spacing)
     for _hero_list in multi_valid:
         for _object_name, _object_dimensions in _hero_list.items():
             hero_matrix.auto_append(_object_dimensions, _object_name)
@@ -416,23 +404,24 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
 
     for _row_index, _row in enumerate(hero_matrix):
         # print("row({}) length: {}".format(_row_index, len(_row)))
-        for _object_index, _object in enumerate(_row):
+        print("row 1 {}".format(_row))
+        for _object_index, _Row_item in enumerate(_row):
 
-            x = _object[0][0]
-            y = _object[0][1]
-            w = _object[0][2]
-            h = _object[0][3]
+            x = _Row_item.dimensions.x
+            y = _Row_item.dimensions.y
 
-            y2 = y + h
-            x2 = x + w
+            x2 = _Row_item.dimensions.x2
+            y2 = _Row_item.dimensions.y2
 
-            _hero_name = _object[1]
+            _hero_name = _Row_item.name
 
             ROI = original_unmodifiable[y:
                                         y2,
                                         x:
                                         x2]
             if si_adjustment:
+                w = _Row_item.dimensions.w
+                h = _Row_item.dimensions.h
                 x_adjust = round(w * si_adjustment)
                 y_adjust = round(h * si_adjustment)
 
@@ -442,45 +431,47 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
                                                 y2,
                                                 _new_x:
                                                 x2]
-                new_ROI = new_ROI.copy()
                 blurred = blur_image(new_ROI, reverse=True, hsv_range=[
                     np.array([4, 69, 83]), np.array([23, 255, 355])])
 
                 new_contours = cv2.findContours(
                     blurred, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-                import imutils
                 new_contours = imutils.grab_contours(new_contours)
+                # Get largest contour
                 new_contours = sorted(new_contours, key=cv2.contourArea,
                                       reverse=True)[0]
                 new_x, new_y, new_w, new_h = cv2.boundingRect(new_contours)
-                # cv2.rectangle(new_ROI, (new_x, new_y),
-                #               (new_x+new_w, new_y+new_h), (0, 0, 255), 2)
 
                 new_contours = [new_contours]
 
                 cv2.fillPoly(new_ROI, new_contours, [255, 0, 0])
                 # (dimensions, name)
-                _collision_index = _row.check_collision(
-                    ((x2-new_w, y2-new_h, new_w, new_h), _hero_name))
-                _hero_name = _row[_collision_index][1]
+                _temp_row_item = stamina.RowItem(
+                    (x2-new_w, y2-new_h, new_w, new_h))
+                _collision_item_id = _row.check_collision(_temp_row_item)
+                _merged_row_item = _row.get(_collision_item_id, id_lookup=True)
+                # x, y, w, h = _merged_row_item.dimensions.coords()
 
-                x = _row[_object_index][0][0]
-                y = _row[_object_index][0][1]
-                w = _row[_object_index][0][2]
-                h = _row[_object_index][0][3]
+                w_border_offset = max(
+                    round(0.03 * _merged_row_item.dimensions.w), 2)
+                h_border_offset = max(
+                    round(0.03 * _merged_row_item.dimensions.h), 2)
+                _temp_row_item.dimensions.x = max(x - w_border_offset, 0)
+                _temp_row_item.dimensions.y = max(y - h_border_offset, 0)
+                _temp_row_item.dimensions.w = _merged_row_item.dimensions.w + \
+                    w_border_offset
+                _temp_row_item.dimensions.h = _merged_row_item.dimensions.h + \
+                    h_border_offset
 
-                y2 = y + h
-                x2 = x + w
-                w_border_offset = max(round(0.03 * w), 2)
-                h_border_offset = max(round(0.03 * h), 2)
+                _collision_item_id = _row.check_collision(_temp_row_item)
+                if _collision_item_id != -1:
+                    _merged_row_item = _row.get(_collision_item_id)
+                    _hero_name = _merged_row_item.name
 
-                ROI = original_unmodifiable[max(y - h_border_offset, 0):
-                                            y2,
-                                            max(x - w_border_offset, 0):
-                                            x2]
-            # staminaLib.signatureItemFeatures(ROI)
-            # cv2.imwrite("./tempHero/{}".format(_hero_name), ROI)
-
+                ROI = original_unmodifiable[_merged_row_item.dimensions.y:
+                                            _merged_row_item.dimensions.y2,
+                                            _merged_row_item.dimensions.x:
+                                            _merged_row_item.dimensions.x2]
             heroes[_hero_name] = {}
 
             if removeBG:
@@ -492,10 +483,13 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
             else:
                 heroes[_hero_name]["image"] = ROI
 
-            heroes[_hero_name]["object"] = _object
+            heroes[_hero_name]["object"] = _Row_item
 
-        # load.display_image([heroes[_hero[1]]["image"]
-        #                    for _hero in _row], multiple=True, display=True)
+        # columns = [_row.columns.find_column(_row_item) for _row_item in _row]
+        # print(columns)
+        # load.display_image([heroes[_row_item.name]["image"]
+        #                    for _row_item in _row], multiple=True,
+        # display=True)
 
     return heroes, hero_matrix
 

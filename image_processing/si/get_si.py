@@ -119,7 +119,7 @@ def get_si(image, image_name, debug_raw=False, imageDB=None):
     hsv_range = [lower_hsv, upper_hsv]
     blur_args = {"hsv_range": hsv_range}
     heroesDict, rows = processing.getHeroes(
-        hero_ss, blur_args=blur_args)
+        hero_ss, blur_args=blur_args, row_eliminate=4)
 
     digit_bins = {}
 
@@ -205,13 +205,16 @@ def get_si(image, image_name, debug_raw=False, imageDB=None):
         # if "display" in _hero_data:
         #     print("Failed to find fi score")
         #     load.display_image(heroesDict[name]["image"], display=True)
-        fontScale = 0.5 * (rows[0][0][0][-1]/100)
-
+        fontScale = 0.5 * (rows.get_avg_width()/20)
+        print(rows.get_avg_width())
+        print(hero_name, coords)
         text_size = cv2.getTextSize(result, font, fontScale, thickness)
         height = text_size[0][1]
-        coords = (coords[0], coords[1] + height)
+        # coords = (coords[0], coords[1] + height)
+        print(hero_name, coords, height, fontScale)
+
         cv2.putText(
-            hero_ss, result, coords, font, fontScale, color, thickness,
+            hero_ss, result, coords, font, abs(fontScale), color, thickness,
             cv2.LINE_AA)
     # test_names = set(_hero_name for _hero_name,
     #                  _hero_info_dict in heroesDict.items())
@@ -226,12 +229,12 @@ def get_si(image, image_name, debug_raw=False, imageDB=None):
 
     for _row in rows:
         temp_list = []
-        for _index in range(len(_row)):
+        for _row_item in _row:
             hero_data = []
-            temp = return_dict[_row[_index][1]]["result"]
+            temp = return_dict[_row_item.name]["result"]
             hero_data.append(temp)
             if debug_raw:
-                _raw_score = return_dict[_row[_index][1]]["score"]
+                _raw_score = return_dict[_row_item.name]["score"]
                 hero_data.append(_raw_score)
             temp_list.append(hero_data)
         json_dict[image_name]["heroes"].append(temp_list)
@@ -252,8 +255,8 @@ def parallel_detect(info_dict):
         v["image"], si_dict, graded_avg_bin)
     fi_scores = stamina.furnitureItemFeatures(
         v["image"], fi_dict, graded_avg_bin)
-    x = v["object"][0][0]
-    y = v["object"][0][1]
+    x = v["object"].dimensions.x
+    y = v["object"].dimensions.y
     if fi_scores["9"] == 0 or fi_scores["3"] == 0:
         return_dict["display"] = True
     if fi_scores["9"] > 0.7:
