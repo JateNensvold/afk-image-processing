@@ -10,6 +10,7 @@ import collections
 import numpy as np
 import image_processing.scripts.getSISize as siScript
 import multiprocessing
+import psutil
 
 
 def rollingAverage(avg, newSample, size):
@@ -119,7 +120,7 @@ def get_si(image, image_name, debug_raw=False, imageDB=None):
     hsv_range = [lower_hsv, upper_hsv]
     blur_args = {"hsv_range": hsv_range}
     heroesDict, rows = processing.getHeroes(
-        hero_ss, blur_args=blur_args, row_eliminate=4)
+        hero_ss, blur_args=blur_args)
 
     digit_bins = {}
 
@@ -190,7 +191,9 @@ def get_si(image, image_name, debug_raw=False, imageDB=None):
     font = cv2.FONT_HERSHEY_SIMPLEX
     fontScale = 3
     color = (255, 255, 0)
+    # color = (0,0,0)
     thickness = 2
+    fontScale = 0.5 * (rows.get_avg_width()/100)
 
     for _hero_data in reduced_values:
         # name = "{}{}".format(_hero_data["si"], _hero_data["fi"])
@@ -205,13 +208,9 @@ def get_si(image, image_name, debug_raw=False, imageDB=None):
         # if "display" in _hero_data:
         #     print("Failed to find fi score")
         #     load.display_image(heroesDict[name]["image"], display=True)
-        fontScale = 0.5 * (rows.get_avg_width()/20)
-        print(rows.get_avg_width())
-        print(hero_name, coords)
         text_size = cv2.getTextSize(result, font, fontScale, thickness)
         height = text_size[0][1]
-        # coords = (coords[0], coords[1] + height)
-        print(hero_name, coords, height, fontScale)
+        coords = (coords[0], coords[1] + round(5 * height))
 
         cv2.putText(
             hero_ss, result, coords, font, abs(fontScale), color, thickness,
@@ -238,6 +237,8 @@ def get_si(image, image_name, debug_raw=False, imageDB=None):
                 hero_data.append(_raw_score)
             temp_list.append(hero_data)
         json_dict[image_name]["heroes"].append(temp_list)
+    print(psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2)
+
     return json_dict
 
 
@@ -298,6 +299,7 @@ def parallel_detect(info_dict):
     return_dict["pseudo_name"] = k
     return_dict["coords"] = coords
     # return_dict["name"] = hero
+    print(psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2)
     return return_dict
 
 

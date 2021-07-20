@@ -399,12 +399,12 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
     for _hero_list in multi_valid:
         for _object_name, _object_dimensions in _hero_list.items():
             hero_matrix.auto_append(_object_dimensions, _object_name)
-    hero_matrix.prune(threshold=row_eliminate)
+    # Sort before pruning so all columns get generated
     hero_matrix.sort()
+    hero_matrix.prune(threshold=row_eliminate)
 
     for _row_index, _row in enumerate(hero_matrix):
         # print("row({}) length: {}".format(_row_index, len(_row)))
-        print("row 1 {}".format(_row))
         for _object_index, _Row_item in enumerate(_row):
 
             x = _Row_item.dimensions.x
@@ -431,7 +431,8 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
                                                 y2,
                                                 _new_x:
                                                 x2]
-                blurred = blur_image(new_ROI, reverse=True, hsv_range=[
+                modifiable_ROI = new_ROI.copy()
+                blurred = blur_image(modifiable_ROI, reverse=True, hsv_range=[
                     np.array([4, 69, 83]), np.array([23, 255, 355])])
 
                 new_contours = cv2.findContours(
@@ -442,9 +443,8 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
                                       reverse=True)[0]
                 new_x, new_y, new_w, new_h = cv2.boundingRect(new_contours)
 
-                new_contours = [new_contours]
-
-                cv2.fillPoly(new_ROI, new_contours, [255, 0, 0])
+                # new_contours = [new_contours]
+                # cv2.fillPoly(modifiable_ROI, new_contours, [255, 0, 0])
                 # (dimensions, name)
                 _temp_row_item = stamina.RowItem(
                     (x2-new_w, y2-new_h, new_w, new_h))
@@ -485,8 +485,8 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
 
             heroes[_hero_name]["object"] = _Row_item
 
-        # columns = [_row.columns.find_column(_row_item) for _row_item in _row]
-        # print(columns)
+        columns = [_row.columns.find_column(_row_item) for _row_item in _row]
+        print(columns)
         # load.display_image([heroes[_row_item.name]["image"]
         #                    for _row_item in _row], multiple=True,
         # display=True)

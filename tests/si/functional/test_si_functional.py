@@ -94,7 +94,7 @@ def hero_data():
             # print("Gen heroes: {}".format(gen_heroes))
             for _i in gen_heroes:
                 print([_hero_object[0] for _hero_object in _i])
-            raise IndexError("{} len gen: {} len test: {} index: {}".format(
+            raise IndexError("{} gen_len: {} test_len: {} index: {}".format(
                 image_name,
                 len(gen_heroes),
                 len(test_heroes),

@@ -88,6 +88,12 @@ class DimensionsObject:
         else:
             return [(self.x, self.y), (self.x2, self.y2)]
 
+    def size(self):
+        """
+        Return the size of the dimension object
+        """
+        return self.h * self.w
+
     def overlap(self, dim_object: "DimensionsObject"):
         """
         Calculate the area between 'dim_object' and the current object
@@ -97,9 +103,9 @@ class DimensionsObject:
             area(int) of overlap()
         """
         x_width = max(0, min(self.x2, dim_object.x2) -
-                      min(self.x, dim_object.x))
+                      max(self.x, dim_object.x))
         y_height = max(0, min(self.y2, dim_object.y2) -
-                       min(self.y, dim_object.y))
+                       max(self.y, dim_object.y))
         return x_width * y_height
 
 
@@ -119,7 +125,8 @@ class ColumnObjects:
 
     def find_column(self, row_item: "RowItem", auto_add: bool = True,
                     update_rtree: bool = True,
-                    conflict_resolve: bool = True):
+                    conflict_resolve: bool = True,
+                    new_column_thresh: int = 0.7):
         """
         Find the column that row_item would fall under
 
@@ -133,6 +140,8 @@ class ColumnObjects:
             conflict_resolve: flag that resolves conflicts when intersections
                 return multiple columns, causes column with the most overlap
                 with 'row_item' to be returned
+            new_column_thresh: threshold to create a new column with if the
+                overlap percent is under it
         Return:
             an (int) representing the index of the column if one is
                 found/created
@@ -149,7 +158,15 @@ class ColumnObjects:
             index = self.column_id_to_index[_intersection_id]
             if update_rtree:
                 _column = self.columns[index]
-                self.update_column(_column, row_item)
+                overlap_raw = row_item.dimensions.overlap(
+                    _column)
+                overlap_p = overlap_raw / row_item.dimensions.size()
+                # print("raw: {} percent: {}".format(overlap_raw, overlap_p))
+                if overlap_p > 0.7:
+                    self.update_column(_column, row_item)
+                else:
+                    if auto_add:
+                        self.add_column(row_item)
             return index
         elif len(_intersections_list) == 0:
             if auto_add:
@@ -167,7 +184,7 @@ class ColumnObjects:
                     overlap = row_item.dimensions.overlap(
                         _intersection_object_dimensions)
                     overlap_list.append((_index, overlap))
-                print(overlap_list)
+                # print(overlap_list)
                 max_tuple = max(
                     overlap_list, key=lambda overlap_tuple: overlap_tuple[1])
                 return max_tuple[0]
@@ -304,6 +321,7 @@ class row():
         self._idx = 0
         self.rtree = rtree.index.Index()
         self.columns = columns
+        print("new row: {}".format(id(columns)))
         self.head: int = None
         self.avg_width = 0
 
@@ -371,7 +389,26 @@ class row():
         """
         return self._row_items[index]
 
-    def get_item_gap(self):
+    def _get_row_bottom(self):
+        """
+        Get the avg y coordinate of the bottom of the row.
+        Return:
+            avg y coordinate(float)
+        """
+
+        output = [_row_item.dimensions.y2 for _row_item in self._row_items]
+        return np.mean(output)
+
+    def _get_avg_height(self):
+        """
+        Get the avg height of items in the row
+        Return:
+            avg height (float)
+        """
+        output = [_row_item.dimensions.h for _row_item in self._row_items]
+        return np.mean(output)
+
+    def _get_item_gap(self):
         """
         Get avg gap between each item in row that is known to be consecutive
             i.e. there are no missing row_items between two existing row_items
@@ -395,7 +432,7 @@ class row():
         else:
             return None
 
-    def add_average(self, new_num: int) -> int:
+    def _add_average(self, new_num: int) -> int:
         """
         Calculate running average width of row with 'new_num' updating the
             avg_width.
@@ -404,10 +441,11 @@ class row():
         Return:
             Updated avg_width with 'new_num' added
         """
-        return self.avg_width + ((
+        output = self.avg_width + ((
             new_num - self.avg_width) / (len(self._row_items) + 1))
+        return output
 
-    def remove_average(self, remove_num: int) -> int:
+    def _remove_average(self, remove_num: int) -> int:
         """
         Calculate running average width of row with 'remove_num' removed from
             the avg_width.
@@ -416,10 +454,13 @@ class row():
         Return:
             Updated avg_width with 'remove_num' removed
         """
-        return self.avg_width + ((
+        if len(self._row_items) == 1:
+            return 0
+        output = self.avg_width + ((
             self.avg_width - remove_num) / (len(self._row_items) - 1))
+        return output
 
-    def append(self, dimensions, name, detect_collision=True):
+    def append(self, dimensions, name: str = None, detect_collision=True):
         """
         Adds a new RowItem to Row
         Args:
@@ -444,7 +485,10 @@ class row():
         self._row_items_by_name[name] = _temp_RowItem
         self._row_items_by_id[_temp_id] = _temp_RowItem
 
+        avg_width = self._add_average(_temp_RowItem.dimensions.w)
+        self.avg_width = avg_width
         self._row_items.append(_temp_RowItem)
+
         self.rtree.insert(id(_temp_RowItem),
                           _temp_RowItem.dimensions.coords())
         self.columns.find_column(_temp_RowItem)
@@ -488,9 +532,9 @@ class row():
                 self.rtree.delete(_intersection_id,
                                   _collision_item_coordinates)
                 if old_width != new_width:
-                    removed_width = self.remove_average(old_width)
+                    removed_width = self._remove_average(old_width)
                     self.avg_width = removed_width
-                    removed_width = self.add_average(new_width)
+                    removed_width = self._add_average(new_width)
                     self.avg_width = removed_width
 
                 self.rtree.insert(_intersection_id,
@@ -534,7 +578,7 @@ class matrix():
             spacing: minimum distance between each row without merging
         """
         self.source_height = source_height
-        self.source_height = source_width
+        self.source_width = source_width
         self.spacing = spacing
         self._heads: dict[int, callable[[], int]] = {}
         self._row_list: list[row] = []
@@ -577,10 +621,17 @@ class matrix():
 
     def get_avg_width(self) -> int:
         """
-        Return the Average width of RowItems in the matrix
+        Return the average width of RowItems in the matrix
         """
         avg_width = [_row.avg_width for _row in self._row_list]
         return np.mean(avg_width)
+
+    def get_avg_height(self):
+        """
+        Return the average height of RowItems in the matrix
+        """
+        avg_height = [_row._get_avg_height() for _row in self._row_list]
+        return np.mean(avg_height)
 
     def get_avg_row_gap(self):
         """
@@ -593,7 +644,7 @@ class matrix():
         """
         gap_list: list[int] = []
         for _row in self._row_list:
-            _temp_gap = _row.get_item_gap()
+            _temp_gap = _row._get_item_gap()
             if _temp_gap is not None:
                 gap_list.append(_temp_gap)
         avg_gap = np.mean(gap_list)
@@ -638,7 +689,12 @@ class matrix():
         Sort Matrix by y coordinate of each row
         """
         for _row in self._row_list:
+            column_list = []
             _row.sort()
+            for _row_item in _row:
+                column = _row.columns.find_column(_row_item)
+                column_list.append(column)
+            print(column_list)
         self._row_list.sort(key=lambda _row: _row.head)
 
     def prune(self, threshold: int, fill_hero: bool = True):
@@ -653,15 +709,119 @@ class matrix():
         Return:
             None
         """
-        # TODO
         _prune_list = []
 
         for _index, _row_object in enumerate(self._row_list):
-            if len(_row_object) < threshold:
+            if len(_row_object) < threshold and _index != (
+                    len(self._row_list) - 1):
                 if fill_hero:
-                    pass
+                    print("before: {}".format(_row_object))
+                    _column_index = 0
+                    while _column_index < len(self.columns.columns):
+                        columns = [self.columns.find_column(
+                            _row_item) for _row_item in _row_object]
+                        print(_column_index, columns,
+                              len(self.columns.columns))
+                        if _column_index not in columns:
+                            print("{} not in {}".format(
+                                _column_index, columns))
+                            right_side = [
+                                _i for _i in columns if _i > _column_index]
+                            left_side = [
+                                _i for _i in columns if _i < _column_index]
+                            right_side.sort()
+                            left_side.sort()
+                            if len(left_side) > 0:
+                                closest_left = left_side[-1]
+                            else:
+                                closest_left = None
+                            if len(right_side) > 0:
+                                closest_right = right_side[0]
+                            else:
+                                closest_right = None
+                            if closest_left and closest_right:
+                                left_row_object = _row_object._row_items[
+                                    closest_left]
+                                right_row_object = _row_object._row_items[
+                                    closest_right]
+                                left_x = left_row_object.dimensions.x2
+                                right_x = right_row_object.dimensions.x
+                                gap_size = right_x - left_x
+                                _avg_width = self.get_avg_width()
+                                missing_row_items = gap_size//_avg_width
+                                print("num missing:{} gap:{} item_w:{}".format(
+                                    missing_row_items, gap_size, _avg_width))
+
+                                extra_gap = gap_size - \
+                                    (missing_row_items*_avg_width)
+                                extra_gap_number = (missing_row_items + 1)
+                                extra_gap_width = extra_gap/extra_gap_number
+
+                                _avg_height = self.get_avg_height()
+                                for _itr in range(missing_row_items):
+                                    _temp_dims = (
+                                        left_x + extra_gap_width,
+                                        _row_object._get_row_bottom(
+                                        ) - _avg_height,
+                                        _avg_width, _avg_height)
+                                    _temp_dim_object = DimensionsObject(
+                                        _temp_dims)
+                                    left_x = _temp_dim_object.x2
+                                    _row_object.append(_temp_dim_object)
+                            elif closest_left:
+                                _avg_height = self.get_avg_height()
+                                _avg_width = self.get_avg_width()
+
+                                left_row_object = _row_object._row_items[
+                                    closest_left]
+
+                                _avg_gap = self.get_avg_row_gap()
+                                left_x = left_row_object.dimensions.x2
+                                gap_size = self.source_width - left_x
+                                _leftover_gap = gap_size
+
+                                while _leftover_gap > _avg_width:
+                                    _temp_dims = (
+                                        left_x + _avg_gap,
+                                        _row_object._get_row_bottom(
+                                        ) - _avg_height,
+                                        _avg_width, _avg_height)
+                                    _temp_dim_object = DimensionsObject(
+                                        _temp_dims)
+                                    left_x = _temp_dim_object.x2
+                                    _row_object.append(_temp_dim_object)
+                                    _leftover_gap -= (_avg_width + _avg_gap)
+
+                            elif closest_right:
+                                right_row_object = _row_object._row_items[
+                                    closest_right]
+
+                                right_x = right_row_object.dimensions.x
+                                gap_size = right_x
+
+                                _avg_height = self.get_avg_height()
+                                _avg_width = self.get_avg_width()
+                                _avg_gap = self.get_avg_row_gap()
+
+                                _leftover_gap = gap_size
+                                while _leftover_gap > _avg_width:
+                                    _temp_dims = (
+                                        right_x - _avg_width,
+                                        _row_object._get_row_bottom(
+                                        ) - _avg_height,
+                                        _avg_width, _avg_height)
+
+                                    _temp_dim_object = DimensionsObject(
+                                        _temp_dims)
+                                    right_x = _temp_dim_object.x
+                                    _row_object.append(_temp_dim_object)
+                                    _leftover_gap -= (_avg_width + _avg_gap)
+
+                        _column_index += 1
+                    print("after: {}".format(_row_object))
                 else:
                     _prune_list.append(_index)
+            _row_object.sort()
         if len(_prune_list) > 0:
             if GV.VERBOSE_LEVEL >= 1:
                 print("Deleting ({}) row objects({}) from matrix. Ensure that "
@@ -893,15 +1053,12 @@ def signatureItemFeatures(hero: np.array,
             si_height, original_width = si_image.shape[:2]
 
             base_height_ratio = si_height/hero_h
-            print(base_height_ratio)
             # resize_height
             base_new_height = round(
                 lvlRatioDict[folder_name]["height"]) + pixel_offset
             new_height = round(base_new_height * base_height_ratio)
             scale_ratio = new_height/si_height
             new_width = round(original_width * scale_ratio)
-            print(base_new_height, scale_ratio)
-            print(new_width, new_height)
             si_image = cv2.resize(
                 si_image, (new_width, new_height))
             si_image_gray = cv2.cvtColor(si_image, cv2.COLOR_BGR2GRAY)

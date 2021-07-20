@@ -6,7 +6,7 @@
             [
                 "solise 103",
                 "oscar 000",
-                "anoki 100",
+                "anoki 000",
                 "drez 103",
                 "theowyn 100"
             ],
@@ -1213,7 +1213,7 @@
             ],
             [
                 "hendrik 100",
-                "fawkes 000",
+                "fawkes 100",
                 "seirus 100",
                 "queen 100",
                 "dastan 000"
@@ -1224,6 +1224,58 @@
                 "thoran 200",
                 "baden 100",
                 "ulmus 100"
+            ]
+        ]
+    },
+    "/home/nate/projects/afk-image-processing/tests/data/images/partial_row.png ": {
+        "rows": 7,
+        "columns": 5,
+        "heroes": [
+            [
+                "anoki 000",
+                "skreg 000",
+                "khasos 000",
+                "izold 000",
+                "rigby 000"
+            ],
+            [
+                "seirus 000",
+                "saurus 000",
+                "baden 000",
+                "nara 000",
+                "zaphrael 000"
+            ],
+            [
+                "safiya 000",
+                "belinda 000",
+                "lorsan 000",
+                "skriath 000",
+                "food 000"
+            ],
+            [
+                "food 000",
+                "food 000",
+                "food 000",
+                "food 000",
+                "food 000"
+            ],
+            [
+                "food 000",
+                "food 0003",
+                "food 000",
+                "food 000",
+                "food 000"
+            ],
+            [
+                "food 000",
+                "food 000",
+                "food 000",
+                "food 000",
+                "food 000"
+            ],
+            [
+                "food 000",
+                "food 000"
             ]
         ]
     }
