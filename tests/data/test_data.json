@@ -1227,7 +1227,7 @@
             ]
         ]
     },
-    "/home/nate/projects/afk-image-processing/tests/data/images/partial_row.png ": {
+    "/home/nate/projects/afk-image-processing/tests/data/images/partial_row.png": {
         "rows": 7,
         "columns": 5,
         "heroes": [

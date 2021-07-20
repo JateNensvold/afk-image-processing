@@ -20,19 +20,24 @@ class DimensionsObject:
         return "({},{},{},{})".format(
             self.x, self.y, self.w, self.h)
 
-    def __init__(self, dimensions):
+    def __init__(self, dimensions, full_number: bool = True):
         """
             Create a Dimensions object to hold x,y coordinates as well as
                 width and height
             Args:
                 dimensions: tuple containing (x,y, width, height)
+                full_number: flag to enforce all 'DimensionObject' values to
+                    be whole numbers during its lifetime
         """
+        self.__dict__["full_number"] = full_number
         self.x = dimensions[0]
         self.y = dimensions[1]
         self.w = dimensions[2]
         self.h = dimensions[3]
         self.x2 = self.x + self.w
         self.y2 = self.y + self.h
+        if self.full_number:
+            self._truncate_values()
 
     def __getitem__(self, index: int) -> int:
         """
@@ -54,6 +59,25 @@ class DimensionsObject:
                 "DimensionObject index({}) out of range({})".format(
                     index, len(dimension_index)))
 
+    def __setattr__(self, name, value):
+        if isinstance(value, (int, float)):
+            if self.full_number:
+                self.__dict__[name] = int(value)
+        else:
+            self.__dict__[name] = value
+
+    def _truncate_values(self):
+        """
+        Private method to enforce each 'DimensionObject' value is a
+            whole number
+        """
+        self.x = int(self.x)
+        self.y = int(self.y)
+        self.x2 = int(self.x2)
+        self.y2 = int(self.y2)
+        self.w = int(self.w)
+        self.h = int(self.h)
+
     def merge(self, dimensions_object: "DimensionsObject"):
         """
         Combine two DimensionsObject into the existing DimensionsObject object
@@ -62,11 +86,13 @@ class DimensionsObject:
         """
         self.x = min(self.x, dimensions_object.x)
         self.y = min(self.y, dimensions_object.y)
-        self.w = max(self.w, dimensions_object.w)
-        self.h = max(self.h, dimensions_object.h)
+        self.x2 = max(self.x2, dimensions_object.x2)
+        self.y2 = max(self.y2, dimensions_object.y2)
 
-        self.x2 = self.x + self.w
-        self.y2 = self.y + self.h
+        self.w = self.x2 - self.x
+        self.h = self.y2 - self.y
+        if self.full_number:
+            self._truncate_values()
 
     def coords(self, single=True) -> list:
         """
@@ -77,7 +103,7 @@ class DimensionsObject:
         Return:
             On single=True
 
-            list(x1,y2,x2,y2)
+            list(x1,y1,x2,y2)
 
             otherwise list of tuples
 
@@ -87,6 +113,12 @@ class DimensionsObject:
             return [self.x, self.y, self.x2, self.y2]
         else:
             return [(self.x, self.y), (self.x2, self.y2)]
+
+    def dimensional_values(self, single=True):
+        if single:
+            return [self.x, self.y, self.w, self.h]
+        else:
+            return [(self.x, self.y), (self.w, self.h)]
 
     def size(self):
         """
@@ -122,6 +154,7 @@ class ColumnObjects:
         self.matrix = matrix
         self.columns: list[DimensionsObject] = []
         self.column_id_to_index: dict[int, int] = {}
+        self.column_id_to_column: dict[int, DimensionsObject] = {}
 
     def find_column(self, row_item: "RowItem", auto_add: bool = True,
                     update_rtree: bool = True,
@@ -150,23 +183,40 @@ class ColumnObjects:
         Raise:
             Exception when multiple columns are intersected with
         """
+
+        # TODO Find out why invalid y values cause intersections/overlap to
+        #   break
+        _temp_dimensions_object = DimensionsObject(
+            (row_item.dimensions.x, 0,
+             row_item.dimensions.w, self.matrix.source_height))
         _intersections_list = list(self.column_rtree.intersection(
-            row_item.dimensions.coords()))
+            _temp_dimensions_object.coords()))
 
         if len(_intersections_list) == 1:
             _intersection_id = _intersections_list[0]
-            index = self.column_id_to_index[_intersection_id]
+            _column = self.column_id_to_column[_intersection_id]
             if update_rtree:
-                _column = self.columns[index]
-                overlap_raw = row_item.dimensions.overlap(
+                overlap_raw = _temp_dimensions_object.overlap(
                     _column)
-                overlap_p = overlap_raw / row_item.dimensions.size()
-                # print("raw: {} percent: {}".format(overlap_raw, overlap_p))
-                if overlap_p > 0.7:
-                    self.update_column(_column, row_item)
-                else:
+                overlap_p = overlap_raw / _temp_dimensions_object.size()
+
+                index = self.column_id_to_index[id(_column)]
+                if overlap_p == 1:
+                    pass
+                elif overlap_p > new_column_thresh:
+                    index = self.update_column(_column, row_item)
+                elif overlap_p <= new_column_thresh:
+                    # TODO Add a way to treat partial overlapping columns
+                    print("raw: {} percent: {}".format(
+                          overlap_raw, overlap_p))
+                    print("Overlap: {} {} {}".format(
+                        overlap_p, _temp_dimensions_object.coords(),
+                        _column.coords()))
+                    print(auto_add)
                     if auto_add:
-                        self.add_column(row_item)
+                        print("adding column intersection: {}".format(
+                            overlap_p))
+                        index = self.add_column(row_item)
             return index
         elif len(_intersections_list) == 0:
             if auto_add:
@@ -187,6 +237,7 @@ class ColumnObjects:
                 # print(overlap_list)
                 max_tuple = max(
                     overlap_list, key=lambda overlap_tuple: overlap_tuple[1])
+                print(max_tuple)
                 return max_tuple[0]
             else:
                 raise Exception("More than one intersection occurred "
@@ -206,6 +257,7 @@ class ColumnObjects:
         self.column_rtree.delete(column_id, column.coords())
         column.merge(row_item.dimensions)
         self.column_rtree.insert(column_id, column.coords())
+        return self.column_id_to_index[column_id]
 
     def add_column(self, row_item: "RowItem"):
         """
@@ -214,20 +266,28 @@ class ColumnObjects:
         Args:
             row_item: RowItem object to build new column around
         """
+        columns = []
+        for _i in self.columns:
+            _temp_coords = _i.coords()
+            columns.append(
+                (_temp_coords[0], _temp_coords[2],  _temp_coords[1],
+                 _temp_coords[3]))
+        columns.sort(key=lambda f: f[0])
+
         column_dimensions_object = DimensionsObject(
             (row_item.dimensions.x, 0,
              row_item.dimensions.w, self.matrix.source_height))
         new_column_id = id(column_dimensions_object)
         self.column_rtree.insert(
             new_column_id, column_dimensions_object.coords())
-        new_index = self._find_index(column_dimensions_object)
-        if len(self.columns) > new_index:
-            for _column in self.columns[(new_index)::]:
-                _column_id = id(_column)
-                self.column_id_to_index[_column_id] = \
-                    self.column_id_to_index[_column_id] + 1
-        self.columns.insert(new_index, column_dimensions_object)
-        self.column_id_to_index[new_column_id] = new_index
+        self.column_id_to_index[new_column_id] = len(self.column_id_to_index)
+        self.column_id_to_column[new_column_id] = column_dimensions_object
+
+        self.columns.append(column_dimensions_object)
+        self.columns.sort(key=lambda f: f.x)
+        for _index, _column_object in enumerate(self.columns):
+            self.column_id_to_index[id(_column_object)] = _index
+        return self.column_id_to_index[new_column_id]
 
     def _find_index(self, column_dimensions: DimensionsObject) -> int:
         """
@@ -321,7 +381,6 @@ class row():
         self._idx = 0
         self.rtree = rtree.index.Index()
         self.columns = columns
-        print("new row: {}".format(id(columns)))
         self.head: int = None
         self.avg_width = 0
 
@@ -496,7 +555,7 @@ class row():
 
     def check_collision(self, new_row_item: RowItem,
                         size_allowance_boundary: int = 0.25,
-                        raise_error: bool = False):
+                        resolve_error: bool = True):
         """
         Check if row_item's dimensions overlap with any of the objects
             in the row object, and merge collision_object with overlaping
@@ -505,8 +564,8 @@ class row():
             row_item: new RowItem to check against existing RowItems
             size_allowance_boundary: percent size that collision image must be
                 within the average of all other images in row
-            raise_error: flag to raise errors when multi RowItem collisions
-                occur
+            resolve_error: flag to resolve errors when multi RowItem collisions
+                occur and return the item with the greatest overlap
         Return:
             When collision occurs id(int) of updated row object is returned
 
@@ -542,20 +601,29 @@ class row():
             return _intersection_id
         elif len(_intersections_list) > 1:
             _intersection_objects = [
-                str(self._row_items_by_id[_intersection_id])
+                self._row_items_by_id[_intersection_id]
                 for _intersection_id in _intersections_list]
-            if raise_error:
+            if resolve_error:
+                overlap_list: tuple[int, int] = []
+                for _row_item in _intersection_objects:
+                    overlap = _row_item.dimensions.overlap(
+                        new_row_item.dimensions)
+                    overlap_list.append((id(_row_item), overlap))
+                # print(overlap_list)
+                max_overlap_tuple = max(
+                    overlap_list, key=lambda overlap_tuple: overlap_tuple[1])
+                return max_overlap_tuple[0]
 
-                raise Exception("More than one intersection occurred "
-                                "between {} and {}".format(
-                                    new_row_item,
-                                    _intersection_objects))
-            print("More than one intersection occurred "
+                # raise Exception("More than one intersection occurred "
+                #                 "between {} and {}".format(
+                #                     new_row_item,
+                #                     _intersection_objects))
+            raise Exception("More than one intersection occurred "
                   "between {} and {}".format(
                       new_row_item,
-                      _intersection_objects))
-            return -1
+                      [str(_i) for _i in _intersection_objects]))
         else:
+            # No intersection at all
             return -1
 
     def sort(self):
@@ -654,7 +722,8 @@ class matrix():
             return avg_gap
 
     def auto_append(self, dimensions: tuple, name: str,
-                    detect_collision: bool = True):
+                    detect_collision: bool = True,
+                    dimension_object=False):
         """
         Add a new entry into the matrix, either creating a new row or adding to
             an existing row depending on `spacing` settings and distance.
@@ -663,10 +732,15 @@ class matrix():
             name: identifier for object
             detect_collision: check for object overlap/collisions when
                 appending to row
+            dimension_object: flag to treat `dimensions` as DimensionObject
+                instead of a tuple
         Return:
             None
         """
-        _temp_dimensions = DimensionsObject(dimensions)
+        if dimension_object:
+            _temp_dimensions = dimensions
+        else:
+            _temp_dimensions = DimensionsObject(dimensions)
         y = _temp_dimensions.y
         _row_index = None
         for _index, _head in self._heads.items():
@@ -689,15 +763,11 @@ class matrix():
         Sort Matrix by y coordinate of each row
         """
         for _row in self._row_list:
-            column_list = []
             _row.sort()
-            for _row_item in _row:
-                column = _row.columns.find_column(_row_item)
-                column_list.append(column)
-            print(column_list)
         self._row_list.sort(key=lambda _row: _row.head)
 
-    def prune(self, threshold: int, fill_hero: bool = True):
+    def prune(self, threshold: int, fill_hero: bool = True,
+              hard_threshold: int = 1):
         """
         Remove all rows that have a length less than the `threshold`
 
@@ -706,25 +776,30 @@ class matrix():
                 its length is less than this
             fill_hero: flag to attempt to fill missing hero locations in each
                 row that is below the threshold
+            hard_threshold: number that will trigger a row removal regardless
+                of if fill_hero is set to true
         Return:
             None
         """
         _prune_list = []
+        for _row in self._row_list:
+            for _row_item in _row:
+                _row.columns.find_column(_row_item)
 
         for _index, _row_object in enumerate(self._row_list):
             if len(_row_object) < threshold and _index != (
                     len(self._row_list) - 1):
-                if fill_hero:
-                    print("before: {}".format(_row_object))
+                if fill_hero and len(_row_object) > hard_threshold:
+                    # print("before: {}".format(_row_object))
                     _column_index = 0
                     while _column_index < len(self.columns.columns):
                         columns = [self.columns.find_column(
                             _row_item) for _row_item in _row_object]
-                        print(_column_index, columns,
-                              len(self.columns.columns))
+                        # print(_column_index, columns,
+                        #       len(self.columns.columns))
                         if _column_index not in columns:
-                            print("{} not in {}".format(
-                                _column_index, columns))
+                            # print("{} not in {}".format(
+                            #     _column_index, columns))
                             right_side = [
                                 _i for _i in columns if _i > _column_index]
                             left_side = [
@@ -740,17 +815,21 @@ class matrix():
                             else:
                                 closest_right = None
                             if closest_left and closest_right:
-                                left_row_object = _row_object._row_items[
+                                left_row_object = self.columns.columns[
                                     closest_left]
-                                right_row_object = _row_object._row_items[
+                                right_row_object = self.columns.columns[
                                     closest_right]
-                                left_x = left_row_object.dimensions.x2
-                                right_x = right_row_object.dimensions.x
+                                left_x = left_row_object.x2
+                                right_x = right_row_object.x
+                                # print("x1: {} x2: {}".format(
+                                # left_x, right_x))
                                 gap_size = right_x - left_x
                                 _avg_width = self.get_avg_width()
-                                missing_row_items = gap_size//_avg_width
-                                print("num missing:{} gap:{} item_w:{}".format(
-                                    missing_row_items, gap_size, _avg_width))
+                                # print(gap_size, _avg_width)
+                                missing_row_items = int(gap_size//_avg_width)
+                                # print("num missing:{} gap:{} item_w:{}"
+                                # .format(
+                                #     missing_row_items, gap_size, _avg_width))
 
                                 extra_gap = gap_size - \
                                     (missing_row_items*_avg_width)
@@ -772,11 +851,11 @@ class matrix():
                                 _avg_height = self.get_avg_height()
                                 _avg_width = self.get_avg_width()
 
-                                left_row_object = _row_object._row_items[
+                                left_row_object = self.columns.columns[
                                     closest_left]
 
                                 _avg_gap = self.get_avg_row_gap()
-                                left_x = left_row_object.dimensions.x2
+                                left_x = left_row_object.x2
                                 gap_size = self.source_width - left_x
                                 _leftover_gap = gap_size
 
@@ -793,10 +872,11 @@ class matrix():
                                     _leftover_gap -= (_avg_width + _avg_gap)
 
                             elif closest_right:
-                                right_row_object = _row_object._row_items[
+                                # print(closest_right)
+                                right_row_object = self.columns.columns[
                                     closest_right]
 
-                                right_x = right_row_object.dimensions.x
+                                right_x = right_row_object.x
                                 gap_size = right_x
 
                                 _avg_height = self.get_avg_height()
@@ -818,7 +898,7 @@ class matrix():
                                     _leftover_gap -= (_avg_width + _avg_gap)
 
                         _column_index += 1
-                    print("after: {}".format(_row_object))
+                    # print("after: {}".format(_row_object))
                 else:
                     _prune_list.append(_index)
             _row_object.sort()

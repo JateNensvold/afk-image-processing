@@ -10,7 +10,7 @@ import collections
 import numpy as np
 import image_processing.scripts.getSISize as siScript
 import multiprocessing
-import psutil
+# import psutil
 
 
 def rollingAverage(avg, newSample, size):
@@ -19,9 +19,10 @@ def rollingAverage(avg, newSample, size):
     return avg
 
 
-def get_si(image, image_name, debug_raw=False, imageDB=None):
+def get_si(roster_image, image_name, debug_raw=False, imageDB=None):
     if imageDB is None:
         imageDB = BD.get_db(enrichedDB=True)
+    # hero_ss = image
 
     baseImages = collections.defaultdict(dict)
 
@@ -97,7 +98,6 @@ def get_si(image, image_name, debug_raw=False, imageDB=None):
             baseImages[_si_name][_digit_name] = {}
         baseImages[_si_name][_digit_name]["v_scale"] = _v_scale
 
-    hero_ss = image
 
     # (hMin = 0 , sMin = 68, vMin = 170), (hMax = 35 , sMax = 91, vMax = 255)
     # lower_hsv = np.array([0, 68, 170])
@@ -120,7 +120,7 @@ def get_si(image, image_name, debug_raw=False, imageDB=None):
     hsv_range = [lower_hsv, upper_hsv]
     blur_args = {"hsv_range": hsv_range}
     heroesDict, rows = processing.getHeroes(
-        hero_ss, blur_args=blur_args)
+        roster_image, blur_args=blur_args)
 
     digit_bins = {}
 
@@ -213,7 +213,7 @@ def get_si(image, image_name, debug_raw=False, imageDB=None):
         coords = (coords[0], coords[1] + round(5 * height))
 
         cv2.putText(
-            hero_ss, result, coords, font, abs(fontScale), color, thickness,
+            roster_image, result, coords, font, abs(fontScale), color, thickness,
             cv2.LINE_AA)
     # test_names = set(_hero_name for _hero_name,
     #                  _hero_info_dict in heroesDict.items())
@@ -237,7 +237,7 @@ def get_si(image, image_name, debug_raw=False, imageDB=None):
                 hero_data.append(_raw_score)
             temp_list.append(hero_data)
         json_dict[image_name]["heroes"].append(temp_list)
-    print(psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2)
+    # print(psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2)
 
     return json_dict
 
@@ -299,7 +299,7 @@ def parallel_detect(info_dict):
     return_dict["pseudo_name"] = k
     return_dict["coords"] = coords
     # return_dict["name"] = hero
-    print(psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2)
+    # print(psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2)
     return return_dict
 
 

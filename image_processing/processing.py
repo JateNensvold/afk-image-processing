@@ -177,7 +177,8 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, display=None,
         image: hero roster screenshot
 
     Return:
-        dict with imageSize as key and coordinates(h, w, x, y) as values
+        dict with imageSize as key and
+            image_processing.stamina.DimensionalObject's as values
     """
 
     dilate = blur_image(image, **blurKwargs)
@@ -199,22 +200,22 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, display=None,
 
     # Iterate through contours and filter for ROI
     image_number = 0
-    sizes = {}
+    sizes: dict[int, list[stamina.DimensionsObject]] = {}
     heights = []
     widths = []
-    customContour = []
 
     idx = rtree.index.Index()
 
     for _index, c in enumerate(contours):
 
         x, y, w, h = cv2.boundingRect(c)
+        _dim_object = stamina.DimensionsObject((x, y, w, h))
         diff = abs(h-w)
         avg_h_w = ((h+w)/2)
         tolerance = avg_h_w * 0.2
 
         # if GV.DEBUG and display:
-        _idx_coords = (x, y, x+w, y+h)
+        _idx_coords = _dim_object.coords()
         _intersections = list(idx.intersection(_idx_coords))
         if _intersections:
             for _collision in _intersections:
@@ -222,7 +223,9 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, display=None,
                 pass
         else:
             idx.insert(_index, _idx_coords)
-            cv2.rectangle(image, (x, y), (x+w, y+h), (0, 0, 255), 2)
+            _split_coords = _dim_object.coords(single=False)
+            cv2.rectangle(
+                image, _split_coords[0], _split_coords[1], (0, 0, 255), 2)
 
             # print("cnt", x, y)
             # ROI = image[y:
@@ -232,34 +235,32 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, display=None,
             # cv2.drawContours(image, [c], -1, (0, 0, 255), thickness=2)
 
             # cv2.rectangle(image, (x, y), (x+w, y+h), (255, 0, 0), 2)
+        if diff < tolerance and (_dim_object.size()) > 2500:
+            _split_coords = _dim_object.coords(single=False)
 
-        if diff < tolerance and (h*w) > 2500:
+            # outside = []
 
-            a = x + w
-            b = y + h
+            # outside.append(_split_coords[0])
+            # outside.append(_split_coords[1])
 
-            outside = []
-
-            outside.append([x, y])
-            outside.append([a, b])
-            addStatus = True
-            for shape in customContour:
-                x1, y1 = shape[0]
-                a1, b1 = shape[1]
-                if not (a < x1 or a1 < x or b < y1 or b1 < y):
-                    addStatus = False
-                    break
-            if not addStatus:
-                continue
-
-            if h*w not in sizes:
-                sizes[h*w] = []
+            # addStatus = True
+            # for shape in customContour:
+            #     x1, y1 = shape[0]
+            #     a1, b1 = shape[1]
+            #     if not (a < x1 or a1 < x or b < y1 or b1 < y):
+            #         addStatus = False
+            #         break
+            # if not addStatus:
+            #     continue
+            _size = _dim_object.size()
+            if _size not in sizes:
+                sizes[_size] = []
             # sizes[h*w].append((h, w, x, y))
-            sizes[h*w].append((x, y, w, h))
+            sizes[_size].append(_dim_object)
 
-            customContour.append(outside)
-            heights.append(h)
-            widths.append(w)
+            # customContour.append(outside)
+            heights.append(_dim_object.h)
+            widths.append(_dim_object.w)
 
         image_number += 1
     load.display_image(image, display=(True and GV.DEBUG))
@@ -278,18 +279,20 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, display=None,
 
     occurrences = 0
     valid_sizes = {}
-    for size, dimensions in sizes.items():
+    for _name, _size_list in sizes.items():
 
-        for _coords in dimensions:
-            if (h_low <= _coords[3] <= h_high) or \
-                    (w_low <= _coords[2] <= w_high):
+        for _dimension_object in _size_list:
+            if (h_low <= _dimension_object.h <= h_high) or \
+                    (w_low <= _dimension_object.w <= w_high):
                 occurrences += 1
                 # if size not in valid_sizes:
                 #     valid_sizes[size] = []
+                # name = "{}x{}_{}x{}".format(
+                #     _coords[0], _coords[1], _coords[2], _coords[3])
                 name = "{}x{}_{}x{}".format(
-                    _coords[0], _coords[1], _coords[2], _coords[3])
+                    *_dimension_object.dimensional_values())
 
-                valid_sizes[name] = _coords
+                valid_sizes[name] = _dimension_object
 
     # length = len(contours)
     # for i in sizes.values():
@@ -336,7 +339,7 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
 
     heroes = {}
     baseArgs = (original_modifiable, sizeAllowanceBoundary)
-    multi_valid = []
+    multi_valid: list[dict[str, stamina.DimensionsObject]] = []
 
     # if maxHeroes:
     # multi_valid.append(getHeroContours(*baseArgs, dilate=True))
@@ -384,9 +387,9 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
     hero_heights = []
 
     for _heroes_list in multi_valid:
-        for _object_name, _object_dimensions in _heroes_list.items():
-            hero_widths.append(_object_dimensions[2])
-            hero_heights.append(_object_dimensions[3])
+        for _object_name, _dimension_object in _heroes_list.items():
+            hero_widths.append(_dimension_object.w)
+            hero_heights.append(_dimension_object.h)
     hero_widths.sort()
     hero_heights.sort()
 
@@ -397,8 +400,9 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
     image_width, image_height = image.shape[:2]
     hero_matrix = stamina.matrix(image_height, image_width, spacing=spacing)
     for _hero_list in multi_valid:
-        for _object_name, _object_dimensions in _hero_list.items():
-            hero_matrix.auto_append(_object_dimensions, _object_name)
+        for _object_name, _dimension_object in _hero_list.items():
+
+            hero_matrix.auto_append(_dimension_object, _object_name)
     # Sort before pruning so all columns get generated
     hero_matrix.sort()
     hero_matrix.prune(threshold=row_eliminate)
@@ -465,7 +469,8 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
 
                 _collision_item_id = _row.check_collision(_temp_row_item)
                 if _collision_item_id != -1:
-                    _merged_row_item = _row.get(_collision_item_id)
+                    _merged_row_item = _row.get(
+                        _collision_item_id, id_lookup=True)
                     _hero_name = _merged_row_item.name
 
                 ROI = original_unmodifiable[_merged_row_item.dimensions.y:
@@ -485,8 +490,8 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
 
             heroes[_hero_name]["object"] = _Row_item
 
-        columns = [_row.columns.find_column(_row_item) for _row_item in _row]
-        print(columns)
+        # columns = [_row.columns.find_column(_row_item) for _row_item in _row]
+        # print(columns)
         # load.display_image([heroes[_row_item.name]["image"]
         #                    for _row_item in _row], multiple=True,
         # display=True)
