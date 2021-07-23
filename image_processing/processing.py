@@ -423,6 +423,8 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
                                         y2,
                                         x:
                                         x2]
+            # load.display_image(ROI, display=True)
+
             if si_adjustment:
                 w = _Row_item.dimensions.w
                 h = _Row_item.dimensions.h
@@ -452,8 +454,10 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
                 # (dimensions, name)
                 _temp_row_item = stamina.RowItem(
                     (x2-new_w, y2-new_h, new_w, new_h))
+                # _temp_row_item.dimensions._display(GV.image_ss, display=True)
                 _collision_item_id = _row.check_collision(_temp_row_item)
                 _merged_row_item = _row.get(_collision_item_id, id_lookup=True)
+
                 # x, y, w, h = _merged_row_item.dimensions.coords()
 
                 w_border_offset = max(
@@ -477,8 +481,12 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
                                             _merged_row_item.dimensions.y2,
                                             _merged_row_item.dimensions.x:
                                             _merged_row_item.dimensions.x2]
+                if GV.DEBUG:
+                    _merged_coords = _merged_row_item.dimensions.coords(
+                        single=False)
+                    cv2.rectangle(GV.image_ss, _merged_coords[0],
+                                  _merged_coords[1], (255, 0, 0), 2)
             heroes[_hero_name] = {}
-
             if removeBG:
 
                 out, poly = remove_background(ROI)

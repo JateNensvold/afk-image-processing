@@ -98,7 +98,6 @@ def get_si(roster_image, image_name, debug_raw=False, imageDB=None):
             baseImages[_si_name][_digit_name] = {}
         baseImages[_si_name][_digit_name]["v_scale"] = _v_scale
 
-
     # (hMin = 0 , sMin = 68, vMin = 170), (hMax = 35 , sMax = 91, vMax = 255)
     # lower_hsv = np.array([0, 68, 170])
     # upper_hsv = np.array([35, 91, 255])
@@ -196,35 +195,28 @@ def get_si(roster_image, image_name, debug_raw=False, imageDB=None):
     fontScale = 0.5 * (rows.get_avg_width()/100)
 
     for _hero_data in reduced_values:
-        # name = "{}{}".format(_hero_data["si"], _hero_data["fi"])
-        name = _hero_data["pseudo_name"]
         result = _hero_data["result"]
-        coords = _hero_data["coords"]
-        # hero_name, baseHeroImage = imageDB.search(v["image"])
+        name = _hero_data["pseudo_name"]
         hero_name, _ = imageDB.search(heroesDict[name]["image"])
         result = "{} {}".format(hero_name, result)
         _hero_data["result"] = result
         return_dict[name] = _hero_data
-        # if "display" in _hero_data:
-        #     print("Failed to find fi score")
-        #     load.display_image(heroesDict[name]["image"], display=True)
-        text_size = cv2.getTextSize(result, font, fontScale, thickness)
-        height = text_size[0][1]
-        coords = (coords[0], coords[1] + round(5 * height))
+        if GV.VERBOSE_LEVEL >= 1:
+            coords = _hero_data["coords"]
+            text_size = cv2.getTextSize(result, font, fontScale, thickness)
+            height = text_size[0][1]
+            coords = (coords[0], coords[1] + round(5 * height))
 
-        cv2.putText(
-            roster_image, result, coords, font, abs(fontScale), color, thickness,
-            cv2.LINE_AA)
-    # test_names = set(_hero_name for _hero_name,
-    #                  _hero_info_dict in heroesDict.items())
-    # return_names = set(return_dict.keys())
+            cv2.putText(
+                roster_image, result, coords, font, abs(
+                    fontScale), color, thickness,
+                cv2.LINE_AA)
     json_dict = {}
     json_dict[image_name] = {}
     json_dict[image_name]["rows"] = len(rows)
     json_dict[image_name]["columns"] = max([len(_row) for _row in rows])
 
     json_dict[image_name]["heroes"] = []
-    # output_set = set(sorted(output.keys()))
 
     for _row in rows:
         temp_list = []
