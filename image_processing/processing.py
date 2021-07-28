@@ -324,7 +324,7 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
             returned
         si_adjustment: percent of the image dimensions to take on the left and
             top side of the image to ensure si30/40 capture during hero
-            detection(False/None for no adjustment)
+            contour re-evaluation(False/None for no adjustment)
         row_eliminate: minimum row size to allow (helps eliminate false
             positives i.e. similar size shapes as median hero shape) that are
             near the same size as the median hero detection)
@@ -397,7 +397,7 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
     hero_h_median = statistics.median(hero_heights)
 
     spacing = round((hero_w_median + hero_h_median)/10)
-    image_width, image_height = image.shape[:2]
+    image_height, image_width = image.shape[:2]
     hero_matrix = stamina.matrix(image_height, image_width, spacing=spacing)
     for _hero_list in multi_valid:
         for _object_name, _dimension_object in _hero_list.items():
@@ -447,48 +447,58 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
                 # Get largest contour
                 new_contours = sorted(new_contours, key=cv2.contourArea,
                                       reverse=True)[0]
-                new_x, new_y, new_w, new_h = cv2.boundingRect(new_contours)
-
+                contour_x, contour_y, contour_w, contour_h = cv2.boundingRect(
+                    new_contours)
+                # if GV.DEBUG:
                 # new_contours = [new_contours]
                 # cv2.fillPoly(modifiable_ROI, new_contours, [255, 0, 0])
+                # load.display_image(modifiable_ROI, display=True)
+
                 # (dimensions, name)
                 _temp_row_item = stamina.RowItem(
-                    (x2-new_w, y2-new_h, new_w, new_h))
-                # _temp_row_item.dimensions._display(GV.image_ss, display=True)
-                _collision_item_id = _row.check_collision(_temp_row_item)
-                _merged_row_item = _row.get(_collision_item_id, id_lookup=True)
+                    (x2-contour_w, y2-contour_h, contour_w, contour_h))
 
-                # x, y, w, h = _merged_row_item.dimensions.coords()
-
-                w_border_offset = max(
-                    round(0.03 * _merged_row_item.dimensions.w), 2)
-                h_border_offset = max(
-                    round(0.03 * _merged_row_item.dimensions.h), 2)
-                _temp_row_item.dimensions.x = max(x - w_border_offset, 0)
-                _temp_row_item.dimensions.y = max(y - h_border_offset, 0)
-                _temp_row_item.dimensions.w = _merged_row_item.dimensions.w + \
-                    w_border_offset
-                _temp_row_item.dimensions.h = _merged_row_item.dimensions.h + \
-                    h_border_offset
-
-                _collision_item_id = _row.check_collision(_temp_row_item)
+                _collision_item_id = _row.check_collision(
+                    _temp_row_item, size_allowance_boundary=0.07,
+                    avg_height=hero_matrix.get_avg_height(),
+                    avg_width=hero_matrix.get_avg_width(),
+                    avg_value_boundary=True)
                 if _collision_item_id != -1:
                     _merged_row_item = _row.get(
                         _collision_item_id, id_lookup=True)
                     _hero_name = _merged_row_item.name
 
+                w_border_offset = max(
+                    round(0.03 * _merged_row_item.dimensions.w), 2)
+                h_border_offset = max(
+                    round(0.03 * _merged_row_item.dimensions.h), 2)
+                _merged_row_item.dimensions.x = max(
+                    _merged_row_item.dimensions.x - w_border_offset, 0)
+                _merged_row_item.dimensions.y = max(
+                    _merged_row_item.dimensions.y - h_border_offset, 0)
+
+                # _merged_row_item.dimensions._display(GV.image_ss,
+                #                                      display=True)
+
                 ROI = original_unmodifiable[_merged_row_item.dimensions.y:
                                             _merged_row_item.dimensions.y2,
                                             _merged_row_item.dimensions.x:
                                             _merged_row_item.dimensions.x2]
+                # load.display_image([ROI, new_ROI], display=True,
+                #                    multiple=True)
+                # ROI = new_ROI
                 if GV.DEBUG:
                     _merged_coords = _merged_row_item.dimensions.coords(
                         single=False)
                     cv2.rectangle(GV.image_ss, _merged_coords[0],
                                   _merged_coords[1], (255, 0, 0), 2)
             heroes[_hero_name] = {}
+            if GV.VERBOSE_LEVEL >= 1:
+                h, w = ROI.shape[:2]
+                _coords = _merged_row_item.dimensions.coords(single=False)
+                cv2.rectangle(
+                    GV.image_ss, _coords[0], _coords[1], (0, 0, 0), 2)
             if removeBG:
-
                 out, poly = remove_background(ROI)
 
                 heroes[_hero_name]["image"] = out
@@ -502,7 +512,7 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
         # print(columns)
         # load.display_image([heroes[_row_item.name]["image"]
         #                    for _row_item in _row], multiple=True,
-        # display=True)
+        #                    display=True)
 
     return heroes, hero_matrix
 

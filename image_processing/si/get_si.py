@@ -267,6 +267,10 @@ def parallel_detect(info_dict):
             best_si = "30"
         elif si_scores["20"] > 0.7:
             best_si = "20"
+        elif si_scores["10"] > 0.55:
+            best_si = "10"
+        elif si_scores["10"] < 0.55 and si_scores["0"] > 0.75:
+            best_si = "00"
         elif si_scores["10"] > 0.50:
             best_si = "10"
         else:
@@ -298,7 +302,8 @@ def parallel_detect(info_dict):
 if __name__ == "__main__":
     # pool = multiprocessing.Pool()
     json_dict = get_si(GV.image_ss, GV.image_ss_name, debug_raw=True,)
-    load.display_image(GV.image_ss, display=True)
+    if GV.VERBOSE_LEVEL >= 1:
+        load.display_image(GV.image_ss, display=True)
 
     print(json_dict)
     # with open("temp.json", "w") as f:

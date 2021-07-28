@@ -25,7 +25,8 @@ class DimensionsObject:
         Create a Dimensions object to hold x,y coordinates as well as
             width and height. Any changes made to x(x2) or y(y2)
             coordinates will update the corresponding 'w' or 'h' object
-            for that dimension.
+            for that dimension. Because of this capability always modify,
+            x/x2/y/y2 when trying to change width and height.
         Args:
             dimensions: tuple containing (x,y, width, height)
             full_number: flag to enforce all 'DimensionObject' values to
@@ -91,21 +92,83 @@ class DimensionsObject:
         self.w = int(self.w)
         self.h = int(self.h)
 
-    def merge(self, dimensions_object: "DimensionsObject"):
+    def merge(self, dimensions_object: "DimensionsObject",
+              size_allowance_boundary=None, avg_value_boundary=False,
+              avg_width=None, avg_height=None):
         """
         Combine two DimensionsObject into the existing DimensionsObject object
         Args:
             dimensions_object: DimensionsObject to absorb
+            size_allowance_boundary: optional flag/int used to limit the size
+                of a merge for any given coordinate. If the distance between
+                the two merging coordinates are more than this number no merge
+                will occur
+            avg_value_boundary: flag to use size_allowance_boundary on
+                'avg_width' and 'avg_height' arguments rather than the stored
+                width and height
+            avg_width: width value to calculate maximum size boundary change
+                with, meant to simulate the "average" width of whatever this
+                dimensional object is representing
+            avg_height: height value to calculate maximum size boundary change
+                with, meant to simulate the "average" height of whatever this
+                dimensional object is representing
         """
-        self.x = min(self.x, dimensions_object.x)
-        self.y = min(self.y, dimensions_object.y)
-        self.x2 = max(self.x2, dimensions_object.x2)
-        self.y2 = max(self.y2, dimensions_object.y2)
+        # width and height automatically update when setting x/x2/y/y2 values
 
-        self.w = self.x2 - self.x
-        self.h = self.y2 - self.y
-        if self.full_number:
-            self._truncate_values()
+        if size_allowance_boundary is not None:
+
+            def print_fail(size_type, current_size, new_size, size_boundary,
+                           size_change):
+                if GV.VERBOSE_LEVEL >= 1:
+                    print("Failed to update {} from ({}) to ({}) due to"
+                          " boundary limit({}) < boundary size({:.2f})".format(
+                              size_type, current_size, new_size, size_boundary,
+                              size_change))
+
+            new_x = min(self.x, dimensions_object.x)
+            new_y = min(self.y, dimensions_object.y)
+            new_x2 = max(self.x2, dimensions_object.x2)
+            new_y2 = max(self.y2, dimensions_object.y2)
+
+            x_change = abs(new_x - self.x)
+            y_change = abs(new_y - self.y)
+            x2_change = abs(new_x2 - self.x2)
+            y2_change = abs(new_y2 - self.y2)
+
+            if avg_value_boundary:
+                if avg_width:
+                    max_width_change = size_allowance_boundary * avg_width
+                if avg_height:
+                    max_height_change = size_allowance_boundary * avg_height
+            else:
+                max_width_change = self.w * size_allowance_boundary
+                max_height_change = self.h * size_allowance_boundary
+
+            if x_change < max_width_change:
+                self.x = new_x
+            else:
+                print_fail("x", self.x, new_x, size_allowance_boundary,
+                           x_change/self.w)
+            if y_change < max_height_change:
+                self.y = new_y
+            else:
+                print_fail("y", self.y, new_y, size_allowance_boundary,
+                           y_change/self.h)
+            if x2_change < max_width_change:
+                self.x2 = new_x2
+            else:
+                print_fail("x2", self.x2, new_x2, size_allowance_boundary,
+                           x2_change/self.w)
+            if y2_change < max_height_change:
+                self.y2 = new_y2
+            else:
+                print_fail("y2", self.y2, new_y2, size_allowance_boundary,
+                           y2_change/self.h)
+        else:
+            self.x = min(self.x, dimensions_object.x)
+            self.y = min(self.y, dimensions_object.y)
+            self.x2 = max(self.x2, dimensions_object.x2)
+            self.y2 = max(self.y2, dimensions_object.y2)
 
     def coords(self, single=True) -> list:
         """
@@ -164,7 +227,8 @@ class DimensionsObject:
                 and 'dim_object' percent overlap
         """
         raw_overlap = self.overlap(dim_object)
-        return (raw_overlap, raw_overlap/self.size(), raw_overlap/dim_object.size())
+        return (raw_overlap, raw_overlap/self.size(),
+                raw_overlap/dim_object.size())
 
     def _display(self, image: np.ndarray, *args, **kwargs):
         ROI = image[self.y:
@@ -175,6 +239,10 @@ class DimensionsObject:
 
 
 class ColumnObjects:
+
+    def __str__(self):
+
+        return "".join([str((_c.x, _c.x2)) for _c in self.columns])
 
     def __init__(self, matrix: "matrix"):
         """
@@ -292,7 +360,7 @@ class ColumnObjects:
                         return None
                 else:
                     index = max_tuple[0]
-                columns = [_c.coords() for _c in self.columns]
+                # columns = [_c.coords() for _c in self.columns]
                 # print(index, columns,
                 #       len(self.columns))
                 return index
@@ -314,7 +382,15 @@ class ColumnObjects:
 
         columns_width = max_x - min_x
         avg_column_width = sum([_i.w for _i in self.columns])/len(self.columns)
-        num_columns = round(columns_width/avg_column_width)
+        num_columns = int(columns_width/avg_column_width)
+        adjusted_avg_column_w = avg_column_width * 0.75
+        last_min = self.columns[0].x2
+        missing_columns = 0
+        for _c in self.columns:
+            if _c.x - last_min > adjusted_avg_column_w:
+                missing_columns += 1
+            last_min = _c.x2
+        num_columns += missing_columns
         column_size = int(columns_width//num_columns)
         remainder = columns_width - column_size * \
             num_columns
@@ -336,6 +412,20 @@ class ColumnObjects:
             self.column_rtree.insert(id(_column), _column.coords())
         # Add any changed/new items to column_id_to_index
         self._sort()
+
+    def _display(self, image: np.ndarray, *args, **kwargs):
+        # ROI = image[self.y:
+        #             self.y2,
+        #             self.x:
+        #             self.x2]
+        ROI_list = []
+        for _d in self.columns:
+            ROI = image[_d.y:_d.y2, _d.x:_d.x2]
+            h, w = ROI.shape[:2]
+            cv2.rectangle(ROI, (0, 0), (w, h), (0, 0, 0), 2)
+            ROI_list.append(ROI)
+        print(len(ROI_list))
+        load.display_image(ROI_list, *args, multiple=True, ** kwargs)
 
     def _sort(self):
         """
@@ -407,7 +497,6 @@ class ColumnObjects:
                 self.column_rtree.insert(id(_column), _column.coords())
 
         else:
-
             self.column_rtree.insert(
                 new_column_id, column_dimensions_object.coords())
             self.column_id_to_index[new_column_id] = len(
@@ -481,13 +570,13 @@ class RowItem():
         """
         return self.dimensions[index]
 
-    def merge(self, row_item: "RowItem"):
+    def merge(self, row_item: "RowItem", **dimension_object_kwargs):
         """
         Combine two RowItem into the existing RowItem object
         Args:
             row_item: RowItem to absorb
         """
-        self.dimensions.merge(row_item.dimensions)
+        self.dimensions.merge(row_item.dimensions, **dimension_object_kwargs)
         self.alias.add(row_item.name)
 
         self.alias.update(row_item.alias)
@@ -621,6 +710,10 @@ class row():
         else:
             return None
 
+    def get_average(self):
+        width_list = [_row_item.dimensions.w for _row_item in self._row_items]
+        return np.mean(width_list)
+
     def _add_average(self, new_num: int) -> int:
         """
         Calculate running average width of row with 'new_num' updating the
@@ -671,8 +764,8 @@ class row():
 
             # If collision is successful, don't return\
             if _collision_status != -1:
-                output = _temp_RowItem.dimensions.overlap(
-                    self._row_items_by_id[_collision_status].dimensions)
+                # output = _temp_RowItem.dimensions.overlap(
+                #     self._row_items_by_id[_collision_status].dimensions)
                 # print("collision", _collision_status,
                 #       output/_temp_RowItem.dimensions.size())
                 return _collision_status
@@ -680,8 +773,8 @@ class row():
         self._row_items_by_name[name] = _temp_RowItem
         self._row_items_by_id[_temp_id] = _temp_RowItem
 
-        avg_width = self._add_average(_temp_RowItem.dimensions.w)
-        self.avg_width = avg_width
+        # avg_width = self._add_average(_temp_RowItem.dimensions.w)
+        # self.avg_width = avg_width
         self._row_items.append(_temp_RowItem)
 
         self.rtree.insert(id(_temp_RowItem),
@@ -690,17 +783,15 @@ class row():
         return _collision_status
 
     def check_collision(self, new_row_item: RowItem,
-                        size_allowance_boundary: int = 0.25,
                         resolve_error: bool = True,
-                        collision_overlap=0.75):
+                        collision_overlap=0.75,
+                        **dimension_object_kwargs):
         """
         Check if row_item's dimensions overlap with any of the objects
             in the row object, and merge collision_object with overlaping
             object if collisions is detected
         Args:
             row_item: new RowItem to check against existing RowItems
-            size_allowance_boundary: percent size that collision image must be
-                within the average of all other images in row
             resolve_error: flag to resolve errors when multi RowItem collisions
                 occur and return the item with the greatest overlap
             collision_overlap: if the collision is any less than this number
@@ -716,53 +807,26 @@ class row():
         if len(_intersections_list) == 1:
             _intersection_id = _intersections_list[0]
 
-            _collision_row_item = self._row_items_by_id[_intersection_id]
-            _collision_item_coordinates = _collision_row_item.\
-                dimensions.coords()
-
-            old_coords = _collision_row_item.dimensions.coords()
-            old_width = _collision_row_item.dimensions.w
-
-            _collision_tuple = _collision_row_item.dimensions._overlap_percent(
-                new_row_item.dimensions)
-            # print(_collision_tuple)
-            if _collision_tuple[2] < collision_overlap:
-                return _intersection_id
-            _collision_row_item.merge(new_row_item)
-
-            new_coords = _collision_row_item.dimensions.coords()
-            new_width = _collision_row_item.dimensions.w
-            if new_coords != old_coords:
-                self.rtree.delete(_intersection_id,
-                                  _collision_item_coordinates)
-                if old_width != new_width:
-                    removed_width = self._remove_average(old_width)
-                    self.avg_width = removed_width
-                    removed_width = self._add_average(new_width)
-                    self.avg_width = removed_width
-
-                self.rtree.insert(_intersection_id,
-                                  _collision_row_item.dimensions.coords())
-            return _intersection_id
+            return self._merge(_intersection_id, new_row_item,
+                               collision_overlap, **dimension_object_kwargs)
         elif len(_intersections_list) > 1:
             _intersection_objects = [
                 self._row_items_by_id[_intersection_id]
                 for _intersection_id in _intersections_list]
+            # Attempt to merge with largest collision object
             if resolve_error:
                 overlap_list: tuple[int, int] = []
                 for _row_item in _intersection_objects:
-                    overlap = _row_item.dimensions.overlap(
+                    overlap_tuple = _row_item.dimensions._overlap_percent(
                         new_row_item.dimensions)
-                    overlap_list.append((id(_row_item), overlap))
+                    overlap_list.append((id(_row_item), overlap_tuple))
                 # print(overlap_list)
                 max_overlap_tuple = max(
                     overlap_list, key=lambda overlap_tuple: overlap_tuple[1])
-                return max_overlap_tuple[0]
+                return self._merge(max_overlap_tuple[0], new_row_item,
+                                   collision_overlap,
+                                   **dimension_object_kwargs)
 
-                # raise Exception("More than one intersection occurred "
-                #                 "between {} and {}".format(
-                #                     new_row_item,
-                #                     _intersection_objects))
             raise Exception("More than one intersection occurred "
                             "between {} and {}".format(
                                 new_row_item,
@@ -770,6 +834,53 @@ class row():
         else:
             # No intersection at all
             return -1
+
+    def _merge(self, collision_item_id: int, new_row_item: RowItem,
+               collision_overlap: int,
+               **dimension_object_kwargs):
+        """
+            Merge RowItem that corresponds with 'collision_item_id' 'and
+            new_row_item' when collision_overlap threshold is met
+        Args:
+            collision_item_id: id of RowItem in row
+            new_row_item: RowItem to merge with 'RowItem' corresponding with
+                'collision_item_id'
+            collision_overlap: if the collision is any less than this number
+                return the collision index but don't merge
+        Return:
+            'collision_item_id'(int)
+        """
+        _collision_row_item = self._row_items_by_id[collision_item_id]
+        _collision_item_coordinates = _collision_row_item.\
+            dimensions.coords()
+
+        old_coords = _collision_row_item.dimensions.coords()
+        # old_width = _collision_row_item.dimensions.w
+
+        _collision_tuple = _collision_row_item.dimensions._overlap_percent(
+            new_row_item.dimensions)
+        if _collision_tuple[2] < collision_overlap:
+            if GV.VERBOSE_LEVEL >= 1:
+                print("Collision overlap({}) was below collision"
+                      " threshold({}), returning collision ID with"
+                      " no update".format(
+                          _collision_tuple[2], collision_overlap))
+            return collision_item_id
+
+        _collision_row_item.merge(new_row_item, **dimension_object_kwargs)
+
+        # new_width = _collision_row_item.dimensions.w
+        if _collision_row_item.dimensions.coords() != old_coords:
+            self.rtree.delete(collision_item_id,
+                              _collision_item_coordinates)
+            # if old_width != new_width:
+            #     removed_width = self._remove_average(old_width)
+            #     self.avg_width = removed_width
+            #     removed_width = self._add_average(new_width)
+            #     self.avg_width = removed_width
+            self.rtree.insert(collision_item_id,
+                              _collision_row_item.dimensions.coords())
+        return collision_item_id
 
     def sort(self):
         '''
@@ -836,8 +947,10 @@ class matrix():
         """
         Return the average width of RowItems in the matrix
         """
-        avg_width = [_row.avg_width for _row in self._row_list]
-        return np.mean(avg_width)
+        # avg_width = [_row.avg_width for _row in self._row_list]
+        # print(np.mean(avg_width))
+        avg_width_list = [_row.get_average() for _row in self._row_list]
+        return np.mean(avg_width_list)
 
     def get_avg_height(self):
         """
@@ -1070,7 +1183,8 @@ class matrix():
                 self._row_list.pop(_index)
                 del self._heads[_index]
 
-    def _balance(self, width_diff=0.1):
+    def _balance(self, width_diff_threshold=0.1,
+                 height_diff_threshold=0.1):
         """
         Balance self.columns object so all columns that are adjacent have
             equal width, additionally iterate through matrix object and adjust
@@ -1078,24 +1192,57 @@ class matrix():
         """
         self.columns.balance()
         avg_w = self.get_avg_width()
-        adjusted_avg_w = avg_w * (1+width_diff)
+        avg_h = self.get_avg_height()
+        width_diff = width_diff_threshold*avg_w
+        height_diff = height_diff_threshold*avg_h
+
+        adjusted_avg_w = avg_w + width_diff
+        adjusted_avg_h = avg_h + height_diff
 
         for _row in self._row_list:
+            _row_bottom = _row._get_row_bottom()
+            _row_top = _row_bottom - avg_h
+            _adjusted_row_top = _row_bottom - adjusted_avg_h
+
             for _row_item in _row:
+                # _row_item.dimensions._display(GV.image_ss, display=True)
                 _index = self.columns.find_column(_row_item)
                 _column = self.columns[_index]
                 if _row_item.dimensions.x < _column.x:
+                    print("x edit", _row_item.dimensions.x, _column.x)
                     _row_item.dimensions.x = max(
                         _row_item.dimensions.x, _column.x)
                 if _row_item.dimensions.x2 > _column.x2:
+                    print("x2 edit", _row_item.dimensions.x2, _column.x2)
                     _row_item.dimensions.x2 = min(
                         _row_item.dimensions.x2, _column.x2)
-                if (_row_item.dimensions.w > adjusted_avg_w or
-                        _row_item.dimensions.w >
-                        _row_item.dimensions.h * 1+width_diff):
+                if _row_item.dimensions.y > _adjusted_row_top:
+                    print("y edit", _row_item.dimensions.y, _row_top)
+                    _row_item.dimensions.y = _row_top
+
+                if _row_item.dimensions.y2 < (_row_bottom *
+                                              (1 + height_diff_threshold)):
+                    print("y2 edit", _row_item.dimensions.y2, _row_bottom)
+                    _row_item.dimensions.y2 = _row_bottom
+
+                if (abs(_row_item.dimensions.w
+                        - adjusted_avg_w) > (width_diff) or
+                        _row_item.dimensions.w -
+                        _row_item.dimensions.h > width_diff):
                     _row_item.dimensions.x = max(
                         _row_item.dimensions.x, _column.x)
                     _row_item.dimensions.x2 = _row_item.dimensions.x + avg_w
+                if (abs(_row_item.dimensions.h
+                        - adjusted_avg_h) > height_diff or
+                        _row_item.dimensions.h -
+                        _row_item.dimensions.w > height_diff):
+                    _row_item.dimensions.y = max(
+                        _row_item.dimensions.y,
+                        (_row_bottom - avg_h))
+                    _row_item.dimensions.y2 = _row_item.dimensions.y + avg_h
+                # print(self.columns)
+                # _row_item.dimensions._display(GV.image_ss, display=True)
+                # self.columns._display(GV.image_ss, display=True)
 
 
 def cachedproperty(func):
@@ -1296,6 +1443,7 @@ def signatureItemFeatures(hero: np.array,
             image
     """
     x, y, _ = hero.shape
+
     x_div = 2.4
     y_div = 2.0
     hero_copy = hero.copy()
@@ -1329,32 +1477,40 @@ def signatureItemFeatures(hero: np.array,
             mask_gray = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
             # mask_gray = mask
 
-            height, width = si_image.shape[:2]
+            # height, width = si_image.shape[:2]
 
             # sizedROI = cv2.resize(
             #     hero, (int(x * image_ratio), int(y * image_ratio)))
             if folder_name != "0":
                 mask_gray = cv2.bitwise_not(mask_gray)
             # if folder_name == "10":
-            # load.display_image(mask_gray, display=True)
 
             try:
-                templateMatch = cv2.matchTemplate(
-                    hero_gray, si_image_gray, cv2.TM_CCOEFF_NORMED,
-                    mask=mask_gray)
-            except Exception:
-                if crop_hero.shape[0] < si_image.shape[0] or \
-                        crop_hero.shape[1] < si_image.shape[1]:
-                    _height, _width = si_image.shape[:2]
-                    crop_hero = hero[0: max(int(y/y_div), int(_height*1.2)),
-                                     0: max(int(x/x_div), int(_width*1.2))]
+                try:
+                    templateMatch = cv2.matchTemplate(
+                        hero_gray, si_image_gray, cv2.TM_CCOEFF_NORMED,
+                        mask=mask_gray)
+                except Exception:
 
-                    hero_gray = cv2.cvtColor(crop_hero, cv2.COLOR_BGR2GRAY)
-                templateMatch = cv2.matchTemplate(
-                    hero_gray, si_image_gray, cv2.TM_CCOEFF_NORMED,
-                    mask=mask_gray)
-            (_, score, _, scoreLoc) = cv2.minMaxLoc(templateMatch)
-            coords = (scoreLoc[0] + width, scoreLoc[1] + height)
+                    if crop_hero.shape[0] < si_image_gray.shape[0] or \
+                            crop_hero.shape[1] < si_image_gray.shape[1]:
+                        _height, _width = si_image_gray.shape[:2]
+                        crop_hero = hero[0: max(int(y/y_div),
+                                                int(_height*1.2)),
+                                         0: max(int(x/x_div),
+                                                int(_width*1.2))]
+                        hero_gray = cv2.cvtColor(crop_hero, cv2.COLOR_BGR2GRAY)
+                    templateMatch = cv2.matchTemplate(
+                        hero_gray, si_image_gray, cv2.TM_CCOEFF_NORMED,
+                        mask=mask_gray)
+                (_, score, _, scoreLoc) = cv2.minMaxLoc(templateMatch)
+                height, width = si_image.shape[:2]
+                coords = (scoreLoc[0] + width, scoreLoc[1] + height)
+            except Exception as e:
+                raise IndexError(
+                    "Si Size({}) is larger than source image({}),"
+                    " check if source image is valid".format(
+                        si_image.shape[:2], hero.shape[:2])) from e
 
             if folder_name not in numberScore:
                 numberScore[folder_name] = []
@@ -1366,16 +1522,16 @@ def signatureItemFeatures(hero: np.array,
         _best_match = numberScore[_folder][-1]
         _score_loc = _best_match[2][0]
         _coords = _best_match[2][1]
+        if GV.VERBOSE_LEVEL >= 1:
+            cv2.rectangle(hero_copy, _score_loc, _coords, (255, 0, 0), 1)
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            fontScale = 0.5
+            color = (255, 0, 0)
+            thickness = 2
 
-        cv2.rectangle(hero_copy, _score_loc, _coords, (255, 0, 0), 1)
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        fontScale = 0.5
-        color = (255, 0, 0)
-        thickness = 2
-
-        cv2.putText(
-            hero_copy, _folder, _coords, font, fontScale, color, thickness,
-            cv2.LINE_AA)
+            cv2.putText(
+                hero_copy, _folder, _coords, font, fontScale, color, thickness,
+                cv2.LINE_AA)
         best_score[_folder] = round(_best_match[0], 3)
     # print(best_score)
     # load.display_image(hero_copy, display=True)
