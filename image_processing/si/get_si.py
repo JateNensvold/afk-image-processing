@@ -11,7 +11,7 @@ import numpy as np
 import image_processing.scripts.getSISize as siScript
 import multiprocessing
 from detectron2.engine import DefaultPredictor
-from detectron2.config import get_cfg, CfgNode
+from detectron2.config import get_cfg
 from detectron2 import model_zoo
 
 # from detectron2.checkpoint import DetectionCheckpointer
@@ -20,7 +20,7 @@ from detectron2 import model_zoo
 import torch
 # import psutil
 import warnings
-warnings.filterwarnings("ignore") 
+warnings.filterwarnings("ignore")
 MODEL = None
 BORDER_MODEL = None
 
@@ -280,9 +280,12 @@ def parallel_detect(info_dict):
     global MODEL
     if not MODEL:
         MODEL = torch.hub.load(
-            '/home/nate/projects/afk-image-processing/image_processing/fi/fi_detection/yolov5',
+            '/ home/nate/projects/afk-image-processing/image_processing/fi /" \
+                               "fi_detection/yolov5',
             "custom",
-            "/home/nate/projects/afk-image-processing/image_processing/fi/fi_detection/yolov5/runs/train/yolov5s_results_v22/weights/best.pt",
+            "/home/nate/projects/afk-image-processing/image_processing/fi/"
+            "fi_detection/yolov5/runs/train/yolov5s_results_v22/"
+            "weights/best.pt",
             source="local",
             force_reload=True,
             verbose=False)
@@ -350,8 +353,6 @@ def parallel_detect(info_dict):
                             final_star_results["confidence"]}
         if final_star_results["confidence"] > 0.8:
             star = True
-        #     best_ascension = " "
-        #     ascension_scores = {best_ascension: 1.0}
     if not star:
         global BORDER_MODEL
         if not BORDER_MODEL:
@@ -366,7 +367,9 @@ def parallel_detect(info_dict):
             # Let training initialize from model zoo
             # cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(
             #     "COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml")
-            cfg.MODEL.WEIGHTS = "detectron2://COCO-Detection/faster_rcnn_R_50_FPN_3x/137849458/model_final_280758.pkl"
+            cfg.MODEL.WEIGHTS = (
+                "detectron2://COCO-Detection/"
+                "faster_rcnn_R_50_FPN_3x/137849458/model_final_280758.pkl")
 
             cfg.SOLVER.IMS_PER_BATCH = 2
             cfg.SOLVER.BASE_LR = 0.00025
@@ -376,26 +379,21 @@ def parallel_detect(info_dict):
 
             cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 64
             cfg.MODEL.ROI_HEADS.NUM_CLASSES = 8
-            # cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
 
             # cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.8
-            cfg.MODEL.WEIGHTS = "/home/nate/projects/afk-image-processing/image_processing/fi/fi_detection/output/model_final.pth"
+            cfg.MODEL.WEIGHTS = ("/home/nate/projects/afk-image-processing/"
+                                 "image_processing/fi/fi_detection/"
+                                 "hero_border_model_output/model_final.pth")
             cfg.MODEL.ROI_HEADS.NUM_CLASSES = len(border_labels)
             BORDER_MODEL = DefaultPredictor(cfg)
-        # BORDER_MODEL = torch.hub.load(
-        #     '/home/nate/projects/afk-image-processing/image_processing/fi/fi_detection/yolov5',
-        #     "custom",
-        #     "/home/nate/projects/afk-image-processing/image_processing/fi/fi_detection/yolov5/runs/train/yolov5s_results_v3/weights/best.pt",
-        #     source="local",
-        #     force_reload=True,
-        #     verbose=False)
 
         raw_border_results = BORDER_MODEL(test_img)
         border_results = raw_border_results["instances"]
         # print(border_results)
         classes = border_results.pred_classes.cpu().tolist()
         scores = border_results.scores.cpu().tolist()
-        best_class = list(zip([border_labels[class_num] for class_num in classes], scores))[0]
+        best_class = list(zip([border_labels[class_num]
+                          for class_num in classes], scores))[0]
         # # pred_class_names = list(map(lambda x: class_names[x], classes))
         # # print(pred_class_names)
         # scores = border_results["scores"]
