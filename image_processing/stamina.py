@@ -1209,20 +1209,20 @@ class matrix():
                 _index = self.columns.find_column(_row_item)
                 _column = self.columns[_index]
                 if _row_item.dimensions.x < _column.x:
-                    print("x edit", _row_item.dimensions.x, _column.x)
+                    # print("x edit", _row_item.dimensions.x, _column.x)
                     _row_item.dimensions.x = max(
                         _row_item.dimensions.x, _column.x)
                 if _row_item.dimensions.x2 > _column.x2:
-                    print("x2 edit", _row_item.dimensions.x2, _column.x2)
+                    # print("x2 edit", _row_item.dimensions.x2, _column.x2)
                     _row_item.dimensions.x2 = min(
                         _row_item.dimensions.x2, _column.x2)
                 if _row_item.dimensions.y > _adjusted_row_top:
-                    print("y edit", _row_item.dimensions.y, _row_top)
+                    # print("y edit", _row_item.dimensions.y, _row_top)
                     _row_item.dimensions.y = _row_top
 
                 if _row_item.dimensions.y2 < (_row_bottom *
                                               (1 + height_diff_threshold)):
-                    print("y2 edit", _row_item.dimensions.y2, _row_bottom)
+                    # print("y2 edit", _row_item.dimensions.y2, _row_bottom)
                     _row_item.dimensions.y2 = _row_bottom
 
                 if (abs(_row_item.dimensions.w
@@ -1777,6 +1777,7 @@ def furnitureItemFeatures(hero: np.array, fi_dict: dict,
         _coords = _best_match[2][1]
         cv2.rectangle(blur_hero, _score_loc, _coords, (255, 0, 0), 1)
         best_score[_folder] = _best_match[0]
+        print(best_score[_folder])
 
     return best_score
 

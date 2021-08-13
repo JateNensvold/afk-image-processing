@@ -13,6 +13,7 @@ from detectron2 import model_zoo
 from detectron2.config import get_cfg
 from detectron2.engine import DefaultTrainer
 from detectron2.utils.visualizer import Visualizer
+import matplotlib.pyplot as plt
 
 INFO = {
     "description": "AFK Arena Hero Info Dataset",
@@ -32,30 +33,40 @@ LICENSES = [
 ]
 
 CATEGORIES = {
-    "none": {
+    "elite": {
         'id': 0,
-        'name': 'none_si',
-        'supercategory': 'si',
+        'name': 'elite',
+        'supercategory': 'border',
     },
-    "0": {
+    "elite+": {
         'id': 1,
-        'name': '0_si',
-        'supercategory': 'si',
+        'name': 'elite+',
+        'supercategory': 'border',
     },
-    "10": {
+    "legendary": {
         'id': 2,
-        'name': '10_si',
-        'supercategory': 'si',
+        'name': 'legendary',
+        'supercategory': 'border',
     },
-    "20": {
+    "legendary+": {
         'id': 3,
-        'name': '20_si',
-        'supercategory': 'si',
+        'name': 'legendary+',
+        'supercategory': 'border',
     },
-    "30": {
+    "mythic": {
         'id': 4,
-        'name': '30_si',
-        'supercategory': 'si',
+        'name': 'mythic',
+        'supercategory': 'border',
+    },
+    "mythic+": {
+        'id': 5,
+        'name': 'mythic+',
+        'supercategory': 'border',
+    },
+    "ascended": {
+        'id': 6,
+        'name': 'ascended',
+        'supercategory': 'border',
     },
 }
 
@@ -79,8 +90,9 @@ def get_dataset_function():
 
 
 def init():
-    csvfile = open("./si_data.txt", "r")
-    jsonfile = open("./si_data.json", "w")
+    csvfile = open(
+        "/home/nate/projects/afk-image-processing/export-2021-08-06T03_10_14.517Z.json", "r")
+    jsonfile = open("./border_data_coco.json", "w")
 
     fieldNames = ["path", "left", "bottom", "right", "top", "label"]
     reader = csv.DictReader(csvfile, fieldNames)
@@ -216,7 +228,6 @@ def classify():
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.7
     predictor = DefaultPredictor(cfg)
     SI_metadata = MetadataCatalog.get("AFK_arena_SI_info")
-    import matplotlib.pyplot as plt
     directory = "./backup/30"
     for imagePath in sorted(os.listdir(directory)):
         im = cv2.imread(os.path.join(directory, imagePath))
@@ -239,5 +250,5 @@ def classify():
 
 if __name__ == "__main__":
 
-    # init()
-    classify()
+    init()
+    # classify()

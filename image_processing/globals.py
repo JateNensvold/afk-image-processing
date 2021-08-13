@@ -1,6 +1,8 @@
 import os
 import cv2
 import argparse
+import logging
+
 parser = argparse.ArgumentParser(description='AFK arena object extraction and '
                                  'image analysis.')
 parser.add_argument("-d", "--DEBUG", help="Runs the program in debug mode,"
@@ -16,7 +18,7 @@ parser.add_argument("-v", "--verbose", help="Increase verbosity of output"
                     "from image processing", action='count', default=0)
 parser.add_argument("-p", "--parallel", help="Utilize as many cores as"
                     "possible while processing",
-                    choices=["True", "False"], default="True")
+                    choices=["True", "False"], default="False")
 args = parser.parse_args()
 
 DEBUG = args.DEBUG
@@ -25,6 +27,10 @@ PARALLEL = True if args.parallel.lower() in ["true"] else False
 image_ss = None
 image_ss_name = None
 VERBOSE_LEVEL = args.verbose
+
+if VERBOSE_LEVEL == 0:
+    logging.disable(logging.INFO)
+
 
 # Stores cached function results
 CACHED = {}
@@ -47,8 +53,8 @@ database_icon_path = os.path.join(database_path, "hero_icon")
 flannPath = os.path.join(database_path, "baseHeroes.flann")
 database_pickle = os.path.join(database_path, 'imageDB.pickle')
 
-staminaTemplatesPath = os.path.join(baseDir, "stamina_templates")
-levelTemplatesPath = os.path.join(baseDir, "level_templates")
+staminaTemplatesPath = os.path.join(database_path, "stamina_templates")
+# levelTemplatesPath = os.path.join(baseDir, "level_templates")
 
 
 siPath = os.path.join(baseDir, "si")
@@ -59,5 +65,4 @@ fiPath = os.path.join(baseDir, "fi")
 fi_base_path = os.path.join(fiPath, "base")
 fi_train_path = os.path.join(fiPath, "train")
 
-
-lvlPath = os.path.join(baseDir, "levels")
+lvlPath = os.path.join(database_path, "levels")

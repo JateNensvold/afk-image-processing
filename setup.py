@@ -15,7 +15,8 @@ setup(
     # url="http://www.foopackage.com/",
     packages=['image_processing'],  # same as name
     # external packages as dependencies
-    install_requires=['wheel', 'bar'],
+    install_requires=['wheel', 'bar',
+                      'matplotlib', 'imutils', 'rtree', 'dill', 'pandas', 'seaborn'],
     scripts=[
 
     ]

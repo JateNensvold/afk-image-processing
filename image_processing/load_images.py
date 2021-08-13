@@ -1,14 +1,13 @@
 
-import glob
-import numpy as np
 import cv2
+import numpy as np
+import glob
 import matplotlib.pyplot as plt
-import math
-import collections
-
-import image_processing.processing as processing
-import image_processing.database.imageDB as imageSearchDB
 import image_processing.globals as GV
+import image_processing.database.imageDB as imageSearchDB
+import image_processing.processing as processing
+import collections
+import math
 
 
 def display_image(image, multiple=False, display=GV.DEBUG, color_correct=True,

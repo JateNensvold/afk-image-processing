@@ -72,7 +72,9 @@ def buildDB(enrichedDB: bool = False) -> imageSearchDB.imageSearch:
                 print(_hero_path)
                 raise FileNotFoundError()
             hero = cv2.imread(_hero_path)
-            # name = os.path.basename(_hero_path)
+            if hero is None:
+                raise FileNotFoundError(
+                    "Hero not found: {}".format(_hero_path))
             baseImages.append((_hero_name, hero))
 
     imageDB: imageSearchDB.imageSearch = load.build_flann(baseImages)
