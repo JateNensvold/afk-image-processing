@@ -7,6 +7,7 @@ import dill
 import pickle
 import time
 import image_processing.database.imageDB as imageSearchDB
+import image_processing.afk.hero_object as hero_object
 
 
 def pickle_trick(obj, max_depth=10):
@@ -37,16 +38,31 @@ def pickle_trick(obj, max_depth=10):
 
 
 def recurse_dir(path: str, file_dict: dict):
-    folder = os.path.basename(os.path.basename(path))
+    """
+    Recursively iterate through directory adding all ".jpg" and ".png" files
+        to file_dict
+    Args:
+        path: folder path to recurse through
+        file_dict: file dictionary to add images to
+    Return:
+        None, updates file_dict passed in
+    """
+    hero_name = os.path.basename(path)
+    faction = os.path.basename(os.path.dirname(path))
+
     for _file in os.listdir(path):
         _file_path = os.path.join(path, _file)
+        # Skip directories with "other" in them or that start with "_"
         if os.path.isdir(_file_path) and _file_path[0] != "_" and "other" not \
                 in _file_path:
             recurse_dir(_file_path, file_dict)
-        elif os.path.isfile(_file_path) and not _file_path.endswith(".py"):
-            if folder not in file_dict:
-                file_dict[folder] = set()
-            file_dict[folder].add(_file_path)
+        elif os.path.isfile(_file_path) and (_file_path.endswith(".png") or
+                                             _file_path.endswith(".jpg")):
+            if faction not in file_dict:
+                file_dict[faction] = {}
+            if hero_name not in file_dict[faction]:
+                file_dict[faction][hero_name] = set()
+            file_dict[faction][hero_name].add(_file_path)
 
 
 def buildDB(enrichedDB: bool = False) -> imageSearchDB.imageSearch:
@@ -63,28 +79,30 @@ def buildDB(enrichedDB: bool = False) -> imageSearchDB.imageSearch:
         print("Building database!")
     start_time = time.time()
     recurse_dir(GV.database_icon_path, file_dict)
-    baseImages = []
-    for _hero_name, _hero_paths in file_dict.items():
-        if _hero_name == "hero_icon":
-            print(_hero_paths)
-        for _hero_path in _hero_paths:
-            if not os.path.exists(_hero_path):
-                print(_hero_path)
-                raise FileNotFoundError()
-            hero = cv2.imread(_hero_path)
-            if hero is None:
-                raise FileNotFoundError(
-                    "Hero not found: {}".format(_hero_path))
-            baseImages.append((_hero_name, hero))
+    base_images = []
 
-    imageDB: imageSearchDB.imageSearch = load.build_flann(baseImages)
+    for _faction, _faction_heroes in file_dict.items():
+        for _hero_name, _hero_paths in _faction_heroes.items():
+            for _hero_path in _hero_paths:
+                if not os.path.exists(_hero_path):
+                    raise FileNotFoundError(_hero_path)
+                hero = cv2.imread(_hero_path)
+                if hero is None:
+                    raise FileNotFoundError(
+                        "Hero not found: {}".format(_hero_path))
+
+                base_images.append(hero_object.hero_object(
+                    _hero_name, _faction, hero))
+
+    imageDB: imageSearchDB.imageSearch = load.build_flann(base_images)
 
     if enrichedDB:
         croppedImages = load.crop_heroes(
-            [i[1] for i in baseImages], 0.15, 0.08, 0.25, 0.2)
+            [_hero_tuple.image for _hero_tuple in base_images],
+            0.15, 0.08, 0.25, 0.2)
         for index, cropIMG in enumerate(croppedImages):
             # load.display_image(cropIMG, display=True)
-            imageDB.add_image(baseImages[index][0], cropIMG)
+            imageDB.add_image(base_images[index], cropIMG)
         imageDB.matcher.train()
     end_time = time.time()
     with open(GV.database_pickle, 'wb') as handle:

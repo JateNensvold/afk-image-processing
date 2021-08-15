@@ -532,7 +532,7 @@ if __name__ == "__main__":
         for name, imageDict in heroes.items():
             heroImage = imageDict["image"]
 
-            heroLabel, _ = imageDB.search(heroImage)
+            hero_info, _ = imageDB.search(heroImage)
             # import matplotlib.pyplot as plt
             # plt.imshow(heroImage)
             # plt.show()

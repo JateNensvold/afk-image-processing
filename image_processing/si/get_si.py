@@ -13,12 +13,9 @@ import multiprocessing
 from detectron2.engine import DefaultPredictor
 from detectron2.config import get_cfg
 from detectron2 import model_zoo
-
-# from detectron2.checkpoint import DetectionCheckpointer
-
-# import PIL
 import torch
-# import psutil
+import time
+
 import warnings
 warnings.filterwarnings("ignore")
 MODEL = None
@@ -26,7 +23,7 @@ BORDER_MODEL = None
 
 
 def get_si(roster_image, image_name, debug_raw=False, imageDB=None,
-           hero_dict=None):
+           hero_dict=None, faction=False):
     if imageDB is None:
         imageDB = BD.get_db(enrichedDB=True)
     # hero_ss = image
@@ -227,8 +224,11 @@ def get_si(roster_image, image_name, debug_raw=False, imageDB=None,
     for _hero_data in reduced_values:
         # result = _hero_data["result"]
         name = _hero_data["pseudo_name"]
-        hero_name, _ = imageDB.search(heroesDict[name]["image"])
-        _hero_data["result"].insert(0, hero_name)
+        hero_info, _ = imageDB.search(heroesDict[name]["image"])
+        _hero_data["result"].insert(0, hero_info.name)
+        if faction:
+            _hero_data["result"].append(hero_info.faction)
+
         # result = "{} {}".format(hero_name, result)
         # _hero_data["result"] = result
 
@@ -280,8 +280,8 @@ def parallel_detect(info_dict):
     global MODEL
     if not MODEL:
         MODEL = torch.hub.load(
-            '/ home/nate/projects/afk-image-processing/image_processing/fi /" \
-                               "fi_detection/yolov5',
+            "/home/nate/projects/afk-image-processing/image_processing/fi/"
+            "fi_detection/yolov5",
             "custom",
             "/home/nate/projects/afk-image-processing/image_processing/fi/"
             "fi_detection/yolov5/runs/train/yolov5s_results_v22/"
@@ -394,23 +394,6 @@ def parallel_detect(info_dict):
         scores = border_results.scores.cpu().tolist()
         best_class = list(zip([border_labels[class_num]
                           for class_num in classes], scores))[0]
-        # # pred_class_names = list(map(lambda x: class_names[x], classes))
-        # # print(pred_class_names)
-        # scores = border_results["scores"]
-        # pred_dict = zip(classes, scores)
-        # print(pred_dict)
-        # border_results_array = border_results.pandas().xyxy[0]
-        # if len(border_results_array) > 0:
-        #     final_border_results = border_results_array.sort_values(
-        #         "confidence", ascending=False).iloc[0]
-        #     best_ascension = border_labels[final_border_results["class"]]
-        #     ascension_scores = {best_ascension:
-        #                         final_border_results["confidence"]}
-
-        #     if final_border_results["confidence"] < 0.8:
-        #         best_ascension = " "
-        #         ascension_scores = {best_ascension: 1.0}
-        # else:
         best_ascension = best_class[0]
         ascension_scores = {best_ascension: best_class[1]}
 
@@ -461,9 +444,13 @@ def parallel_detect(info_dict):
 
 if __name__ == "__main__":
     # pool = multiprocessing.Pool()
-    json_dict = get_si(GV.image_ss, GV.image_ss_name, debug_raw=True)
+    start_time = time.time()
+    json_dict = get_si(GV.image_ss, GV.image_ss_name,
+                       debug_raw=False, faction=True)
     if GV.VERBOSE_LEVEL >= 1:
+        end_time = time.time()
         load.display_image(GV.image_ss, display=True)
+        print("Detected features in: {}".format(end_time - start_time))
     if GV.VERBOSE_LEVEL == 0:
         print("{{\"heroes\": {}}}".format(
             json_dict[GV.image_ss_name]["heroes"]))

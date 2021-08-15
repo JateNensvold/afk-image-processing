@@ -8,10 +8,19 @@ import image_processing.database.imageDB as imageSearchDB
 import image_processing.processing as processing
 import collections
 import math
+import matplotlib
+import image_processing.afk.hero_object as HO
 
 
 def display_image(image, multiple=False, display=GV.DEBUG, color_correct=True,
                   colormap=None):
+    backend = matplotlib.get_backend()
+
+    if backend.lower() != 'tkagg':
+        if GV.VERBOSE_LEVEL >= 1:
+            print("Backend: {}".format(backend))
+        plt.switch_backend("tkagg")
+
     if not display:
         return
 
@@ -30,7 +39,7 @@ def display_image(image, multiple=False, display=GV.DEBUG, color_correct=True,
 
     plt.show()
     input('Press any key to continue...')
-    plt.close()
+    plt.close("all")
 
 
 def findFiles(path: str, flag=True, lower=False):
@@ -238,15 +247,6 @@ def crop_heroes(images: list, x_left=None, x_right=None, y_top=None,
     return cropHeroes
 
 
-def get_good_features(matches: list, ratio: int):
-    good_features = []
-    for m, n in matches:
-        if m.distance < ratio * n.distance:
-            good_features.append(m)
-
-    return good_features
-
-
 def concat_resize(img_list, interpolation=cv2.INTER_CUBIC):
     # take minimum width
     # w_max = max(img.shape[1]
@@ -290,23 +290,22 @@ def concat_resize(img_list, interpolation=cv2.INTER_CUBIC):
     return np.hstack(im_list_resize).astype(np.uint8)
 
 
-def build_flann(image_list: list, ratio=0.8):
+def build_flann(image_list: list[HO.hero_object], ratio=0.8):
     """
     Build database of heroes to match to
 
     Args:
-        image_list: list of (image(np.array):name(str)) tuples to build
-             database from
+        image_list: list of (image(np.array), name(str), faction(str)) tuples
+            to build database from
 
     Return:
         An instance of imageSearch() with image_list added to it with the
             matcher trained on them
     """
     imageDB = imageSearchDB.imageSearch(lowesRatio=ratio)
-    for index, image_tuple in enumerate(image_list):
-        name = image_tuple[0]
-        hero = image_tuple[1]
-        imageDB.add_image(name, hero)
+    for _Image_info_index, image_info in enumerate(image_list):
+
+        imageDB.add_image(image_info, image_info.image)
     imageDB.matcher.train()
 
     return imageDB
@@ -335,7 +334,7 @@ if __name__ == "__main__":
     cropHeroes = crop_heroes(heroesDict)
 
     for k, v in cropHeroes.items():
-        name, baseHeroImage = imageDB.search(v)
+        hero_info, baseHeroImage = imageDB.search(v)
         x = heroesDict[k]["dimensions"]["x"]
         y = heroesDict[k]["dimensions"]["y"]
 
@@ -346,7 +345,7 @@ if __name__ == "__main__":
         thickness = 2
 
         cv2.putText(
-            image, name, coords, font, fontScale, color, thickness,
+            image, hero_info.name, coords, font, fontScale, color, thickness,
             cv2.LINE_AA)
 
     plt.figure()

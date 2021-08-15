@@ -1,7 +1,12 @@
 from setuptools import setup
+import os
 
 with open("README.md", 'r') as f:
     long_description = f.read()
+
+# with open("requirements.txt", 'r') as f:
+#     install_requirements = list(f.read().splitlines())
+
 
 setup(
     name='afk-processing',
@@ -15,8 +20,7 @@ setup(
     # url="http://www.foopackage.com/",
     packages=['image_processing'],  # same as name
     # external packages as dependencies
-    install_requires=['wheel', 'bar',
-                      'matplotlib', 'imutils', 'rtree', 'dill', 'pandas', 'seaborn'],
+    install_requires=["wheel", "bar"],
     scripts=[
 
     ]

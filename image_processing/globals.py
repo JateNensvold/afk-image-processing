@@ -19,8 +19,13 @@ parser.add_argument("-v", "--verbose", help="Increase verbosity of output"
 parser.add_argument("-p", "--parallel", help="Utilize as many cores as"
                     "possible while processing",
                     choices=["True", "False"], default="False")
+parser.add_argument("-t", "--truth", help="Argument to pass in a truth value"
+                    "to file being ran",
+                    action="store_true")
+
 args = parser.parse_args()
 
+TRUTH = args.truth
 DEBUG = args.DEBUG
 REBUILD = args.rebuild
 PARALLEL = True if args.parallel.lower() in ["true"] else False

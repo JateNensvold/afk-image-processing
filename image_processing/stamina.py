@@ -1839,8 +1839,8 @@ if __name__ == "__main__":
 
     for k, v in cropHeroes.items():
 
-        name, baseHeroImage = imageDB.search(v, display=False)
-        heroesDict[k]["label"] = name
+        hero_info, baseHeroImage = imageDB.search(v, display=False)
+        heroesDict[k]["label"] = hero_info.name
 
     staminaAreas = get_stamina_area(rows, heroesDict, stamina_image)
     staminaOutput = get_text(staminaAreas)
