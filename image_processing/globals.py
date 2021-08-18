@@ -63,13 +63,16 @@ database_pickle = os.path.join(database_path, 'imageDB.pickle')
 staminaTemplatesPath = os.path.join(database_path, "stamina_templates")
 # levelTemplatesPath = os.path.join(baseDir, "level_templates")
 
+afk_dir = os.path.join(baseDir, "afk")
 
-siPath = os.path.join(baseDir, "si")
+siPath = os.path.join(afk_dir, "si")
 siTrainPath = os.path.join(siPath, "train")
 siBasePath = os.path.join(siPath, "base")
 
-fiPath = os.path.join(baseDir, "fi")
+fiPath = os.path.join(afk_dir, "fi")
 fi_base_path = os.path.join(fiPath, "base")
 fi_train_path = os.path.join(fiPath, "train")
+yolov5_dir = os.path.join(fiPath, "fi_detection/yolov5")
+
 
 lvlPath = os.path.join(database_path, "levels")

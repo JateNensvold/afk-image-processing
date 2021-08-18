@@ -254,12 +254,9 @@ def parallel_detect(info_dict):
     global MODEL
     if not MODEL:
         MODEL = torch.hub.load(
-            "/home/nate/projects/afk-image-processing/image_processing/fi/"
-            "fi_detection/yolov5",
+            GV.yolov5_dir,
             "custom",
-            "/home/nate/projects/afk-image-processing/image_processing/fi/"
-            "fi_detection/yolov5/runs/train/yolov5s_results_v22/"
-            "weights/best.pt",
+            GV.yolov5_dir + "/runs/train/yolov5s_results_v22/weights/best.pt",
             source="local",
             force_reload=True,
             verbose=False)
@@ -341,8 +338,7 @@ def parallel_detect(info_dict):
             cfg.MODEL.ROI_HEADS.NUM_CLASSES = 8
 
             # cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.8
-            cfg.MODEL.WEIGHTS = ("/home/nate/projects/afk-image-processing/"
-                                 "image_processing/fi/fi_detection/"
+            cfg.MODEL.WEIGHTS = (GV.fiPath + "/fi_detection/"
                                  "hero_border_model_output/model_final.pth")
             cfg.MODEL.ROI_HEADS.NUM_CLASSES = len(border_labels)
             BORDER_MODEL = DefaultPredictor(cfg)
