@@ -41,8 +41,6 @@ if VERBOSE_LEVEL == 0:
 CACHED = {}
 
 if args.image:
-    # Avoid cyclical import
-
     multiplier = 1
 
     image_ss = load.load_image(args.image)
