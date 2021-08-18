@@ -53,6 +53,8 @@ if args.image:
 baseDir = os.path.join(os.path.dirname(
     os.path.abspath(__file__)))
 database_path = os.path.join(baseDir, "database")
+database_hero_validation_path = os.path.join(database_path, "hero_validation")
+
 database_icon_path = os.path.join(database_path, "hero_icon")
 # database_png_path = os.path.join(database_path, "hero_icon/*png"
 flannPath = os.path.join(database_path, "baseHeroes.flann")

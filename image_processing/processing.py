@@ -12,10 +12,12 @@ import image_processing.build_db as BD
 import image_processing.globals as GV
 import image_processing.processing as pr
 import image_processing.load_images as load
-import image_processing.stamina as stamina
+import image_processing.afk.roster.DimensionsObject as DO
+import image_processing.afk.roster.matrix as MA
+import image_processing.afk.roster.RowItem as RI
 
 
-def load_image(image_path: str) -> np.ndarray:
+def load_image(image_path: str, check_path=True) -> np.ndarray:
     """
     Loads image from image path
     Args:
@@ -24,7 +26,7 @@ def load_image(image_path: str) -> np.ndarray:
     Returns:
         numpy.ndarray of rgb elements
     """
-    if os.path.exists(image_path):
+    if check_path is False or os.path.exists(image_path):
         return cv2.imread(image_path)
     else:
         raise FileNotFoundError(image_path)
@@ -200,7 +202,7 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, display=None,
 
     # Iterate through contours and filter for ROI
     image_number = 0
-    sizes: dict[int, list[stamina.DimensionsObject]] = {}
+    sizes: dict[int, list[DO.DimensionsObject]] = {}
     heights = []
     widths = []
 
@@ -209,7 +211,7 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, display=None,
     for _index, c in enumerate(contours):
 
         x, y, w, h = cv2.boundingRect(c)
-        _dim_object = stamina.DimensionsObject((x, y, w, h))
+        _dim_object = DO.DimensionsObject((x, y, w, h))
         diff = abs(h-w)
         avg_h_w = ((h+w)/2)
         tolerance = avg_h_w * 0.2
@@ -339,7 +341,7 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
 
     heroes = {}
     baseArgs = (original_modifiable, sizeAllowanceBoundary)
-    multi_valid: list[dict[str, stamina.DimensionsObject]] = []
+    multi_valid: list[dict[str, DO.DimensionsObject]] = []
 
     # if maxHeroes:
     # multi_valid.append(getHeroContours(*baseArgs, dilate=True))
@@ -398,7 +400,7 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
 
     spacing = round((hero_w_median + hero_h_median)/10)
     image_height, image_width = image.shape[:2]
-    hero_matrix = stamina.matrix(image_height, image_width, spacing=spacing)
+    hero_matrix = MA.matrix(image_height, image_width, spacing=spacing)
     for _hero_list in multi_valid:
         for _object_name, _dimension_object in _hero_list.items():
 
@@ -455,7 +457,7 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
                 # load.display_image(modifiable_ROI, display=True)
 
                 # (dimensions, name)
-                _temp_row_item = stamina.RowItem(
+                _temp_row_item = RI.RowItem(
                     (x2-contour_w, y2-contour_h, contour_w, contour_h))
 
                 _collision_item_id = _row.check_collision(

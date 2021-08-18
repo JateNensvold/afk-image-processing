@@ -24,9 +24,26 @@ BORDER_MODEL = None
 
 def get_si(roster_image, image_name, debug_raw=False, imageDB=None,
            hero_dict=None, faction=False):
+    """
+    Detect AFK Arena heroes from a roster screenshot and for each hero detect
+        "FI", "SI", "Ascension", and "hero Name"
+    Args:
+        roster_image: image to run segmentation and detection on
+        image_name: name of 'roster_image' all results in return dictionary
+            are placed under this name in return dictionary
+        debug_raw: flag to add raw values for SI, FI and Ascension detection
+            to return dictionary
+        imageDB: If this variable is None, imageDB is generated otherwise it
+            is assumed imageDB is a fully initialized
+            image_processing.database.imageDB.imageSearch object
+        hero_dict: If this variable is not None, its assumed to be an empty
+            dictionary that to return the hero segmentation dictionary
+            detected from roster_image
+        faction: flag to add faction output to hero feature list in the return
+            dict
+    """
     if imageDB is None:
         imageDB = BD.get_db(enrichedDB=True)
-    # hero_ss = image
 
     baseImages = collections.defaultdict(dict)
 
@@ -48,42 +65,25 @@ def get_si(roster_image, image_name, debug_raw=False, imageDB=None,
 
     baseImages["0"]["image"] = image_0
     baseImages["0"]["contourNum"] = 2
-    # baseImages["0"]["height"] = 52.6
-    # baseImages["0"]["width"] = 52.06666666666667
 
-    # x, y, _ = image_10.shape
-    # new_x = int(x*0.7)
-    # new_y = int(y*0.6)
     baseImages["10"]["image"] = image_10
     baseImages["10"]["crop"] = image_10[0:, 0:]
     baseImages["10"]["contourNum"] = 3
     baseImages["10"]["morph"] = True
-    # baseImages["10"]["height"] = 63
-    # baseImages["10"]["width"] = 63.52173913043478
 
     x, y, _ = image_20.shape
 
-    # start_y = int(y*0.45)
     end_x = int(x*0.5)
     baseImages["20"]["image"] = image_20
     baseImages["20"]["crop"] = image_20[0:, 0:end_x]
     baseImages["20"]["contourNum"] = 2
-    # baseImages["20"]["height"] = 75.1891891891892
-    # baseImages["20"]["width"] = 64.27027027027027
 
-    # new_x = int(x*0.5)
-    # new_y = int(y*0.2)
-    # baseImages["30"]["image"] = image_30
-    # baseImages["30"]["crop"] = image_30[0:new_y, 0:]
-    # baseImages["30"]["contourNum"] = 1
     x, y, _ = image_30.shape
     new_x = int(x*0.3)
     new_y = int(y*0.7)
     baseImages["30"]["image"] = image_30
     baseImages["30"]["crop"] = image_30[0:new_y, 0:new_x]
     baseImages["30"]["contourNum"] = 1
-    # baseImages["30"]["height"] = 78.23076923076923
-    # baseImages["30"]["width"] = 79.94871794871794
 
     csvfile = open(
         "/home/nate/projects/afk-image-processing/image_processing/scripts/"
@@ -102,23 +102,8 @@ def get_si(roster_image, image_name, debug_raw=False, imageDB=None,
             baseImages[_si_name][_digit_name] = {}
         baseImages[_si_name][_digit_name]["v_scale"] = _v_scale
 
-    # (hMin = 0 , sMin = 68, vMin = 170), (hMax = 35 , sMax = 91, vMax = 255)
-    # lower_hsv = np.array([0, 68, 170])
-    # upper_hsv = np.array([35, 91, 255])
-
-    # (hMin = 23 , sMin = 0, vMin = 0), (hMax = 179 , sMax = 255, vMax = 255)
-    # lower_hsv = np.array([23, 0, 0])
-    # upper_hsv = np.array([179, 255, 255])
-
-    # (hMin = 12 , sMin = 75, vMin = 212), (hMax = 23 , sMax = 109, vMax = 253)
-    # lower_hsv = np.array([12, 75, 212])
-    # upper_hsv = np.array([23, 109, 253])
-
-    # (hMin = 5 , sMin = 79, vMin = 211), (hMax = 21 , sMax = 106, vMax = 250)
     lower_hsv = np.array([0, 0, 0])
     upper_hsv = np.array([179, 255, 192])
-
-# (hMin = 0 , sMin = 0, vMin = 0), (hMax = 179 , sMax = 255, vMax = 192)
 
     hsv_range = [lower_hsv, upper_hsv]
     blur_args = {"hsv_range": hsv_range}
@@ -179,11 +164,7 @@ def get_si(roster_image, image_name, debug_raw=False, imageDB=None,
     #     "/home/nate/projects/afk-image-processing/image_processing/fi/"
     #     "fi_detection/yolov5/yolov5s.onnx", None)
 
-
-# names: ['1 star', '2 star', '3 fi', '3 star', '4 star', '5 star', '9 fi']
     model_labels = ["A1", "A2", "3", "A3", "A4", "A5", "9"]
-    # ascended', 'elite', 'elite+', 'legendary', 'legendary+', 'mythic',
-    # 'mythic+
     border_labels = ["B", "E", "E+", "L", "L+", "M", "M+", "A"]
     model_dict = {"labels": model_labels, "border_labels": border_labels}
 
@@ -222,17 +203,12 @@ def get_si(roster_image, image_name, debug_raw=False, imageDB=None,
 
     hero_count = 0
     for _hero_data in reduced_values:
-        # result = _hero_data["result"]
         name = _hero_data["pseudo_name"]
         hero_info, _ = imageDB.search(heroesDict[name]["image"])
         _hero_data["result"].insert(0, hero_info.name)
         if faction:
             _hero_data["result"].append(hero_info.faction)
 
-        # result = "{} {}".format(hero_name, result)
-        # _hero_data["result"] = result
-
-        # if hero_name != "food":
         return_dict[name] = _hero_data
         if GV.VERBOSE_LEVEL >= 1:
             result = str(_hero_data["result"])
@@ -266,7 +242,6 @@ def get_si(roster_image, image_name, debug_raw=False, imageDB=None,
                     hero_data.append(_raw_score)
                 temp_list.append(hero_data)
         json_dict[image_name]["heroes"].append(temp_list)
-    # print(psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2)
 
     return json_dict
 
@@ -275,7 +250,6 @@ def parallel_detect(info_dict):
     k = info_dict["name"]
     v = info_dict["info"]
     si_dict = info_dict["si_dict"]
-    # fi_dict = info_dict["fi_dict"]
 
     global MODEL
     if not MODEL:
@@ -291,23 +265,11 @@ def parallel_detect(info_dict):
             verbose=False)
 
     graded_avg_bin = info_dict["graded_avg_bin"]
-    # for k, v in heroes_dict.items():
-    # heroes_dict[k]["label"] = name
     return_dict = {}
     si_scores = stamina.signatureItemFeatures(
         v["image"], si_dict, graded_avg_bin)
-    # fi_scores = stamina.furnitureItemFeatures(
-    #     v["image"], fi_dict, graded_avg_bin)
     x = v["object"].dimensions.x
     y = v["object"].dimensions.y
-    # if fi_scores["9"] == 0 or fi_scores["3"] == 0:
-    #     return_dict["display"] = True
-    # if fi_scores["9"] > 0.7:
-    #     best_fi = "9"
-    # elif fi_scores["3"] > 0.5:
-    #     best_fi = "3"
-    # else:
-    #     best_fi = "0"
     test_img = v["image"]
     model_image_size = (416, 416)
     test_img = cv2.resize(
@@ -322,13 +284,11 @@ def parallel_detect(info_dict):
 
     results_array = results.pandas().xyxy[0]
     RA = results_array
-    # fi_filtered_results = results_array.query('class == 2 or class == 6')
     fi_filtered_results = RA.loc[(RA['class'] == 2) |
                                  (RA['class'] == 6)]
 
     star_filtered_results = RA.loc[(RA['class'] != 2) &
                                    (RA['class'] != 6)]
-    # star_filtered_results = results_array.query('class != 2 and class != 6')
 
     if len(fi_filtered_results) > 0:
         fi_final_results = fi_filtered_results.sort_values(
@@ -398,7 +358,6 @@ def parallel_detect(info_dict):
         ascension_scores = {best_ascension: best_class[1]}
 
     if si_scores == -1:
-        # circle_fail += 1
         best_si = "none"
     else:
         if si_scores["30"] > 0.6:
@@ -412,23 +371,11 @@ def parallel_detect(info_dict):
         elif si_scores["10"] > 0.50:
             best_si = "10"
         else:
-            # si_label_list = ["0", "10"]
-            # # key=lambda x: heroes[x[0][1]]["dimensions"]["y"][0]
-            # best_si = max(si_label_list, key=lambda x: si_scores[x])
-            # best_si_score = si_scores[best_si]
-            # if best_si_score < 0.4:
-            #     # best_si = "n/a"
             best_si = "00"
 
     coords = (x, y)
-    # name = "{},{}".format(name, best_si)
-    # name = "{} s:{:.3}".format(best_fi, fi_score)
     name = [best_si, best_fi, best_ascension]
-    # "{}{}".format(best_si, best_fi)
-    # print("pid: {} name:{} stat:{}".format(
-    #     multiprocessing.current_process().pid, k, name))
     return_dict["si"] = best_si
-    # return_dict["fi"] = best_fi
     return_dict["score"] = {}
     return_dict["score"]["si"] = si_scores
     return_dict["score"]["fi"] = fi_scores
@@ -437,16 +384,13 @@ def parallel_detect(info_dict):
     return_dict["result"] = name
     return_dict["pseudo_name"] = k
     return_dict["coords"] = coords
-    # return_dict["name"] = hero
-    # print(psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2)
     return return_dict
 
 
 if __name__ == "__main__":
-    # pool = multiprocessing.Pool()
     start_time = time.time()
     json_dict = get_si(GV.image_ss, GV.image_ss_name,
-                       debug_raw=False, faction=True)
+                       debug_raw=False, faction=False)
     if GV.VERBOSE_LEVEL >= 1:
         end_time = time.time()
         load.display_image(GV.image_ss, display=True)
@@ -456,5 +400,3 @@ if __name__ == "__main__":
             json_dict[GV.image_ss_name]["heroes"]))
     else:
         print(json_dict)
-    # with open("temp.json", "w") as f:
-    #     json.dump(json_dict, f)

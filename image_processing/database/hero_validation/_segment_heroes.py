@@ -5,10 +5,25 @@ import image_processing.build_db as BD
 import time
 import image_processing.globals as GV
 
-CURRENT_DUR = os.path.dirname(os.path.abspath(__file__))
+HERO_VALIDATION_DIR = GV.database_hero_validation_path
 
 
 def parse_dict(json_dict, hero_dict, hero_dir, file_name):
+    """
+    Accept a dictionary with hero results and generate directories under
+        database/hero_validation/sorted_heroes for all segmented images/heros
+        detected from source image
+    Args:
+        json_dict: dictionary returned by GS.get_si
+        hero_dict: dictionary/arg 0 returned by
+            image_processing.processing.getHeroes
+        hero_dir: directory under database/hero_validation to generate new
+            directories in
+        file_name: name of source image that json_dict was generated from,
+            used to access data from json_dict that was generated from it.
+    Return:
+        None
+    """
     hero_count = 0
     for row in json_dict[file_name]["heroes"]:
         for hero_object in row:
@@ -62,13 +77,14 @@ if __name__ == "__main__":
     build_database = True
 
     if GV.TRUTH:
-        sorted_heroes_directory = os.path.join(CURRENT_DUR, "sorted_heroes")
+        sorted_heroes_directory = os.path.join(
+            HERO_VALIDATION_DIR, "sorted_heroes")
 
-        for file_name in os.listdir(CURRENT_DUR):
+        for file_name in os.listdir(HERO_VALIDATION_DIR):
             print("Starting {}".format(file_name))
             start_time = time.time()
             if file_name.endswith(".png") or file_name.endswith(".jpg"):
-                file_path = os.path.join(CURRENT_DUR, file_name)
+                file_path = os.path.join(HERO_VALIDATION_DIR, file_name)
                 image = cv2.imread(file_path)
                 hero_dict = {}
                 json_dict = GS.get_si(
