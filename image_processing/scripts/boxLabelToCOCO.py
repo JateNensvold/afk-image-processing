@@ -1,15 +1,20 @@
 import requests
-from PIL import Image
-import numpy as np
-from io import BytesIO
-from typing import Dict, Any
+import time
 import cv2
 import json
 import os
 import pathlib
 import datetime
+
+import numpy as np
+import image_processing.globals as GV
+
+from PIL import Image
+from io import BytesIO
+from typing import Dict, Any
 from pycocotools import mask as cocomask
-import time
+
+
 INFO = {
     "description": "AFK Arena Hero Info Dataset",
     "url": "https://github.com/JateNensvold/afk-image-processing",
@@ -217,7 +222,10 @@ def convert_format(input_data: dict, output_dir: str = "./", license: int = 0,
 
 
 if __name__ == "__main__":
-    json_path = "/home/nate/projects/afk-image-processing/export-2021-08-06T03_10_14.517Z.json"
+    # Replace the following line with the json file downloaded from boxlabel
+    #   dataset
+    json_path = os.path.join(
+        GV.base_dir, "export-2021-08-06T03_10_14.517Z.json")
     with open(json_path, "r") as json_file:
         box_label_data = json.loads(json_file.read())
     convert_format(box_label_data)
