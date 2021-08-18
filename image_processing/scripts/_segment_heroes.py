@@ -1,8 +1,9 @@
-import image_processing.si.get_si as GS
 import os
 import cv2
-import image_processing.build_db as BD
 import time
+
+import image_processing.afk.si.get_si as GS
+import image_processing.build_db as BD
 import image_processing.globals as GV
 
 HERO_VALIDATION_DIR = GV.database_hero_validation_path

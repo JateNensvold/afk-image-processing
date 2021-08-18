@@ -1,12 +1,13 @@
-import numpy as np
-
 import cv2
 import os
-import image_processing.si.get_si as si
 import random
 import time
 import json
 import shutil
+
+import numpy as np
+
+import image_processing.afk.si.get_si as si
 import image_processing.build_db as BD
 
 
@@ -70,7 +71,8 @@ if __name__ == "__main__":
         print(new_image_name)
         shutil.copy(_file_name, new_image_name)
         # json_data[_file_name]["path"] = new_image_name
-        with open(os.path.join(CUR_DIR, "temp_validation_data.json"), "w") as f:
+        with open(os.path.join(CUR_DIR,
+                               "temp_validation_data.json"), "w") as f:
             json.dump(json_dict, f)
 
     # print("min", sizes[5:10])
