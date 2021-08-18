@@ -85,10 +85,7 @@ def get_si(roster_image, image_name, debug_raw=False, imageDB=None,
     baseImages["30"]["crop"] = image_30[0:new_y, 0:new_x]
     baseImages["30"]["contourNum"] = 1
 
-    csvfile = open(
-        "/home/nate/projects/afk-image-processing/image_processing/scripts/"
-        "lvl_txt_si_scale.txt",
-        "r")
+    csvfile = open(os.path.join(GV.lvl_path, "lvl_txt_si_scale.txt"), "r")
 
     header = ["digitName", "si_name", "v_scale"]
 

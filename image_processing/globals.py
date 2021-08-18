@@ -1,7 +1,7 @@
 import os
-import cv2
 import argparse
 import logging
+
 
 parser = argparse.ArgumentParser(description='AFK arena object extraction and '
                                  'image analysis.')
@@ -41,10 +41,15 @@ if VERBOSE_LEVEL == 0:
 CACHED = {}
 
 if args.image:
+    # Avoid cyclical import
+    import image_processing.load_images as load
+
     multiplier = 1
-    image_ss = cv2.imread(args.image)
-    image_ss = cv2.resize(
-        image_ss, (image_ss.shape[1]*multiplier, image_ss.shape[0]*multiplier))
+
+    image_ss = load.load_image(args.image)
+    # image_ss = cv2.resize(image_ss,
+    #                       (image_ss.shape[1]*multiplier,
+    #                        image_ss.shape[0]*multiplier))
     image_ss_name = os.path.basename(args.image)
 
 base_dir = os.path.join(os.path.dirname(

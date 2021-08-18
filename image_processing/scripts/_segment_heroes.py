@@ -98,11 +98,12 @@ if __name__ == "__main__":
 
             print("Finished {} in {}".format(file_name, end_time-start_time))
     else:
-        image_path = "/home/nate/downloads/IMG_20210814_220011.jpg"
-        image = cv2.imread(image_path)
+        # When running in single image mode(i.e. GV.TRUTH is false) pass image
+        #   in with GV.image_ss(i.e. --image/-i)
+        image = GV.image_ss
         hero_dict = {}
         json_dict = GS.get_si(
-            image, image_path, imageDB=imageDB, hero_dict=hero_dict,
+            image, GV.image_ss_name, imageDB=imageDB, hero_dict=hero_dict,
             faction=True)
         hero_dict = hero_dict["hero_dict"]
-        parse_dict(json_dict, hero_dict, "./temp", image_path)
+        parse_dict(json_dict, hero_dict, "./temp", GV.image_ss_name)

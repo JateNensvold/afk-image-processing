@@ -1,15 +1,32 @@
 
 import cv2
-import numpy as np
+import os
 import glob
+import math
+import matplotlib
+
+import numpy as np
 import matplotlib.pyplot as plt
+
 import image_processing.globals as GV
 import image_processing.database.imageDB as imageSearchDB
 import image_processing.processing as processing
-import collections
-import math
-import matplotlib
 import image_processing.afk.hero_object as HO
+
+
+def load_image(image_path: str, check_path=True) -> np.ndarray:
+    """
+    Loads image from image path
+    Args:
+        image_path: path to image on disk
+        check_path: flag to raise an error if 'image_path' is not found
+    Returns:
+        numpy.ndarray of rgb elements
+    """
+    if check_path is False or os.path.exists(image_path):
+        return cv2.imread(image_path)
+    else:
+        raise FileNotFoundError(image_path)
 
 
 def display_image(image, multiple=False, display=GV.DEBUG, color_correct=True,
@@ -143,70 +160,6 @@ def clean_hero(img: np.array, lower_boundary: int, upper_boundary: int,
             cv2.rectangle(mask, corner[1], point, color, -1)
 
     return mask
-
-
-def colorClassify(img: np.ndarray, contour):
-    """
-
-    Args:
-
-    Return:
-
-    """
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-    canvas = img.copy()
-    counter = 0
-    center = [i/2 for i in img.shape]
-    lower_x = img.shape[0]
-    upper_x = 0
-    lower_y = img.shape[1]
-    upper_y = 0
-    colors = []
-    for i in range(len(contour) - 1):
-        pt = contour[i]
-        pt2 = contour[i+1]
-        lower_x = min(pt[0][0], lower_x)
-        upper_x = max(pt[0][0], upper_x)
-        lower_y = min(pt[0][1], lower_y)
-        upper_y = max(pt[0][1], upper_y)
-
-        cv2.circle(canvas, (pt[0][0], pt[0][1]), 2, (0, 255, 0), -1)
-        cv2.drawContours(canvas, [contour], -1,
-                         (0, 0, 255), 1, cv2.LINE_AA)
-
-        from skimage.draw import line
-        # being start and end two points (x1,y1), (x2,y2)
-        start = [pt[0][0], pt[0][1]]
-        end = [pt2[0][0], pt2[0][1]]
-        discrete_line = list(zip(*line(*start, *end)))
-        for point in discrete_line:
-            towardsCenter = list(zip(*line(
-                point[0], point[1], int(center[0]), int(center[1]))))
-            for j in range(6):
-                tc_point = towardsCenter[j]
-
-                if tc_point[0] < gray.shape[0] and tc_point[1] < gray.shape[1]:
-                    color = gray[tc_point[0]][tc_point[1]]
-                    colors.append(color)
-
-    size = (lower_x, upper_x, lower_y, upper_y)
-
-    counter = collections.Counter(colors)
-    common = counter.most_common()
-    alpha_img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
-    mask = cv2.bitwise_not(np.zeros_like(alpha_img))
-    boundary = 10
-    for i in range(10):
-        color = common[i][0]
-        temp_mask = clean_hero(img, int(color - boundary),
-                               int(color + boundary), size, contour)
-
-        mask = cv2.bitwise_and(mask, cv2.bitwise_not(temp_mask))
-    alpha_img = cv2.bitwise_and(alpha_img, mask)
-    return alpha_img, mask
 
 
 def crop_heroes(images: list, x_left=None, x_right=None, y_top=None,

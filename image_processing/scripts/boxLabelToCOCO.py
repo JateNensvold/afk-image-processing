@@ -117,9 +117,8 @@ def get_annotation(mask: np.ndarray):
         # Valid polygons have >= 6 coordinates (3 points)
         if contour.size >= 6:
             segmentation.append(contour.flatten().tolist())
-    RLEs = cocomask.frPyObjects(segmentation, mask.shape[0], mask.shape[1])
-    RLE = cocomask.merge(RLEs)
-    # RLE = cocomask.encode(np.asfortranarray(mask))
+    polygons = cocomask.frPyObjects(segmentation, mask.shape[0], mask.shape[1])
+    RLE = cocomask.merge(polygons)
     area = cocomask.area(RLE)
     [x, y, w, h] = cv2.boundingRect(mask)
 
