@@ -1,7 +1,7 @@
 import os
 import argparse
 import logging
-
+import image_processing.image_helper.load_images as load
 
 parser = argparse.ArgumentParser(description='AFK arena object extraction and '
                                  'image analysis.')
@@ -42,7 +42,6 @@ CACHED = {}
 
 if args.image:
     # Avoid cyclical import
-    import image_processing.load_images as load
 
     multiplier = 1
 
