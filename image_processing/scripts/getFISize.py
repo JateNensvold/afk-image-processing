@@ -6,9 +6,7 @@ import os
 
 if __name__ == "__main__":
 
-    csvfile = open(
-        "/home/nate/projects/afk-image-processing/image_processing/fi/fi_data.txt",
-        "r")
+    csvfile = open(os.path.join(GV.fi_path, "fi_data.txt"), "r")
 
     write_file = open('output.csv', 'w')
 

@@ -144,7 +144,13 @@ def convert_format(input_data: dict, output_dir: str = "./", license: int = 0,
 
     '''
     output_dir = os.path.abspath(output_dir)
-    coco_dir = os.path.join(output_dir, "coco_data")
+    output_dir_files = os.listdir(output_dir)
+    coco_dir_count = 0
+    for _file_name in output_dir_files:
+        if "coco_data" in _file_name:
+            coco_dir_count += 1
+    coco_dir = os.path.join(output_dir, "coco_data" + coco_dir_count)
+
     pathlib.Path(coco_dir).mkdir(parents=True, exist_ok=True)
     coco_train = os.path.join(coco_dir, "train")
     coco_test = os.path.join(coco_dir, "test")
