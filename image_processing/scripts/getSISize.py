@@ -4,8 +4,6 @@ import cv2
 import numpy as np
 import pandas as pd
 
-import matplotlib.pyplot as plt
-import image_processing.load_images as load
 import image_processing.processing as proc
 import image_processing.stamina as stamina
 import image_processing.globals as GV
@@ -41,14 +39,15 @@ def getDigit(image):
     cropped_blur = proc.blur_image(
         cropped, hsv_range=[lowerBound, upperBound])
 
-    cnts = cv2.findContours(
+    digit_countour = cv2.findContours(
         cropped_blur, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    cnts = imutils.grab_contours(cnts)
-    cnts = imutils.contours.sort_contours(cnts, method="left-to-right")[0]
+    digit_countour = imutils.grab_contours(digit_countour)
+    digit_countour = imutils.contours.sort_contours(digit_countour,
+                                                    method="left-to-right")[0]
     bins = {}
     all_y = []
 
-    for index, digit in enumerate(cnts):
+    for index, digit in enumerate(digit_countour):
         x, y, w, h = cv2.boundingRect(digit)
         # if h/w < 10/3:
         # if w > 3 and h > 10:
@@ -100,7 +99,7 @@ def getLevelDigit(sourceImage, digitDict: np.array, train: bool = False):
 
     results = {}
     for folder in folders:
-        folderPath = os.path.join(GV.lvlPath, folder)
+        folderPath = os.path.join(GV.lvl_path, folder)
         folderFiles = os.listdir(folderPath)
         if folder not in results:
             results[folder] = []
@@ -133,33 +132,13 @@ def getLevelDigit(sourceImage, digitDict: np.array, train: bool = False):
 
 
 def trainLevels(image):
-    stamina.digitFeatures(image, saveDir=GV.lvlPath)
+    stamina.digitFeatures(image, save_dir=GV.lvl_path)
 
 
 if __name__ == '__main__':
 
-    # csvfile = open(
-    #     "/home/nate/projects/afk-image-processing/image_processing/scripts/lvl_txt_si_scale.txt",
-    #     "r")
-
-    # header = ["digitName", "si_name", "v_scale"]
-
-    # reader = csv.DictReader(csvfile, header)
-    # si_data_dict = {}
-    # for row in reader:
-    #     digitName = row["digitName"]
-    #     si_name = row["si_name"]
-    #     # h_scale = float(row["h_scale"])
-    #     v_scale = float(row["v_scale"])
-    #     if si_name not in si_data_dict:
-    #         si_data_dict[si_name] = {}
-    #     si_data_dict[si_name][digitName] = {}
-    #     # si_data_dict[si_name][digitName]["h_scale"] = h_scale
-    #     si_data_dict[si_name][digitName]["v_scale"] = v_scale
-
     si_file = open(
-        "/home/nate/projects/afk-image-processing/image_processing/si/si_data.txt",
-        "r")
+        os.path.join(GV.si_path, "si_data.txt"), "r")
 
     si_field_names = ["path", "left", "bottom", "right", "top", "label"]
     si_reader = csv.DictReader(si_file, si_field_names)
@@ -234,8 +213,7 @@ if __name__ == '__main__':
         # print("Actual - h: {}".format(si_height))
 
     fi_file = open(
-        "/home/nate/projects/afk-image-processing/image_processing/fi/fi_data.txt",
-        "r")
+        os.path.join(GV.fi_path, "fi_data.txt"), "r")
 
     fi_field_names = ["path", "left", "bottom", "right", "top", "label"]
     fi_reader = csv.DictReader(fi_file, fi_field_names)

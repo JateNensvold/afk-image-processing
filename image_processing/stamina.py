@@ -65,9 +65,7 @@ def get_text(staminaAreas: dict, train: bool = False):
 
     # build template dictionary
     digits = {}
-    numbersFolder = GV.staminaTemplatesPath
-    # numbersFolder = os.path.join(os.path.dirname(
-    #     os.path.abspath(__file__)), "numbers")
+    numbersFolder = GV.stamina_templates_path
 
     referenceFolders = os.listdir(numbersFolder)
     for folder in referenceFolders:
@@ -128,20 +126,17 @@ def get_text(staminaAreas: dict, train: bool = False):
 
 @ cachedproperty
 def signature_template_mask(templates: dict):
-    siFolders = os.listdir(GV.siBasePath)
+    siFolders = os.listdir(GV.si_base_path)
     si_dict = {}
 
     for folder in siFolders:
-        SIDir = os.path.join(GV.siBasePath, folder)
+        SIDir = os.path.join(GV.si_base_path, folder)
         SIPhotos = os.listdir(SIDir)
         if folder == "40":
             continue
         for imageName in SIPhotos:
 
             siImage = templates[folder]["image"]
-            # siImage = cv2.imread(os.path.join(
-            #     GV.siBasePath, folder, imageName))
-            # SIGray = cv2.cvtColor(siImage, cv2.COLOR_BGR2GRAY)
 
             templateImage = templates[folder].get(
                 "crop", templates[folder].get("image"))
@@ -307,7 +302,7 @@ def signatureItemFeatures(hero: np.array,
 
 
 @ cachedproperty
-def furniture_template_mask(templates: dict):
+def _furniture_template_mask(templates: dict):
 
     fi_dict = {}
     fi_folders = os.listdir(GV.fi_base_path)
@@ -364,8 +359,10 @@ def furniture_template_mask(templates: dict):
     return fi_dict
 
 
-def furnitureItemFeatures(hero: np.array, fi_dict: dict,
-                          lvlRatioDict: dict = None):
+# Deprecated function, functionality replaced with Yolov5 model at
+#   image_processing/afk/fi/fi_detection/data/models
+def _furnitureItemFeatures(hero: np.array, fi_dict: dict,
+                           lvlRatioDict: dict = None):
     """
     Runs template matching FI identification against the 'hero' passed in.
         When lvlRatioDict is passed in the templates will be rescaled to
@@ -550,7 +547,7 @@ def furnitureItemFeatures(hero: np.array, fi_dict: dict,
     return best_score
 
 
-def digitFeatures(digit: np.array, saveDir=None):
+def digitFeatures(digit: np.array, save_dir=None):
     """
     Save a presized digit to whatever number is entered
     Args:
@@ -561,10 +558,10 @@ def digitFeatures(digit: np.array, saveDir=None):
         None
     """
 
-    baseDir = GV.staminaTemplatesPath
-    if saveDir:
-        baseDir = saveDir
-    digitFolders = os.listdir(baseDir)
+    base_dir = GV.stamina_templates_path
+    if save_dir:
+        base_dir = save_dir
+    digitFolders = os.listdir(base_dir)
     plt.figure()
     plt.imshow(digit)
     plt.ion()
@@ -579,7 +576,7 @@ def digitFeatures(digit: np.array, saveDir=None):
         print("No such folder {}".format(number))
         number = "none"
 
-    numberDir = os.path.join(baseDir, number)
+    numberDir = os.path.join(base_dir, number)
     numberLen = str(len(os.listdir(numberDir)))
     numberName = os.path.join(numberDir, numberLen)
 

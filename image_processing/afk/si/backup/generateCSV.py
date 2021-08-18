@@ -5,8 +5,7 @@ import pandas as pd
 import cv2
 
 if __name__ == "__main__":
-    path = GV.siPath
-    trainPath = os.path.join(path, "train")
+    trainPath = os.path.join(GV.si_path, "train")
     data = pd.DataFrame(columns=["Format"])
     trainPathList = os.listdir(trainPath)
     trainPathList = sorted(trainPathList)

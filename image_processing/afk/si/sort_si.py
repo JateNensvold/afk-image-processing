@@ -6,8 +6,7 @@ import matplotlib.pyplot as plt
 
 
 def sortTrainHeroImage(name: str, image: np.array):
-    siPath = GV.siPath
-    trainPath = os.path.join(siPath, "train", )
+    trainPath = os.path.join(GV.si_path, "train", )
 
     print("Please enter the SI of the hero show: ")
 

@@ -47,10 +47,10 @@ def get_si(roster_image, image_name, debug_raw=False, imageDB=None,
 
     baseImages = collections.defaultdict(dict)
 
-    image_0 = cv2.imread(os.path.join(GV.siBasePath, "0", "0.png"))
-    image_10 = cv2.imread(os.path.join(GV.siBasePath, "10", "10.png"))
-    image_20 = cv2.imread(os.path.join(GV.siBasePath, "20", "20.png"))
-    image_30 = cv2.imread(os.path.join(GV.siBasePath, "30", "30.png"))
+    image_0 = cv2.imread(os.path.join(GV.si_base_path, "0", "0.png"))
+    image_10 = cv2.imread(os.path.join(GV.si_base_path, "10", "10.png"))
+    image_20 = cv2.imread(os.path.join(GV.si_base_path, "20", "20.png"))
+    image_30 = cv2.imread(os.path.join(GV.si_base_path, "30", "30.png"))
 
     fi_3_image = cv2.imread(os.path.join(GV.fi_base_path, "3", "3fi.png"))
     fi_9_image = cv2.imread(os.path.join(GV.fi_base_path, "9", "9fi.png"))
@@ -154,15 +154,6 @@ def get_si(roster_image, image_name, debug_raw=False, imageDB=None,
         graded_avg_bin[si_name]["height"] = frequency_height_adjust
 
     si_dict = stamina.signature_template_mask(baseImages)
-    # fi_dict = stamina.furniture_template_mask(baseImages)
-
-    # opencv_model = cv2.dnn.readNetFromONNX(
-    #     "/home/nate/projects/afk-image-processing/image_processing/fi/"
-    #     "fi_detection/yolov5/yolov5s.onnx")
-
-    # fi_model = rt.InferenceSession(
-    #     "/home/nate/projects/afk-image-processing/image_processing/fi/"
-    #     "fi_detection/yolov5/yolov5s.onnx", None)
 
     model_labels = ["A1", "A2", "3", "A3", "A4", "A5", "9"]
     border_labels = ["B", "E", "E+", "L", "L+", "M", "M+", "A"]
@@ -256,7 +247,7 @@ def parallel_detect(info_dict):
         MODEL = torch.hub.load(
             GV.yolov5_dir,
             "custom",
-            GV.yolov5_dir + "/runs/train/yolov5s_results_v22/weights/best.pt",
+            os.path.join(GV.fi_models_dir, "fi_star_model.pt"),
             source="local",
             force_reload=True,
             verbose=False)
@@ -338,14 +329,14 @@ def parallel_detect(info_dict):
             cfg.MODEL.ROI_HEADS.NUM_CLASSES = 8
 
             # cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.8
-            cfg.MODEL.WEIGHTS = (GV.fiPath + "/fi_detection/"
-                                 "hero_border_model_output/model_final.pth")
+            cfg.MODEL.WEIGHTS = os.path.join(
+                GV.fi_models_dir, "ascension_border.pth")
             cfg.MODEL.ROI_HEADS.NUM_CLASSES = len(border_labels)
             BORDER_MODEL = DefaultPredictor(cfg)
 
         raw_border_results = BORDER_MODEL(test_img)
         border_results = raw_border_results["instances"]
-        # print(border_results)
+
         classes = border_results.pred_classes.cpu().tolist()
         scores = border_results.scores.cpu().tolist()
         best_class = list(zip([border_labels[class_num]

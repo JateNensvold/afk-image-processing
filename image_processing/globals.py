@@ -46,33 +46,33 @@ if args.image:
     image_ss = cv2.resize(
         image_ss, (image_ss.shape[1]*multiplier, image_ss.shape[0]*multiplier))
     image_ss_name = os.path.basename(args.image)
-# DEBUG = True
-# DEBUG = False
 
-
-baseDir = os.path.join(os.path.dirname(
+base_dir = os.path.join(os.path.dirname(
     os.path.abspath(__file__)))
-database_path = os.path.join(baseDir, "database")
+database_path = os.path.join(base_dir, "database")
 database_hero_validation_path = os.path.join(database_path, "hero_validation")
 
+# Path to database hero_icons used to build Flann
 database_icon_path = os.path.join(database_path, "hero_icon")
-# database_png_path = os.path.join(database_path, "hero_icon/*png"
-flannPath = os.path.join(database_path, "baseHeroes.flann")
+flann_path = os.path.join(database_path, "baseHeroes.flann")
 database_pickle = os.path.join(database_path, 'imageDB.pickle')
 
-staminaTemplatesPath = os.path.join(database_path, "stamina_templates")
-# levelTemplatesPath = os.path.join(baseDir, "level_templates")
+stamina_templates_path = os.path.join(database_path, "stamina_templates")
 
-afk_dir = os.path.join(baseDir, "afk")
+afk_dir = os.path.join(base_dir, "afk")
 
-siPath = os.path.join(afk_dir, "si")
-siTrainPath = os.path.join(siPath, "train")
-siBasePath = os.path.join(siPath, "base")
+# AFK SI Paths
+si_path = os.path.join(afk_dir, "si")
+si_base_path = os.path.join(si_path, "base")
 
-fiPath = os.path.join(afk_dir, "fi")
-fi_base_path = os.path.join(fiPath, "base")
-fi_train_path = os.path.join(fiPath, "train")
-yolov5_dir = os.path.join(fiPath, "fi_detection/yolov5")
+# AFK Fi Paths
+fi_path = os.path.join(afk_dir, "fi")
+fi_base_path = os.path.join(fi_path, "base")
+fi_train_path = os.path.join(fi_path, "train")
 
+# Yolov5(Stars, FI) and Detectron(Ascension) Model output
+fi_models_dir = os.path.join(fi_path, "fi_detection", "data", "models")
+yolov5_dir = os.path.join(fi_path, "fi_detection", "yolov5")
 
-lvlPath = os.path.join(database_path, "levels")
+# Database lvl training data
+lvl_path = os.path.join(database_path, "levels")

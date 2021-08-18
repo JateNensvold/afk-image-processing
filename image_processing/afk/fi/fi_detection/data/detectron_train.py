@@ -11,6 +11,8 @@ from detectron2.data.datasets import register_coco_instances
 from detectron2.utils.logger import setup_logger
 setup_logger()
 
+BASE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+
 
 def set_config(cfg: CfgNode, train_name: str, test_name: str,
                num_classes: int):
@@ -56,8 +58,7 @@ def test_model(cfg: CfgNode):
 
 
 if __name__ == "__main__":
-    base_path = ("/home/nate/projects/afk-image-processing/image_processing/"
-                 "fi/fi_detection/coco_data/")
+    base_path = os .path.join(BASE_PATH, "coco_data")
     train_path = os.path.join(base_path, "train")
     val_path = os.path.join(base_path, "valid")
     test_path = os.path.join(base_path, "test")
@@ -71,5 +72,5 @@ if __name__ == "__main__":
 
     cfg = get_cfg()
     set_config(cfg, "border_dataset_train", "border_dataset_val", 8)
-    # train_model(cfg)
-    test_model(cfg)
+    train_model(cfg)
+    # test_model(cfg)

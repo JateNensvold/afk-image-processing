@@ -522,12 +522,11 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
 if __name__ == "__main__":
 
     imageDB = BD.get_db(enrichedDB=True)
-    siPath = GV.siPath
 
-    siTempPath = os.path.join(siPath, "temp")
+    siTempPath = os.path.join(GV.si_path, "temp")
 
     for imagePath in os.listdir(siTempPath):
-        rosterImage = cv2.imread(os.path.join(GV.siPath, "temp", imagePath))
+        rosterImage = cv2.imread(os.path.join(GV.si_path, "temp", imagePath))
         heroes = pr.getHeroes(rosterImage)
         # cropHeroes = load.crop_heroes(heroes)
 
