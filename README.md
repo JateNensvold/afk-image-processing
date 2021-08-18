@@ -12,6 +12,6 @@ Download
 "image_processing/afk/fi/fi_detection/data/coco_data/" from labelbox and run conversion to COCO dataset
 "image_processing/afk/fi/fi_detection/models/" local
 "image_processing/afk/fi/fi_detection/yolov5" submodule init
-
+"image_processing/afk/fi/fi_detection/data/fi_stars_data" local
 
 tests/data/images
