@@ -61,6 +61,9 @@ stamina_templates_path = os.path.join(database_path, "stamina_templates")
 
 afk_dir = os.path.join(base_dir, "afk")
 
+# Tests directory
+tests_dir = os.path.join(base_dir, os.path.pardir, "tests")
+
 # AFK SI Paths
 si_path = os.path.join(afk_dir, "si")
 si_base_path = os.path.join(si_path, "base")

@@ -2,6 +2,8 @@
 import os
 import cv2
 
+import image_processing.globals as GV
+
 from detectron2 import model_zoo
 from detectron2.engine import DefaultPredictor
 from detectron2.config import get_cfg, CfgNode
@@ -50,9 +52,8 @@ def test_model(cfg: CfgNode):
 
     cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
     predictor = DefaultPredictor(cfg)
-    image = cv2.imread(
-        "/home/nate/projects/afk-image-processing/tests/data/images/"
-        "image11.png")
+    image = cv2.imread(os.path.join(
+        GV.tests_dir, "data", "images", "image11.png"))
     output = predictor(image)
     print(output)
 
