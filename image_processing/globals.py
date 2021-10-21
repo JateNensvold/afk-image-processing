@@ -1,7 +1,9 @@
 import os
 import argparse
 import logging
-import image_processing.image_helper.load_images as load
+import image_processing.helpers.load_images as load
+import threading
+import image_processing.database.imageDB as imageSearchDB
 
 parser = argparse.ArgumentParser(description='AFK arena object extraction and '
                                  'image analysis.')
@@ -33,9 +35,14 @@ image_ss = None
 image_ss_name = None
 VERBOSE_LEVEL = args.verbose
 
+THREADS: dict[str, threading.Thread] = {}
+
+MODEL = None
+BORDER_MODEL = None
+IMAGE_DB: imageSearchDB.imageSearch = None
+
 if VERBOSE_LEVEL == 0:
     logging.disable(logging.INFO)
-
 
 # Stores cached function results
 CACHED = {}

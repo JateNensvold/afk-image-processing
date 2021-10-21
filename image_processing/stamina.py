@@ -188,8 +188,7 @@ def signature_template_mask(templates: dict):
 
 
 def signatureItemFeatures(hero: np.array,
-                          si_dict: dict,
-                          lvlRatioDict: dict = None):
+                          si_dict: dict):
     """
     Runs template matching SI identification against the 'hero' passed in.
         When lvlRatioDict is passed in the templates will be rescaled to
@@ -199,44 +198,56 @@ def signatureItemFeatures(hero: np.array,
         hero: np.array(x,y.3) representing an rgb image
         templates: dictionary of information about each SI template to get ran
             against the image
-        lvlRatioDict: dictionary that contains the predicted height of each
-            signature item based on precomputed text to si scaling calculations
     Returns:
         dictionary with best "score" that each template achieved on the 'hero'
             image
     """
-    x, y, _ = hero.shape
+    hero_width, hero_height, _ = hero.shape
 
     x_div = 2.4
     y_div = 2.0
     hero_copy = hero.copy()
 
-    crop_hero = hero[0: int(y/y_div), 0: int(x/x_div)]
+    crop_hero = hero[0: int(hero_height/y_div), 0: int(hero_width/x_div)]
     numberScore = {}
 
-    for pixel_offset in range(-5, 50, 2):
-        for folder_name, imageDict in si_dict.items():
-            si_image = imageDict["template"]
+    # si_name_size = {"30": {"lower": 0.35, "upper": 0.55},
+    #                 "20": {"lower": 0.35, "upper": 0.55},
+    #                 "10": {"lower": 0.35, "upper": 0.55},
+    #                 "0": {"lower": 0.35, "upper": 0.55}}
 
-            sourceSIImage = imageDict["source"]
-            hero_h, hero_w = sourceSIImage.shape[:2]
+    # base_height
 
-            si_height, original_width = si_image.shape[:2]
+    # 30%
+    start_percent = 20
+    # 50%
+    end_percent = 50
 
-            base_height_ratio = si_height/hero_h
-            # resize_height
-            base_new_height = round(
-                lvlRatioDict[folder_name]["height"]) + pixel_offset
-            new_height = round(base_new_height * base_height_ratio)
-            scale_ratio = new_height/si_height
-            new_width = round(original_width * scale_ratio)
+    for folder_name, imageDict in si_dict.items():
+        si_image = imageDict["template"]
+        # si_height, si_width = si_image.shape[:2]
+        # sourceSIImage = imageDict["source"]
+
+        for height_percent in range(start_percent, end_percent, 2):
+            # si_image = imageDict["template"]
+            height_percent = height_percent/100
+            # si_height, original_width = si_image.shape[:2]
+            new_si_height = round(height_percent * hero_height)
+            new_si_width = round(height_percent * hero_width)
+            # resize_height`
+            # base_new_height = round(
+            #     si_name_size[folder_name]["height"]) + pixel_offset
+            # new_height = round(base_new_height * base_height_ratio)
+            # scale_ratio = new_height/si_height
+            # new_width = round(original_width * scale_ratio)
+
             si_image = cv2.resize(
-                si_image, (new_width, new_height))
+                si_image, (new_si_width, new_si_height))
             si_image_gray = cv2.cvtColor(si_image, cv2.COLOR_BGR2GRAY)
             hero_gray = cv2.cvtColor(crop_hero, cv2.COLOR_BGR2GRAY)
 
             mask = cv2.resize(
-                imageDict["mask"], (new_width, new_height))
+                imageDict["mask"], (new_si_width, new_si_height))
             mask_gray = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
             # mask_gray = mask
 
@@ -258,9 +269,9 @@ def signatureItemFeatures(hero: np.array,
                     if crop_hero.shape[0] < si_image_gray.shape[0] or \
                             crop_hero.shape[1] < si_image_gray.shape[1]:
                         _height, _width = si_image_gray.shape[:2]
-                        crop_hero = hero[0: max(int(y/y_div),
+                        crop_hero = hero[0: max(int(hero_height/y_div),
                                                 int(_height*1.2)),
-                                         0: max(int(x/x_div),
+                                         0: max(int(hero_width/x_div),
                                                 int(_width*1.2))]
                         hero_gray = cv2.cvtColor(crop_hero, cv2.COLOR_BGR2GRAY)
                     templateMatch = cv2.matchTemplate(
@@ -278,7 +289,7 @@ def signatureItemFeatures(hero: np.array,
             if folder_name not in numberScore:
                 numberScore[folder_name] = []
             numberScore[folder_name].append(
-                (score, pixel_offset, (scoreLoc, coords)))
+                (score, height_percent, (scoreLoc, coords)))
     best_score = {}
     for _folder, _si_scores in numberScore.items():
         numberScore[_folder] = sorted(_si_scores, key=lambda x: x[0])

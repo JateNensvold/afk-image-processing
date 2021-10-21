@@ -147,6 +147,7 @@ def get_db(rebuild=GV.REBUILD, enrichedDB=True):
             DB = loadDB()
         except FileNotFoundError:
             DB = buildDB(enrichedDB=enrichedDB)
+    GV.IMAGE_DB = DB
     return DB
 
 

@@ -7,6 +7,7 @@ import cv2
 import os
 import imutils
 import rtree
+import statistics
 
 import image_processing.build_db as BD
 import image_processing.globals as GV
@@ -355,21 +356,6 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
     multi_valid.append(getHeroContours(
         *baseArgs, hsv_range=hsv_range, **blur_args))
 
-    # baseArgs = (image.copy(), sizeAllowanceBoundary)
-    # blur_args["hsv_range"] = [
-    #     np.array([5, 79, 211]), np.array([21, 106, 250])]
-    # blur_args["reverse"] = True
-    # multi_valid.append(getHeroContours(
-    #     *baseArgs, **blur_args))
-
-    # multi_valid.append(getHeroContours(*baseArgs))
-
-    # multi_valid = sorted(multi_valid, key=lambda x: len(x), reverse=True)
-    # valid_sizes = multi_valid[0]
-
-#     valid_sizes = getHeroContours(*baseArgs)
-
-    import statistics
     hero_widths = []
     hero_heights = []
 
@@ -485,13 +471,18 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
                 _coords = _merged_row_item.dimensions.coords(single=False)
                 cv2.rectangle(
                     GV.image_ss, _coords[0], _coords[1], (0, 0, 0), 2)
-            if removeBG:
-                out, poly = remove_background(ROI)
+            # if removeBG:
+            #     out, poly = remove_background(ROI)
 
-                heroes[_hero_name]["image"] = out
-                heroes[_hero_name]["poly"] = poly
-            else:
-                heroes[_hero_name]["image"] = ROI
+            #     heroes[_hero_name]["image"] = out
+            #     heroes[_hero_name]["poly"] = poly
+            # else:
+            model_image_size = (416, 416)
+            ROI = cv2.resize(
+                ROI,
+                model_image_size,
+                interpolation=cv2.INTER_CUBIC)
+            heroes[_hero_name]["image"] = ROI
 
             heroes[_hero_name]["object"] = _Row_item
 

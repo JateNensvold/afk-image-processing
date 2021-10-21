@@ -1,25 +1,53 @@
 import cv2
 import os
 import csv
+import collections
+# import multiprocessing
+# import torch
+import time
+import threading
+
 import image_processing.build_db as BD
 import image_processing.globals as GV
 import image_processing.load_images as load
 import image_processing.processing as processing
 import image_processing.stamina as stamina
-import collections
+import image_processing.helpers.load_models as LM
+
 import numpy as np
-import image_processing.scripts.getSISize as siScript
-import multiprocessing
-from detectron2.engine import DefaultPredictor
-from detectron2.config import get_cfg
-from detectron2 import model_zoo
-import torch
-import time
+
+# from detectron2.engine import DefaultPredictor
+# from detectron2.config import get_cfg
+# from detectron2 import model_zoo
 
 import warnings
 warnings.filterwarnings("ignore")
-MODEL = None
-BORDER_MODEL = None
+
+MODEL_LABELS = ["A1", "A2", "3", "A3", "A4", "A5", "9"]
+BORDER_MODEL_LABELS = ["B", "E", "E+", "L", "L+", "M", "M+", "A"]
+
+
+def load_files(model_path: str, border_model_path: str, enrichedDB=True):
+    if GV.IMAGE_DB is None:
+        db_thread = threading.Thread(
+            kwargs={"enrichedDB": enrichedDB},
+            target=BD.get_db)
+        GV.THREADS["IMAGE_DB"] = db_thread
+        db_thread.start()
+
+    if GV.MODEL is None:
+        model_thread = threading.Thread(
+            args=[model_path],
+            target=LM.load_FI_model)
+        GV.THREADS["MODEL"] = model_thread
+        model_thread.start()
+
+    if GV.BORDER_MODEL is None:
+        border_model_thread = threading.Thread(
+            args=[border_model_path, BORDER_MODEL_LABELS],
+            target=LM.load_border_model)
+        GV.THREADS["BORDER_MODEL"] = border_model_thread
+        border_model_thread.start()
 
 
 def get_si(roster_image, image_name, debug_raw=False, imageDB=None,
@@ -42,8 +70,10 @@ def get_si(roster_image, image_name, debug_raw=False, imageDB=None,
         faction: flag to add faction output to hero feature list in the return
             dict
     """
-    if imageDB is None:
-        imageDB = BD.get_db(enrichedDB=True)
+    GV.IMAGE_DB = imageDB
+    model_path = os.path.join(GV.fi_models_dir, "fi_star_model.pt")
+    border_model_path = os.path.join(GV.fi_models_dir, "ascension_border.pth")
+    load_files(model_path, border_model_path)
 
     baseImages = collections.defaultdict(dict)
 
@@ -109,76 +139,15 @@ def get_si(roster_image, image_name, debug_raw=False, imageDB=None,
 
     if hero_dict is not None:
         hero_dict["hero_dict"] = heroesDict
-    digit_bins = {}
-
-    for k, v in heroesDict.items():
-        bins = siScript.getDigit(v["image"])
-        v["digit_info"] = bins
-        for digitName, tempDigitdict in bins.items():
-
-            digitTuple = tempDigitdict["digit_info"]
-            digitTop = digitTuple[0]
-            digitBottom = digitTuple[1]
-            digitHeight = digitBottom - digitTop
-            if digitName not in digit_bins:
-                digit_bins[digitName] = []
-            digit_bins[digitName].append(digitHeight)
-    avg_bin = {}
-    total_digit_occurrences = 0
-    for k, v in digit_bins.items():
-        avg = np.mean(v)
-        avg_bin[k] = {}
-        avg_bin[k]["height"] = avg
-        occurrence = len(v)
-        avg_bin[k]["count"] = occurrence
-        total_digit_occurrences += occurrence
-
-    graded_avg_bin = {}
-    for si_name, image_dict in baseImages.items():
-        if si_name not in graded_avg_bin:
-            graded_avg_bin[si_name] = {}
-        frequency_height_adjust = 0
-        for digit_name, scale_dict in avg_bin.items():
-
-            v_scale = baseImages[si_name][digit_name]["v_scale"]
-
-            digit_count = scale_dict["count"]
-            digit_height = scale_dict["height"]
-            digit_freqency = digit_count / total_digit_occurrences
-
-            frequency_height_adjust += (v_scale *
-                                        digit_height) * digit_freqency
-        graded_avg_bin[si_name]["height"] = frequency_height_adjust
 
     si_dict = stamina.signature_template_mask(baseImages)
 
-    model_labels = ["A1", "A2", "3", "A3", "A4", "A5", "9"]
-    border_labels = ["B", "E", "E+", "L", "L+", "M", "M+", "A"]
-    model_dict = {"labels": model_labels, "border_labels": border_labels}
+    reduced_values = []
+    for _hero_name, _hero_info_dict in heroesDict.items():
 
-    if not GV.DEBUG and GV.PARALLEL:
-        pool = multiprocessing.Pool()
-
-        all_args = [({"name": _hero_name,
-                      "info": _hero_info_dict,
-                      "si_dict": si_dict,
-                      "graded_avg_bin": graded_avg_bin,
-                      "model": model_dict}
-                     )for _hero_name, _hero_info_dict in heroesDict.items()]
-
-        reduced_values = pool.map(parallel_detect, all_args)
-    else:
-        reduced_values = []
-        for _hero_name, _hero_info_dict in heroesDict.items():
-
-            results = parallel_detect(
-                {"name": _hero_name,
-                 "info": _hero_info_dict,
-                 "si_dict": si_dict,
-                 "graded_avg_bin": graded_avg_bin,
-                 "model": model_dict})
-
-            reduced_values.append(results)
+        results = detect_features(
+            _hero_name, _hero_info_dict, si_dict)
+        reduced_values.append((_hero_name, results))
 
     return_dict = {}
 
@@ -190,9 +159,10 @@ def get_si(roster_image, image_name, debug_raw=False, imageDB=None,
     fontScale = 0.5 * (rows.get_avg_width()/100)
 
     hero_count = 0
-    for _hero_data in reduced_values:
+    GV.THREADS["IMAGE_DB"].join()
+    for _hero_name, _hero_data in reduced_values:
         name = _hero_data["pseudo_name"]
-        hero_info, _ = imageDB.search(heroesDict[name]["image"])
+        hero_info, _ = GV.IMAGE_DB.search(heroesDict[_hero_name]["image"])
         _hero_data["result"].insert(0, hero_info.name)
         if faction:
             _hero_data["result"].append(hero_info.faction)
@@ -224,7 +194,7 @@ def get_si(roster_image, image_name, debug_raw=False, imageDB=None,
         temp_list = []
         for _row_item in _row:
             hero_data = return_dict[_row_item.name]["result"]
-            if hero_data[0] != "food":
+            if hero_data[0].lower() != "food":
                 if debug_raw:
                     _raw_score = return_dict[_row_item.name]["score"]
                     hero_data.append(_raw_score)
@@ -234,38 +204,24 @@ def get_si(roster_image, image_name, debug_raw=False, imageDB=None,
     return json_dict
 
 
-def parallel_detect(info_dict):
-    k = info_dict["name"]
-    v = info_dict["info"]
-    si_dict = info_dict["si_dict"]
+def detect_features(name, image_info, si_dict: dict):
+    """
+    """
+    GV.THREADS["MODEL"].join()
 
-    global MODEL
-    if not MODEL:
-        MODEL = torch.hub.load(
-            GV.yolov5_dir,
-            "custom",
-            os.path.join(GV.fi_models_dir, "fi_star_model.pt"),
-            source="local",
-            force_reload=True,
-            verbose=False)
-
-    graded_avg_bin = info_dict["graded_avg_bin"]
     return_dict = {}
     si_scores = stamina.signatureItemFeatures(
-        v["image"], si_dict, graded_avg_bin)
-    x = v["object"].dimensions.x
-    y = v["object"].dimensions.y
-    test_img = v["image"]
-    model_image_size = (416, 416)
-    test_img = cv2.resize(
-        test_img,
-        model_image_size,
-        interpolation=cv2.INTER_CUBIC)
+        image_info["image"], si_dict)
+    x = image_info["object"].dimensions.x
+    y = image_info["object"].dimensions.y
+    test_img = image_info["image"]
+    # model_image_size = (416, 416)
+    # test_img = cv2.resize(
+    #     test_img,
+    #     model_image_size,
+    #     interpolation=cv2.INTER_CUBIC)
     test_img = test_img[..., ::-1]
-    results = MODEL([test_img], size=416)
-
-    model_labels = info_dict["model"]["labels"]
-    border_labels = info_dict["model"]["border_labels"]
+    results = GV.MODEL([test_img], size=416)
 
     results_array = results.pandas().xyxy[0]
     RA = results_array
@@ -278,7 +234,7 @@ def parallel_detect(info_dict):
     if len(fi_filtered_results) > 0:
         fi_final_results = fi_filtered_results.sort_values(
             "confidence").iloc[0]
-        best_fi = model_labels[fi_final_results["class"]]
+        best_fi = MODEL_LABELS[fi_final_results["class"]]
 
         fi_scores = {best_fi:
                      fi_final_results["confidence"]}
@@ -292,51 +248,21 @@ def parallel_detect(info_dict):
     if len(star_filtered_results) > 0:
         final_star_results = star_filtered_results.sort_values(
             "confidence", ascending=False).iloc[0]
-        best_ascension = model_labels[final_star_results["class"]]
+        best_ascension = MODEL_LABELS[final_star_results["class"]]
 
         ascension_scores = {best_ascension:
                             final_star_results["confidence"]}
-        if final_star_results["confidence"] > 0.8:
+        if final_star_results["confidence"] > 0.92:
             star = True
     if not star:
-        global BORDER_MODEL
-        if not BORDER_MODEL:
-            cfg = get_cfg()
+        GV.THREADS["BORDER_MODEL"].join()
 
-            cfg.merge_from_file(model_zoo.get_config_file(
-                "COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml"))
-            cfg.DATASETS.TRAIN = ("border_dataset_train",)
-            cfg.DATASETS.TEST = ("border_dataset_val",)
-
-            cfg.DATALOADER.NUM_WORKERS = 0
-            # Let training initialize from model zoo
-            # cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(
-            #     "COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml")
-            cfg.MODEL.WEIGHTS = (
-                "detectron2://COCO-Detection/"
-                "faster_rcnn_R_50_FPN_3x/137849458/model_final_280758.pkl")
-
-            cfg.SOLVER.IMS_PER_BATCH = 2
-            cfg.SOLVER.BASE_LR = 0.00025
-
-            # adjust up if val mAP is still rising, adjust down if overfit
-            cfg.SOLVER.MAX_ITER = 3000
-
-            cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 64
-            cfg.MODEL.ROI_HEADS.NUM_CLASSES = 8
-
-            # cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.8
-            cfg.MODEL.WEIGHTS = os.path.join(
-                GV.fi_models_dir, "ascension_border.pth")
-            cfg.MODEL.ROI_HEADS.NUM_CLASSES = len(border_labels)
-            BORDER_MODEL = DefaultPredictor(cfg)
-
-        raw_border_results = BORDER_MODEL(test_img)
+        raw_border_results = GV.BORDER_MODEL(test_img)
         border_results = raw_border_results["instances"]
 
         classes = border_results.pred_classes.cpu().tolist()
         scores = border_results.scores.cpu().tolist()
-        best_class = list(zip([border_labels[class_num]
+        best_class = list(zip([BORDER_MODEL_LABELS[class_num]
                           for class_num in classes], scores))[0]
         best_ascension = best_class[0]
         ascension_scores = {best_ascension: best_class[1]}
@@ -358,15 +284,15 @@ def parallel_detect(info_dict):
             best_si = "00"
 
     coords = (x, y)
-    name = [best_si, best_fi, best_ascension]
+    detection_results = [best_si, best_fi, best_ascension]
     return_dict["si"] = best_si
     return_dict["score"] = {}
     return_dict["score"]["si"] = si_scores
     return_dict["score"]["fi"] = fi_scores
     return_dict["score"]["ascension"] = ascension_scores
 
-    return_dict["result"] = name
-    return_dict["pseudo_name"] = k
+    return_dict["result"] = detection_results
+    return_dict["pseudo_name"] = name
     return_dict["coords"] = coords
     return return_dict
 
@@ -374,7 +300,7 @@ def parallel_detect(info_dict):
 if __name__ == "__main__":
     start_time = time.time()
     json_dict = get_si(GV.image_ss, GV.image_ss_name,
-                       debug_raw=False, faction=False)
+                       debug_raw=True, faction=False)
     if GV.VERBOSE_LEVEL >= 1:
         end_time = time.time()
         load.display_image(GV.image_ss, display=True)
@@ -384,3 +310,8 @@ if __name__ == "__main__":
             json_dict[GV.image_ss_name]["heroes"]))
     else:
         print(json_dict)
+
+    for row in json_dict[GV.image_ss_name]["heroes"]:
+        for hero in row:
+            print(hero[0], hero[4]["si"])
+            # print(hero)
