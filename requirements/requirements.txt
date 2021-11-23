@@ -1,0 +1,15 @@
+wheel
+bar
+matplotlib==3.3.4
+imutils
+rtree
+dill
+pandas
+seaborn
+opencv-python
+pyyaml
+tqdm
+
+
+
+

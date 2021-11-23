@@ -4,6 +4,11 @@ detect in game characters and a facet of features that each character can posses
 
 This repository can detect character names, FI level, SI level and ascension.
 
+## Environment
+When initializing the environment a build architecture needs to be selected.
+Supported build options are 'GPU' and 'CPU' which will setup the environment for the selected architecture type
+To set the build type go to .devcontainer/devcontainer.json and set 'build:args:BUILD_TYPE' to the desired type
+
 ## Dependencies
 
 ```python

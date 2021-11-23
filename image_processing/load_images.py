@@ -2,7 +2,7 @@
 import cv2
 import glob
 import math
-import matplotlib
+# import matplotlib
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,12 +15,12 @@ import image_processing.afk.hero_object as HO
 
 def display_image(image, multiple=False, display=GV.DEBUG, color_correct=True,
                   colormap=None):
-    backend = matplotlib.get_backend()
+    # backend = matplotlib.get_backend()
 
-    if backend.lower() != 'tkagg':
-        if GV.VERBOSE_LEVEL >= 1:
-            print("Backend: {}".format(backend))
-        plt.switch_backend("tkagg")
+    # if backend.lower() != 'tkagg':
+    #     if GV.VERBOSE_LEVEL >= 1:
+    #         print("Backend: {}".format(backend))
+    #     plt.switch_backend("tkagg")
 
     if not display:
         return

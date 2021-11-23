@@ -9,6 +9,8 @@
 			// Update 'VARIANT' to pick a Python version: 3, 3.10, 3.9, 3.8, 3.7, 3.6
 			// Append -bullseye or -buster to pin to an OS version.
 			// Use -bullseye variants on local on arm64/Apple Silicon.
+			// pytorch/detectron2 build type (CUDA, CPU)
+			"BUILD_TYPE": "CPU",
 			"VARIANT": "3.9",
 			// Options
 			"NODE_VERSION": "lts/*"
@@ -35,7 +37,7 @@
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
 		"ms-python.python",
-		"ms-python.vscode-pylance"
+		"ms-python.vscode-pylance",
 	],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
@@ -51,5 +53,5 @@
 		"docker-from-docker": "latest",
 		"git": "os-provided"
 	},
-	"postStartCommand": "ls && pip3 install -e ."
+	"postStartCommand": "pip3 install -e .",
 }

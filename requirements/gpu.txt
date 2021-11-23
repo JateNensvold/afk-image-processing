@@ -1,0 +1,10 @@
+-r requirements.txt
+# GPU pyTorch
+--find-links https://download.pytorch.org/whl/torch_stable.html
+torch
+torchvision
+torchaudio
+
+# Detectron2 GPU
+--find-links https://dl.fbaipublicfiles.com/detectron2/wheels/cu102/torch1.10/index.html
+detectron2

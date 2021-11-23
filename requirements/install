@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+supported_architecture=("CPU" "GPU")
+
+if [ "$#" -ne 1 ]; then
+    echo "Pass a supported architecture when calling this script: ${supported_architecture}"
+    echo "Ex. 'install CPU'"
+    exit 1
+fi
+echo "BUILD Type: ${1}"
+
+
+case ${1} in
+    "CPU")
+        requirements_path="/tmp/pip-tmp/requirements/cpu.txt"
+    ;;
+    "GPU")
+        requirements_path="/tmp/pip-tmp/requirements/gpu.txt"
+    ;;
+    *)
+        echo "Invalid architecture used"
+        echo "${1} not in ${supported_architecture}"
+        exit 1
+    ;;
+esac
+
+pip3 --disable-pip-version-check --no-cache-dir install -r ${requirements_path} \
+   && rm -rf /tmp/pip-tmp

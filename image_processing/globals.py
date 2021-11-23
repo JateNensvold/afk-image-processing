@@ -34,6 +34,15 @@ PARALLEL = True if args.parallel.lower() in ["true"] else False
 image_ss = None
 image_ss_name = None
 VERBOSE_LEVEL = args.verbose
+try:
+    ARCHITECTURE = os.environ["BUILD_TYPE"]
+    ARCHITECTURE_TYPES = {"GPU": "cuda",
+                          "CPU": "cpu"}
+    ARCHITECTURE = ARCHITECTURE_TYPES[ARCHITECTURE]
+except KeyError as e:
+    raise EnvironmentError(
+        "Environment variable 'BUILD_TYPE' not set. Please set BUILD_TYPE to a"
+        " valid option listed in the README") from e
 
 THREADS: dict[str, threading.Thread] = {}
 
