@@ -13,7 +13,9 @@ RUN apt-get update && \
    apt-get install -y \
    ffmpeg \
    libsm6 \
-   libxext6 
+   libxext6 \
+   vim \
+   ping
 
 RUN python3 -m pip install --upgrade pip
 
