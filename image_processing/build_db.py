@@ -6,7 +6,9 @@ import image_processing.globals as GV
 import dill
 import pickle
 import time
-import image_processing.database.imageDB as imageSearchDB
+
+from image_processing.database.imageDB import imageSearch
+
 import image_processing.afk.hero_object as hero_object
 
 
@@ -65,14 +67,14 @@ def recurse_dir(path: str, file_dict: dict):
             file_dict[faction][hero_name].add(_file_path)
 
 
-def buildDB(enrichedDB: bool = False) -> imageSearchDB.imageSearch:
+def buildDB(enrichedDB: bool = False) -> "imageSearch":
     """
     Build and save a new hero database
     Args:
         enrichedDB: flag to add every hero to the database a second time with
             parts of the the image border removed from each side
     Return:
-        imageSearchDB.imageSearch database object
+        "imageSearch" database object
     """
     file_dict = {}
     if GV.VERBOSE_LEVEL >= 1:
@@ -94,7 +96,7 @@ def buildDB(enrichedDB: bool = False) -> imageSearchDB.imageSearch:
                 base_images.append(hero_object.hero_object(
                     _hero_name, _faction, hero))
 
-    imageDB: imageSearchDB.imageSearch = load.build_flann(base_images)
+    imageDB: "imageSearch" = load.build_flann(base_images)
 
     if enrichedDB:
         croppedImages = load.crop_heroes(
@@ -113,19 +115,19 @@ def buildDB(enrichedDB: bool = False) -> imageSearchDB.imageSearch:
     return imageDB
 
 
-def loadDB() -> imageSearchDB.imageSearch:
+def loadDB() -> "imageSearch":
     """
     Load hero database from pickle file.
 
     Return:
-        imageSearchDB.imageSearch database object
+        "imageSearch" database object
     """
     if os.path.exists(GV.database_pickle):
         if GV.VERBOSE_LEVEL >= 1:
             print("Loading database!")
         start_time = time.time()
         with open(GV.database_pickle, 'rb') as handle:
-            db: imageSearchDB.imageSearch = pickle.load(handle)
+            db: "imageSearch" = pickle.load(handle)
         end_time = time.time()
         if GV.VERBOSE_LEVEL >= 1:
             print("Database loaded! Loaded in {} seconds".format(

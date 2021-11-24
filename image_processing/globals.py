@@ -3,7 +3,10 @@ import argparse
 import logging
 import image_processing.helpers.load_images as load
 import threading
-import image_processing.database.imageDB as imageSearchDB
+
+import typing
+if typing.TYPE_CHECKING:
+    import image_processing.database.imageDB as imageSearchDB
 
 parser = argparse.ArgumentParser(description='AFK arena object extraction and '
                                  'image analysis.')
@@ -48,7 +51,7 @@ THREADS: dict[str, threading.Thread] = {}
 
 MODEL = None
 BORDER_MODEL = None
-IMAGE_DB: imageSearchDB.imageSearch = None
+IMAGE_DB: "imageSearchDB.imageSearch" = None
 
 if VERBOSE_LEVEL == 0:
     logging.disable(logging.INFO)

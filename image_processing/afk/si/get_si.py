@@ -1,3 +1,4 @@
+# from logging import debug
 import cv2
 import os
 import csv
@@ -50,7 +51,7 @@ def load_files(model_path: str, border_model_path: str, enrichedDB=True):
         border_model_thread.start()
 
 
-def get_si(roster_image, image_name, debug_raw=False, imageDB=None,
+def get_si(roster_image, image_name, debug_raw=None, imageDB=None,
            hero_dict=None, faction=False):
     """
     Detect AFK Arena heroes from a roster screenshot and for each hero detect
@@ -70,6 +71,11 @@ def get_si(roster_image, image_name, debug_raw=False, imageDB=None,
         faction: flag to add faction output to hero feature list in the return
             dict
     """
+    if debug_raw is None:
+        if GV.VERBOSE_LEVEL >= 1:
+            debug_raw = True
+        else:
+            debug_raw = False
     GV.IMAGE_DB = imageDB
     model_path = os.path.join(GV.fi_models_dir, "fi_star_model.pt")
     border_model_path = os.path.join(GV.fi_models_dir, "ascension_border.pth")
@@ -300,7 +306,7 @@ def detect_features(name, image_info, si_dict: dict):
 if __name__ == "__main__":
     start_time = time.time()
     json_dict = get_si(GV.image_ss, GV.image_ss_name,
-                       debug_raw=False, faction=False)
+                       faction=False)
     if GV.VERBOSE_LEVEL >= 1:
         end_time = time.time()
         print("Detected features in: {}".format(end_time - start_time))
@@ -309,7 +315,24 @@ if __name__ == "__main__":
         print("{{\"heroes\": {}}}".format(
             json_dict[GV.image_ss_name]["heroes"]))
     else:
-        print(json_dict)
+        print("Heroes:")
+        print(f"Rows: {json_dict[GV.image_ss_name]['rows']}")
+        print(f"Columns: {json_dict[GV.image_ss_name]['columns']}")
+        indent_level = 0
+        hero_count = 0
+        for row_index, row in enumerate(json_dict[GV.image_ss_name]['heroes']):
+            tab_string = "\t" * indent_level
+            print(f"{tab_string}Row {row_index + 1}")
+            indent_level += 1
+            tab_string = "\t" * indent_level
+            for hero_index, hero_info in enumerate(row):
+                print(f"{tab_string}Hero: {hero_count + 1} {tab_string} "
+                      f"{hero_info}")
+                # print(f"{tab_string}{hero_info}")
+                hero_count += 1
+            indent_level -= 1
+
+        # print(json_dict)
 
     # for row in json_dict[GV.image_ss_name]["heroes"]:
     #     for hero in row:

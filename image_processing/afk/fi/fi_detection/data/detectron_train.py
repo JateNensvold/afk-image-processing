@@ -1,6 +1,7 @@
 # import some common libraries
 import os
 import cv2
+import glob
 
 import image_processing.globals as GV
 
@@ -58,14 +59,21 @@ def test_model(cfg: CfgNode):
     print(output)
 
 
+def find_json(folder_path: str):
+    full_path = os.path.join(folder_path, "*.json")
+    glob_list = glob.glob(full_path)
+    assert len(glob_list) > 0, f"No Json Found at {folder_path}"
+    return glob_list[0]
+
+
 if __name__ == "__main__":
-    base_path = os .path.join(BASE_PATH, "coco_data")
+    base_path = os.path.join(BASE_PATH, "coco_data")
     train_path = os.path.join(base_path, "train")
     val_path = os.path.join(base_path, "valid")
     test_path = os.path.join(base_path, "test")
 
     register_coco_instances("border_dataset_train", {},
-                            os.path.join(train_path, "coco.json"), train_path)
+                            find_json(train_path), train_path)
     register_coco_instances("border_dataset_val", {},
                             os.path.join(val_path, "coco.json"), val_path)
     register_coco_instances("border_dataset_test", {},
