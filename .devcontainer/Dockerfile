@@ -15,7 +15,7 @@ RUN apt-get update && \
    libsm6 \
    libxext6 \
    vim \
-   ping
+   iputils-ping
 
 RUN python3 -m pip install --upgrade pip
 
@@ -24,6 +24,17 @@ COPY requirements /tmp/pip-tmp/requirements
 RUN /tmp/pip-tmp/requirements/install ${BUILD_TYPE}
 
 ENV BUILD_TYPE=${BUILD_TYPE}
+
+# Install Dotnet to run Archmage Bot
+RUN wget https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
+   sudo dpkg -i packages-microsoft-prod.deb  && \
+   rm packages-microsoft-prod.deb 
+
+RUN apt-get update && \
+   apt-get install -y \
+   apt-transport-https \
+   dotnet-sdk-6.0
+
 # [Optional] Uncomment this section to install additional OS packages.
 # RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 #     && apt-get -y install --no-install-recommends <your-package-list-here>

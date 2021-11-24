@@ -300,18 +300,18 @@ def detect_features(name, image_info, si_dict: dict):
 if __name__ == "__main__":
     start_time = time.time()
     json_dict = get_si(GV.image_ss, GV.image_ss_name,
-                       debug_raw=True, faction=False)
+                       debug_raw=False, faction=False)
     if GV.VERBOSE_LEVEL >= 1:
         end_time = time.time()
-        load.display_image(GV.image_ss, display=True)
         print("Detected features in: {}".format(end_time - start_time))
+        load.display_image(GV.image_ss, display=True)
     if GV.VERBOSE_LEVEL == 0:
         print("{{\"heroes\": {}}}".format(
             json_dict[GV.image_ss_name]["heroes"]))
     else:
         print(json_dict)
 
-    for row in json_dict[GV.image_ss_name]["heroes"]:
-        for hero in row:
-            print(hero[0], hero[4]["si"])
-            # print(hero)
+    # for row in json_dict[GV.image_ss_name]["heroes"]:
+    #     for hero in row:
+    #         print(hero[0], hero[4]["si"])
+    # print(hero)

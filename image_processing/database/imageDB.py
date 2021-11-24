@@ -48,7 +48,7 @@ class imageSearch():
                 }
 
     def __setstate__(self, incoming):
-
+        self.matcher: cv2.FlannBasedMatcher
         self.__init__()
         self.image_data = incoming["images"]
         self.names = incoming["names"]
