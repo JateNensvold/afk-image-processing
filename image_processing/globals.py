@@ -39,7 +39,7 @@ image_ss_name = None
 VERBOSE_LEVEL = args.verbose
 try:
     ARCHITECTURE = os.environ["BUILD_TYPE"]
-    ARCHITECTURE_TYPES = {"GPU": "cuda",
+    ARCHITECTURE_TYPES = {"CUDA": "cuda",
                           "CPU": "cpu"}
     ARCHITECTURE = ARCHITECTURE_TYPES[ARCHITECTURE]
 except KeyError as e:

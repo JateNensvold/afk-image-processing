@@ -10,12 +10,16 @@
 			// Append -bullseye or -buster to pin to an OS version.
 			// Use -bullseye variants on local on arm64/Apple Silicon.
 			// pytorch/detectron2 build type (CUDA, CPU)
-			"BUILD_TYPE": "CPU",
+			"BUILD_TYPE": "CUDA",
 			"VARIANT": "3.9",
 			// Options
 			"NODE_VERSION": "lts/*"
 		}
 	},
+	"runArgs": [
+		"--gpus",
+		"all"
+	],
 	"remoteEnv": {},
 	"mounts": [
 		"source=/home/nate/projects/archmage-bot,target=/workspaces/archmage-bot,type=bind"

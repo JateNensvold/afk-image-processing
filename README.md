@@ -9,6 +9,39 @@ When initializing the environment a build architecture needs to be selected.
 Supported build options are 'GPU' and 'CPU' which will setup the environment for the selected architecture type
 To set the build type go to .devcontainer/devcontainer.json and set 'build:args:BUILD_TYPE' to the desired type
 
+
+
+## Training new models
+Place COCO dataset at `/workspaces/afk-image-processing/image_processing/afk/fi/fi_detection/data/coco_data`
+Call `/workspaces/afk-image-processing/image_processing/afk/fi/fi_detection/data/detectron_train.py` 
+with CUDA/GPU architecture.
+
+### Setup GPU Support in docker WSL2
+https://forums.developer.nvidia.com/t/guide-to-run-cuda-wsl-docker-with-latest-versions-21382-windows-build-470-14-nvidia/178365
+https://docs.nvidia.com/cuda/wsl-user-guide/index.html
+
+Step 3 is completed automatically by the devcontainer. Complete steps 1 and 2 to enable GPU development in VSCode/Docker Devcontainers on WSL2
+
+1. Install GPU package in windows
+
+2. Install nvidia docker runtime
+```bash
+sudo apt-get install -y nvidia-docker2      
+```
+
+3. Install Cuda
+```bash
+wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin
+sudo mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
+wget https://developer.download.nvidia.com/compute/cuda/11.4.0/local_installers/cuda-repo-ubuntu2004-11-4-local_11.4.0-470.42.01-1_amd64.deb
+sudo dpkg -i cuda-repo-ubuntu2004-11-4-local_11.4.0-470.42.01-1_amd64.deb
+sudo apt-key add /var/cuda-repo-ubuntu2004-11-4-local/7fa2af80.pub
+sudo apt-get update
+
+apt-get install -y cuda-toolkit-11-4
+```
+
+
 ## Dependencies
 
 ```python

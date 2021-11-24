@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-supported_architecture=("CPU" "GPU")
+supported_architecture=("CPU" "CUDA")
 
 if [ "$#" -ne 1 ]; then
     echo "Pass a supported architecture when calling this script: ${supported_architecture}"
@@ -13,7 +13,7 @@ case ${1} in
     "CPU")
         requirements_path="/tmp/pip-tmp/requirements/cpu.txt"
     ;;
-    "GPU")
+    "CUDA")
         requirements_path="/tmp/pip-tmp/requirements/gpu.txt"
     ;;
     *)
