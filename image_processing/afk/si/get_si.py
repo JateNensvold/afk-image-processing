@@ -98,9 +98,7 @@ def get_si(roster_image, image_name, debug_raw=None, imageDB=None,
         else:
             debug_raw = False
     GV.IMAGE_DB = imageDB
-    # model_path = os.path.join(GV.fi_models_dir, "fi_si_star_model.pt")
-    model_path = "/workspaces/afk-image-processing/image_processing/afk/fi/" \
-        "fi_detection/yolov5/runs/train/yolov5s_results3/weights/best.pt"
+    model_path = os.path.join(GV.fi_models_dir, "fi_si_star_model.pt")
     border_model_path = os.path.join(GV.fi_models_dir, "ascension_border.pt")
     load_files(model_path, border_model_path)
 
