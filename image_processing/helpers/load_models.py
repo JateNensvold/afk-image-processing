@@ -1,5 +1,6 @@
 import torch
 import time
+import pandas
 
 import image_processing.helpers.verbose_print as VP
 
@@ -18,8 +19,6 @@ def load_border_model(path: str, border_labels: list):
 
     cfg.merge_from_file(model_zoo.get_config_file(
         "COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml"))
-    cfg.DATASETS.TRAIN = ("border_dataset_train",)
-    cfg.DATASETS.TEST = ("border_dataset_val",)
 
     cfg.DATALOADER.NUM_WORKERS = 0
 
@@ -32,11 +31,11 @@ def load_border_model(path: str, border_labels: list):
     cfg.SOLVER.MAX_ITER = 3000
 
     cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 64
-    cfg.MODEL.ROI_HEADS.NUM_CLASSES = 8
-
-    # cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.8
-    cfg.MODEL.WEIGHTS = path
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = len(border_labels)
+
+    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.8
+    cfg.MODEL.WEIGHTS = path
+    # cfg.MODEL.ROI_HEADS.NUM_CLASSES = len(border_labels)
     BORDER_MODEL = DefaultPredictor(cfg)
     end_time = time.time()
     VP.print_verbose("Loaded Border_model in: {}".format(
@@ -44,15 +43,15 @@ def load_border_model(path: str, border_labels: list):
     GV.BORDER_MODEL = BORDER_MODEL
 
 
-def load_FI_model(path: str):
+def load_FI_model(path: str, class_labels: list):
     start_time = time.time()
+
     MODEL = torch.hub.load(
         GV.yolov5_dir,
         "custom",
         path,
-        source="local",
-        force_reload=True,
-        verbose=False)
+        source="local")
+
     end_time = time.time()
     VP.print_verbose(
         "Loaded star/FI model in: {}".format(

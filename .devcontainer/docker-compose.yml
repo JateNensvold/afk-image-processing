@@ -3,24 +3,28 @@ version: '3'
 services:
   afk-processing-container:
     build: 
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
       args: 
         BUILD_TYPE: "CUDA"
         VARIANT: 3.9
         NODE_VERSION: "lts/*"
-
+    shm_size: '8G'
     volumes:
       # Forwards the local Docker socket to the container.
       - /var/run/docker.sock:/var/run/docker-host.sock 
       # Update this to wherever you want VS Code to mount the folder of your project
       - ..:/workspace/afk-processing:cached
       - /home/nate/projects/archmage-bot:/workspace/archmage-bot:cached
-        # "source=/home/nate/projects/archmage-bot,target=/workspaces/archmage-bot,type=bind"
-
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+    networks:
+      - devnet
     # Overrides default command so things don't shut down after the process ends.
-    entrypoint: /usr/local/share/docker-init.sh
-    command: --gpus all --shm-size 8G sleep infinity 
+    command: sleep infinity 
     # Uncomment the next four lines if you will use a ptrace-based debuggers like C++, Go, and Rust.
     # cap_add:
     #  - SYS_PTRACE
@@ -36,5 +40,15 @@ services:
     build:
       context: ./redis
       dockerfile: Dockerfile
-    entrypoint: /usr/local/share/docker-init.sh
-    command: sleep infinity 
+    command: redis-server
+    networks:
+      devnet:
+        ipv4_address: 172.20.0.6
+    ports:
+     - "6379:6379"
+networks:
+  devnet:
+    ipam:
+      # driver: default
+      config:
+        - subnet: 172.20.0.0/24

@@ -80,6 +80,6 @@ if __name__ == "__main__":
                             os.path.join(test_path, "coco.json"), test_path)
 
     cfg = get_cfg()
-    set_config(cfg, "border_dataset_train", "border_dataset_val", 8)
+    set_config(cfg, "border_dataset_train", "border_dataset_val", 12)
     train_model(cfg)
     # test_model(cfg)

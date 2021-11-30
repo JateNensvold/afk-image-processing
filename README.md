@@ -12,9 +12,16 @@ To set the build type go to .devcontainer/devcontainer.json and set 'build:args:
 
 
 ## Training new models
+### Detectron i.e border dataset
+Get dataset at https://app.roboflow.com/nate-jensvold/afk-arena-dataset/2
 Place COCO dataset at `/workspaces/afk-image-processing/image_processing/afk/fi/fi_detection/data/coco_data`
 Call `/workspaces/afk-image-processing/image_processing/afk/fi/fi_detection/data/detectron_train.py` 
 with CUDA/GPU architecture.
+
+### YoloV5 i.e. ascension/stars, fi, si
+```python
+python3 yolov5/train.py --img 416 --batch 16 --epochs 3000 --data si_fi_stars/data.yaml --weights yolov5s.pt
+```
 
 ### Setup GPU Support in docker WSL2
 https://forums.developer.nvidia.com/t/guide-to-run-cuda-wsl-docker-with-latest-versions-21382-windows-build-470-14-nvidia/178365
