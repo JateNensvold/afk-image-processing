@@ -18,7 +18,9 @@
 	},
 	"runArgs": [
 		"--gpus",
-		"all"
+		"all",
+		"--shm-size",
+		"8G"
 	],
 	"remoteEnv": {},
 	"mounts": [
