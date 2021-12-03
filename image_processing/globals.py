@@ -1,10 +1,10 @@
 import os
 import argparse
 import logging
-import image_processing.helpers.load_images as load
 import threading
-
 import typing
+
+import image_processing.helpers.load_images as load
 if typing.TYPE_CHECKING:
     import image_processing.database.imageDB as imageSearchDB
 
@@ -35,7 +35,7 @@ DEBUG = args.DEBUG
 REBUILD = args.rebuild
 PARALLEL = True if args.parallel.lower() in ["true"] else False
 image_ss = None
-image_ss_name = None
+IMAGE_SS_NAME = None
 VERBOSE_LEVEL = args.verbose
 try:
     ARCHITECTURE = os.environ["BUILD_TYPE"]
@@ -60,18 +60,13 @@ if VERBOSE_LEVEL == 0:
 CACHED = {}
 
 if args.image:
-    multiplier = 1
-
     image_ss = load.load_image(args.image)
-    # image_ss = cv2.resize(image_ss,
-    #                       (image_ss.shape[1]*multiplier,
-    #                        image_ss.shape[0]*multiplier))
-    image_ss_name = os.path.basename(args.image)
+    IMAGE_SS_NAME = os.path.basename(args.image)
 
 base_dir = os.path.join(os.path.dirname(
     os.path.abspath(__file__)))
 database_path = os.path.join(base_dir, "database")
-database_hero_validation_path = os.path.join(database_path, "hero_validation")
+database_hero_validation_path = os.path.join(database_path, "temp_image")
 
 # Path to database hero_icons used to build Flann
 database_icon_path = os.path.join(database_path, "hero_icon")
@@ -81,6 +76,7 @@ database_pickle = os.path.join(database_path, 'imageDB.pickle')
 stamina_templates_path = os.path.join(database_path, "stamina_templates")
 
 afk_dir = os.path.join(base_dir, "afk")
+models_dir = os.path.join(base_dir, "models")
 
 # Tests directory
 tests_dir = os.path.join(base_dir, os.path.pardir, "tests")
@@ -95,8 +91,8 @@ fi_base_path = os.path.join(fi_path, "base")
 fi_train_path = os.path.join(fi_path, "train")
 
 # Yolov5(Stars, FI) and Detectron(Ascension) Model output
-fi_models_dir = os.path.join(fi_path, "fi_detection", "data", "models")
-yolov5_dir = os.path.join(fi_path, "fi_detection", "yolov5")
+final_models_dir = os.path.join(models_dir, "final_models")
+yolov5_dir = os.path.join(models_dir, "yolov5")
 
 # Database lvl training data
 lvl_path = os.path.join(database_path, "levels")

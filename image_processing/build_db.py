@@ -1,42 +1,15 @@
-import cv2
 import os
+import time
+import pickle
+import cv2
 
 import image_processing.load_images as load
 import image_processing.globals as GV
 import dill
-import pickle
-import time
 
 from image_processing.database.imageDB import imageSearch
 
 import image_processing.afk.hero_object as hero_object
-
-
-def pickle_trick(obj, max_depth=10):
-    output = {}
-
-    if max_depth <= 0:
-        return output
-
-    try:
-        pickle.dumps(obj)
-    except (pickle.PicklingError, TypeError) as e:
-        failing_children = []
-
-        if hasattr(obj, "__dict__"):
-            for k, v in obj.__dict__.items():
-                result = pickle_trick(v, max_depth=max_depth - 1)
-                if result:
-                    failing_children.append(result)
-
-        output = {
-            "fail": obj,
-            "err": e,
-            "depth": max_depth,
-            "failing_children": failing_children
-        }
-
-    return output
 
 
 def recurse_dir(path: str, file_dict: dict):
@@ -67,11 +40,11 @@ def recurse_dir(path: str, file_dict: dict):
             file_dict[faction][hero_name].add(_file_path)
 
 
-def buildDB(enrichedDB: bool = False) -> "imageSearch":
+def buildDB(enriched_db: bool = False) -> "imageSearch":
     """
     Build and save a new hero database
     Args:
-        enrichedDB: flag to add every hero to the database a second time with
+        enriched_db: flag to add every hero to the database a second time with
             parts of the the image border removed from each side
     Return:
         "imageSearch" database object
@@ -98,7 +71,7 @@ def buildDB(enrichedDB: bool = False) -> "imageSearch":
 
     imageDB: "imageSearch" = load.build_flann(base_images)
 
-    if enrichedDB:
+    if enriched_db:
         croppedImages = load.crop_heroes(
             [_hero_tuple.image for _hero_tuple in base_images],
             0.15, 0.08, 0.25, 0.2)
@@ -141,14 +114,14 @@ def loadDB() -> "imageSearch":
     return db
 
 
-def get_db(rebuild=GV.REBUILD, enrichedDB=True):
+def get_db(rebuild=GV.REBUILD, enriched_db=True):
     if rebuild:
-        DB = buildDB(enrichedDB=enrichedDB)
+        DB = buildDB(enriched_db=enriched_db)
     else:
         try:
             DB = loadDB()
         except FileNotFoundError:
-            DB = buildDB(enrichedDB=enrichedDB)
+            DB = buildDB(enriched_db=enriched_db)
     GV.IMAGE_DB = DB
     return DB
 

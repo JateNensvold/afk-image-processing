@@ -42,7 +42,7 @@ def generate_data(json_dict: dict, image_name: str, image: np.array, imageDB,
 if __name__ == "__main__":
     files = os.listdir(SOURCE_DIR)
 
-    imageDB = BD.get_db(enrichedDB=True)
+    imageDB = BD.get_db(enriched_db=True)
     sizes = []
 
     for _file in files:

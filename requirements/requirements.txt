@@ -9,7 +9,3 @@ seaborn
 opencv-python
 pyyaml
 tqdm
-
-
-
-

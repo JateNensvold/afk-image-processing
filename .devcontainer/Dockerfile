@@ -14,8 +14,7 @@ RUN apt-get update && \
    ffmpeg \
    libsm6 \
    libxext6 \
-   vim \
-   iputils-ping
+   vim
 
 RUN python3 -m pip install --upgrade pip
 

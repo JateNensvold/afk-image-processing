@@ -66,5 +66,5 @@
 		"docker-from-docker": "latest",
 		"git": "os-provided"
 	},
-	"postStartCommand": "pip3 install -e /workspace/afk-processing"
+	"postStartCommand": "pip3 install -e /workspace/afk-image-processing"
 }

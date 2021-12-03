@@ -6,9 +6,18 @@ This repository can detect character names, FI level, SI level and ascension.
 
 ## Environment
 When initializing the environment a build architecture needs to be selected.
-Supported build options are 'GPU' and 'CPU' which will setup the environment for the selected architecture type
-To set the build type go to .devcontainer/devcontainer.json and set 'build:args:BUILD_TYPE' to the desired type
+Supported build options are 'CUDA' and 'CPU' which will setup the environment for the selected architecture type
+To set the build type go to .devcontainer/docker-compose.yml and set BUILD_TYPE to the desired architecture
 
+```
+services:
+  afk-processing-container:
+    build:
+    ...
+      args:
+        BUILD_TYPE: "CUDA"
+    ...
+```
 
 
 ## Training new models

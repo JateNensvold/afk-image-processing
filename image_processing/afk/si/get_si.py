@@ -1,27 +1,17 @@
-# from logging import debug
-import cv2
 import os
-# import csv
-# import collections
-# import multiprocessing
-# import torch
 import time
 import threading
+import warnings
+import cv2
 
 import image_processing.build_db as BD
 import image_processing.globals as GV
 import image_processing.load_images as load
 import image_processing.processing as processing
-# import image_processing.stamina as stamina
 import image_processing.helpers.load_models as LM
 
 import numpy as np
 
-# from detectron2.engine import DefaultPredictor
-# from detectron2.config import get_cfg
-# from detectron2 import model_zoo
-
-import warnings
 warnings.filterwarnings("ignore")
 
 MODEL_LABELS = ['0 si', '1 star', '10SI', '2 star', '20 si',
@@ -49,10 +39,13 @@ ASCENSION_STAR_LABELS = {
 }
 
 
-def load_files(model_path: str, border_model_path: str, enrichedDB=True):
+def load_files(model_path: str, border_model_path: str, enriched_db=True):
+    """
+    Load the pytorch models and database
+    """
     if GV.IMAGE_DB is None:
         db_thread = threading.Thread(
-            kwargs={"enrichedDB": enrichedDB},
+            kwargs={"enriched_db": enriched_db},
             target=BD.get_db)
         GV.THREADS["IMAGE_DB"] = db_thread
         db_thread.start()
@@ -98,8 +91,8 @@ def get_si(roster_image, image_name, debug_raw=None, imageDB=None,
         else:
             debug_raw = False
     GV.IMAGE_DB = imageDB
-    model_path = os.path.join(GV.fi_models_dir, "fi_si_star_model.pt")
-    border_model_path = os.path.join(GV.fi_models_dir, "ascension_border.pt")
+    model_path = os.path.join(GV.final_models_dir, "fi_si_star_model.pt")
+    border_model_path = os.path.join(GV.final_models_dir, "ascension_border.pt")
     load_files(model_path, border_model_path)
 
     lower_hsv = np.array([0, 0, 0])
@@ -130,7 +123,10 @@ def get_si(roster_image, image_name, debug_raw=None, imageDB=None,
     fontScale = 0.5 * (rows.get_avg_width()/100)
 
     hero_count = 0
-    GV.THREADS["IMAGE_DB"].join()
+    try:
+        GV.THREADS["IMAGE_DB"].join()
+    except KeyError:
+        pass
     for _hero_name, _hero_data in reduced_values:
         name = _hero_data["pseudo_name"]
         hero_info, _ = GV.IMAGE_DB.search(heroesDict[_hero_name]["image"])
@@ -178,7 +174,10 @@ def get_si(roster_image, image_name, debug_raw=None, imageDB=None,
 def detect_features(name, image_info):
     """
     """
-    GV.THREADS["MODEL"].join()
+    try:
+        GV.THREADS["MODEL"].join()
+    except KeyError:
+        pass
 
     return_dict = {}
 
@@ -188,7 +187,6 @@ def detect_features(name, image_info):
 
     results_array = results.pandas().xyxy[0]
     RA = results_array
-
     fi_filtered_results = RA.loc[RA['class'].isin(FI_LABELS.keys())]
 
     star_filtered_results = RA.loc[RA['class'].isin(
@@ -234,7 +232,10 @@ def detect_features(name, image_info):
         best_si = "0"
         si_scores = {best_si: 1.0}
     if not star:
-        GV.THREADS["BORDER_MODEL"].join()
+        try:
+            GV.THREADS["BORDER_MODEL"].join()
+        except KeyError:
+            pass
 
         raw_border_results = GV.BORDER_MODEL(test_img)
         border_results = raw_border_results["instances"]
@@ -255,7 +256,7 @@ def detect_features(name, image_info):
     coords = (image_info["object"].dimensions.x,
               image_info["object"].dimensions.y)
     detection_results = [best_si, best_fi, best_ascension]
-    # return_dict["si"] = best_si
+
     return_dict["score"] = {}
     return_dict["score"]["si"] = si_scores
     return_dict["score"]["fi"] = fi_scores
@@ -269,22 +270,21 @@ def detect_features(name, image_info):
 
 if __name__ == "__main__":
     start_time = time.time()
-    json_dict = get_si(GV.image_ss, GV.image_ss_name,
+    json_dict = get_si(GV.image_ss, GV.IMAGE_SS_NAME,
                        faction=False)
     if GV.VERBOSE_LEVEL >= 1:
         end_time = time.time()
-        print("Detected features in: {}".format(end_time - start_time))
+        print(f"Detected features in: {end_time - start_time}")
         load.display_image(GV.image_ss, display=True)
     if GV.VERBOSE_LEVEL == 0:
-        print("{{\"heroes\": {}}}".format(
-            json_dict[GV.image_ss_name]["heroes"]))
+        print(f"{{\"heroes\": {json_dict[GV.IMAGE_SS_NAME]['heroes']}}}")
     else:
         print("Heroes:")
-        print(f"Rows: {json_dict[GV.image_ss_name]['rows']}")
-        print(f"Columns: {json_dict[GV.image_ss_name]['columns']}")
+        print(f"Rows: {json_dict[GV.IMAGE_SS_NAME]['rows']}")
+        print(f"Columns: {json_dict[GV.IMAGE_SS_NAME]['columns']}")
         indent_level = 0
         hero_count = 0
-        for row_index, row in enumerate(json_dict[GV.image_ss_name]['heroes']):
+        for row_index, row in enumerate(json_dict[GV.IMAGE_SS_NAME]['heroes']):
             tab_string = "\t" * indent_level
             print(f"{tab_string}Row {row_index + 1}")
             indent_level += 1
@@ -292,13 +292,5 @@ if __name__ == "__main__":
             for hero_index, hero_info in enumerate(row):
                 print(f"{tab_string}Hero: {hero_count + 1} {tab_string} "
                       f"{hero_info}")
-                # print(f"{tab_string}{hero_info}")
                 hero_count += 1
             indent_level -= 1
-
-        # print(json_dict)
-
-    # for row in json_dict[GV.image_ss_name]["heroes"]:
-    #     for hero in row:
-    #         print(hero[0], hero[4]["si"])
-    # print(hero)

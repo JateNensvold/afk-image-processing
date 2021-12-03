@@ -8,7 +8,7 @@ with open("README.md", 'r') as f:
 
 
 setup(
-    name='afk-processing',
+    name='afk-image-processing',
     version='1.0',
     description='A module for processing afk arena screenshots into '
     'textual information',
