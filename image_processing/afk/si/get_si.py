@@ -1,4 +1,3 @@
-import os
 import time
 import threading
 import warnings
@@ -14,9 +13,6 @@ import numpy as np
 
 warnings.filterwarnings("ignore")
 
-MODEL_LABELS = ['0 si', '1 star', '10SI', '2 star', '20 si',
-                '3 fi', '3 star', '30 si', '4 star', '5 star', '9 fi']
-BORDER_MODEL_LABELS = ["B", "E", "E+", "L", "L+", "M", "M+", "A"]
 
 SI_LABELS = {
     0: "0",
@@ -37,32 +33,6 @@ ASCENSION_STAR_LABELS = {
     8: "A4",
     9: "A5"
 }
-
-
-def load_files(model_path: str, border_model_path: str, enriched_db=True):
-    """
-    Load the pytorch models and database
-    """
-    if GV.IMAGE_DB is None:
-        db_thread = threading.Thread(
-            kwargs={"enriched_db": enriched_db},
-            target=BD.get_db)
-        GV.THREADS["IMAGE_DB"] = db_thread
-        db_thread.start()
-
-    if GV.MODEL is None:
-        model_thread = threading.Thread(
-            args=[model_path, MODEL_LABELS],
-            target=LM.load_FI_model)
-        GV.THREADS["MODEL"] = model_thread
-        model_thread.start()
-
-    if GV.BORDER_MODEL is None:
-        border_model_thread = threading.Thread(
-            args=[border_model_path, BORDER_MODEL_LABELS],
-            target=LM.load_border_model)
-        GV.THREADS["BORDER_MODEL"] = border_model_thread
-        border_model_thread.start()
 
 
 def get_si(roster_image, image_name, debug_raw=None, imageDB=None,
@@ -90,10 +60,6 @@ def get_si(roster_image, image_name, debug_raw=None, imageDB=None,
             debug_raw = True
         else:
             debug_raw = False
-    GV.IMAGE_DB = imageDB
-    model_path = os.path.join(GV.final_models_dir, "fi_si_star_model.pt")
-    border_model_path = os.path.join(GV.final_models_dir, "ascension_border.pt")
-    load_files(model_path, border_model_path)
 
     lower_hsv = np.array([0, 0, 0])
     upper_hsv = np.array([179, 255, 192])

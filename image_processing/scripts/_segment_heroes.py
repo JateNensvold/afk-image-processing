@@ -6,8 +6,6 @@ import image_processing.afk.si.get_si as GS
 import image_processing.build_db as BD
 import image_processing.globals as GV
 
-HERO_VALIDATION_DIR = GV.database_hero_validation_path
-
 
 def parse_dict(json_dict: dict, hero_dict: dict, hero_dir: str, file_name: str):
     """
@@ -81,21 +79,20 @@ if __name__ == "__main__":
     imageDB = BD.get_db(enriched_db=True)
 
     if GV.TRUTH:
-        sorted_heroes_directory = os.path.join(
-            HERO_VALIDATION_DIR, "sorted_heroes")
 
-        for image_file_name in os.listdir(HERO_VALIDATION_DIR):
+
+        for image_file_name in os.listdir(GV.ATABASE_HERO_VALIDATION_PATH):
             print(f"Starting {image_file_name}")
             start_time = time.time()
             if image_file_name.endswith(".png") or image_file_name.endswith(".jpg"):
-                file_path = os.path.join(HERO_VALIDATION_DIR, image_file_name)
+                file_path = os.path.join(GV.HERO_VALIDATION_DIR, image_file_name)
                 image = cv2.imread(file_path)
                 image_hero_dict = {}
                 hero_json_dict = GS.get_si(
                     image, image_file_name, imageDB=imageDB, hero_dict=image_hero_dict,
                     faction=True)
                 image_hero_dict = image_hero_dict["hero_dict"]
-                parse_dict(hero_json_dict, image_hero_dict, sorted_heroes_directory,
+                parse_dict(hero_json_dict, image_hero_dict, GV.SEGMENTED_HEROES_DIR,
                            image_file_name)
             end_time = time.time()
 

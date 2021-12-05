@@ -53,7 +53,7 @@ def buildDB(enriched_db: bool = False) -> "imageSearch":
     if GV.VERBOSE_LEVEL >= 1:
         print("Building database!")
     start_time = time.time()
-    recurse_dir(GV.database_icon_path, file_dict)
+    recurse_dir(GV.HERO_ICON_DIR, file_dict)
     base_images = []
 
     for _faction, _faction_heroes in file_dict.items():
@@ -80,7 +80,7 @@ def buildDB(enriched_db: bool = False) -> "imageSearch":
             imageDB.add_image(base_images[index], cropIMG)
         imageDB.matcher.train()
     end_time = time.time()
-    with open(GV.database_pickle, 'wb') as handle:
+    with open(GV.DATABASE_PICKLE_PATH, 'wb') as handle:
         dill.dump(imageDB, handle)
     if GV.VERBOSE_LEVEL >= 1:
         print("Database built! Built in {} seconds".format(
@@ -95,11 +95,11 @@ def loadDB() -> "imageSearch":
     Return:
         "imageSearch" database object
     """
-    if os.path.exists(GV.database_pickle):
+    if os.path.exists(GV.DATABASE_PICKLE_PATH):
         if GV.VERBOSE_LEVEL >= 1:
             print("Loading database!")
         start_time = time.time()
-        with open(GV.database_pickle, 'rb') as handle:
+        with open(GV.DATABASE_PICKLE_PATH, 'rb') as handle:
             db: "imageSearch" = pickle.load(handle)
         end_time = time.time()
         if GV.VERBOSE_LEVEL >= 1:
@@ -110,7 +110,7 @@ def loadDB() -> "imageSearch":
     else:
         raise FileNotFoundError(
             "Unable to find {}. Please call image_processing.build_db.buildDB "
-            "to generate a new database".format(GV.database_pickle))
+            "to generate a new database".format(GV.DATABASE_PICKLE_PATH))
     return db
 
 

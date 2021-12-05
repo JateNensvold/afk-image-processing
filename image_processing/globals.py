@@ -3,6 +3,10 @@ import argparse
 import logging
 import threading
 import typing
+import numpy
+import pathlib
+
+import shlex
 
 import image_processing.helpers.load_images as load
 if typing.TYPE_CHECKING:
@@ -14,7 +18,8 @@ parser.add_argument("-d", "--DEBUG", help="Runs the program in debug mode,"
                     "prints verbose output and displays incremental image"
                     "analysis", action="store_true")
 
-parser.add_argument("-i", "--image", help="Path to Hero Roster Screen shot")
+parser.add_argument("image_path", metavar="path/to/image",
+                    type=str, help="Relative or Absolute Path to Hero Roster Screen shot")
 
 parser.add_argument("-r", "--rebuild", help="Rebuild hero database from"
                     "source images", action="store_true")
@@ -23,20 +28,66 @@ parser.add_argument("-v", "--verbose", help="Increase verbosity of output"
                     "from image processing", action='count', default=0)
 parser.add_argument("-p", "--parallel", help="Utilize as many cores as"
                     "possible while processing",
-                    choices=["True", "False"], default="False")
+                    action="store_true")
 parser.add_argument("-t", "--truth", help="Argument to pass in a truth value"
                     "to file being ran",
                     action="store_true")
 
-args = parser.parse_args()
 
-TRUTH = args.truth
-DEBUG = args.DEBUG
-REBUILD = args.rebuild
-PARALLEL = True if args.parallel.lower() in ["true"] else False
-image_ss = None
-IMAGE_SS_NAME = None
-VERBOSE_LEVEL = args.verbose
+ARGS: argparse.Namespace = None
+TRUTH: bool = None
+DEBUG: bool = None
+REBUILD: bool = None
+PARALLEL: bool = None
+image_ss: numpy.ndarray = None
+IMAGE_SS_NAME: str = None
+VERBOSE_LEVEL: int = None
+MODEL = None
+BORDER_MODEL = None
+IMAGE_DB: "imageSearchDB.imageSearch" = None
+
+# Stores cached function results
+CACHED = {}
+THREADS: dict[str, threading.Thread] = {}
+
+
+def global_parse_args(arg_string: str = None):
+    """
+    Function to load global arguments from either arg_string or sys.argv.
+    The results of the parsing are stored in global argument `ARGS`
+
+    Args:
+        arg_string (str, optional): string to parse into command line arguments. Defaults to None.
+    """
+    global ARGS, TRUTH, DEBUG, REBUILD, PARALLEL, image_ss, IMAGE_SS_NAME, VERBOSE_LEVEL  # pylint: disable=global-statement
+    if arg_string is not None:
+        parsed_args = shlex.split(arg_string)
+    else:
+        parsed_args = None
+    ARGS = parser.parse_args(args=parsed_args)
+
+    TRUTH = ARGS.truth
+    DEBUG = ARGS.DEBUG
+    REBUILD = ARGS.rebuild
+    PARALLEL = ARGS.parallel
+    VERBOSE_LEVEL = ARGS.verbose
+
+    image_ss = load.load_image(ARGS.image_path)
+    IMAGE_SS_NAME = os.path.basename(ARGS.image_path)
+    reload_globals()
+
+
+def reload_globals():
+    """
+    Process global variables after they are loaded/reloaded
+    """
+    global VERBOSE_LEVEL  # pylint: disable=global-statement
+    if VERBOSE_LEVEL == 0:
+        logging.disable(logging.INFO)
+
+
+global_parse_args()
+
 try:
     ARCHITECTURE = os.environ["BUILD_TYPE"]
     ARCHITECTURE_TYPES = {"CUDA": "cuda",
@@ -47,52 +98,44 @@ except KeyError as e:
         "Environment variable 'BUILD_TYPE' not set. Please set BUILD_TYPE to a"
         " valid option listed in the README") from e
 
-THREADS: dict[str, threading.Thread] = {}
 
-MODEL = None
-BORDER_MODEL = None
-IMAGE_DB: "imageSearchDB.imageSearch" = None
+############################
+# All of the following Global variables are dynamically built paths to locations within this repo used to load or train objects that are subject to changing location during development
+############################
 
-if VERBOSE_LEVEL == 0:
-    logging.disable(logging.INFO)
+# Paths to Image Processing Modules/Directories
+GLOBALS_DIR = pathlib.PurePath(os.path.join(os.path.dirname(
+    os.path.abspath(__file__))))
+DATABASE_DIR = pathlib.PurePath(os.path.join(GLOBALS_DIR, "database"))
+AFK_DIR = os.path.join(GLOBALS_DIR, "afk")
+MODELS_DIR = os.path.join(GLOBALS_DIR, "models")
 
-# Stores cached function results
-CACHED = {}
-
-if args.image:
-    image_ss = load.load_image(args.image)
-    IMAGE_SS_NAME = os.path.basename(args.image)
-
-base_dir = os.path.join(os.path.dirname(
-    os.path.abspath(__file__)))
-database_path = os.path.join(base_dir, "database")
-database_hero_validation_path = os.path.join(database_path, "temp_image")
-
-# Path to database hero_icons used to build Flann
-database_icon_path = os.path.join(database_path, "hero_icon")
-flann_path = os.path.join(database_path, "baseHeroes.flann")
-database_pickle = os.path.join(database_path, 'imageDB.pickle')
-
-stamina_templates_path = os.path.join(database_path, "stamina_templates")
-
-afk_dir = os.path.join(base_dir, "afk")
-models_dir = os.path.join(base_dir, "models")
+# Paths to data inside the Database directory
+HERO_ICON_DIR = pathlib.PurePath(os.path.join(DATABASE_DIR, "hero_icon"))
+DATABASE_FLAN_PATH = pathlib.PurePath(
+    os.path.join(DATABASE_DIR, "IMAGE_DB.flann"))
+DATABASE_PICKLE_PATH = pathlib.PurePath(
+    os.path.join(DATABASE_DIR, 'IMAGE_DB.pickle'))
+DATABASE_LEVELS_DATA_DIR = pathlib.PurePath(
+    os.path.join(DATABASE_DIR, "levels"))
+DATABASE_STAMINA_TEMPLATES_DIR = pathlib.PurePath(
+    os.path.join(DATABASE_DIR, "stamina_templates"))
+DATABASE_HERO_VALIDATION_DIR = pathlib.PurePath(
+    os.path.join(DATABASE_DIR, "temp_images"))
+SEGMENTED_HEROES_DIR = os.path.join(
+    DATABASE_HERO_VALIDATION_DIR, "segmented_heroes")
 
 # Tests directory
-tests_dir = os.path.join(base_dir, os.path.pardir, "tests")
+TESTS_DIR = os.path.join(GLOBALS_DIR, os.path.pardir, "tests")
 
-# AFK SI Paths
-si_path = os.path.join(afk_dir, "si")
-si_base_path = os.path.join(si_path, "base")
+# AFK/SI Module paths
+SI_DIR = os.path.join(AFK_DIR, "si")
+SI_TEMPLATE_DIR = os.path.join(SI_DIR, "signature_item_icon")
 
-# AFK Fi Paths
-fi_path = os.path.join(afk_dir, "fi")
-fi_base_path = os.path.join(fi_path, "base")
-fi_train_path = os.path.join(fi_path, "train")
+# AFK/Fi Module paths
+FI_DIR = os.path.join(AFK_DIR, "fi")
+FI_TEMPLATE_DIR = os.path.join(FI_DIR, "furniture_icons")
 
 # Yolov5(Stars, FI) and Detectron(Ascension) Model output
-final_models_dir = os.path.join(models_dir, "final_models")
-yolov5_dir = os.path.join(models_dir, "yolov5")
-
-# Database lvl training data
-lvl_path = os.path.join(database_path, "levels")
+FINAL_MODELS_DIR = os.path.join(MODELS_DIR, "final_models")
+YOLOV5_DIR = os.path.join(MODELS_DIR, "yolov5")

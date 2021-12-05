@@ -54,7 +54,7 @@ def test_model(cfg: CfgNode):
     cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
     predictor = DefaultPredictor(cfg)
     image = cv2.imread(os.path.join(
-        GV.tests_dir, "data", "images", "image11.png"))
+        GV.TESTS_DIR, "data", "images", "image11.png"))
     output = predictor(image)
     print(output)
 

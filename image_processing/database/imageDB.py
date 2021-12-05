@@ -40,7 +40,7 @@ class imageSearch():
 
     def __getstate__(self):
 
-        file_name = GV.flann_path
+        file_name = GV.DATABASE_FLAN_PATH
         self.matcher.write(file_name)
         return {"images": self.image_data, "names": self.names,
                 "matcher": file_name,

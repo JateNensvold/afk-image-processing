@@ -15,12 +15,12 @@ CUR_DIR = os.path.dirname(os.path.abspath(__file__))
 
 try:
     import image_processing.globals as GV
-    SOURCE_DIR = os.path.join(GV.database_path, "hero_validation")
+    SOURCE_DIR = os.path.join(GV.DATABASE_DIR, "hero_validation")
 
 except ImportError:
     DB_DIR = os.path.join(CUR_DIR, os.pardir, os.pardir,
                           "image_processing", "database", "hero_validation")
-    SOURCE_DIR = os.path.join(GV.database_path, "hero_validation")
+    SOURCE_DIR = os.path.join(GV.DATABASE_DIR, "hero_validation")
 
 HERO_SELECTION_RATIO = 0.05
 

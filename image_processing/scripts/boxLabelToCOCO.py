@@ -230,7 +230,7 @@ if __name__ == "__main__":
     # Replace the following line with the json file downloaded from boxlabel
     #   dataset
     json_path = os.path.join(
-        GV.base_dir, "export-2021-08-06T03_10_14.517Z.json")
+        GV.GLOBALS_DIR, "export-2021-08-06T03_10_14.517Z.json")
     with open(json_path, "r") as json_file:
         box_label_data = json.loads(json_file.read())
     convert_format(box_label_data)

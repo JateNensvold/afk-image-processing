@@ -6,15 +6,34 @@ FROM mcr.microsoft.com/vscode/devcontainers/python:0-${VARIANT}
 ARG BUILD_TYPE
 
 # [Choice] Node.js version: none, lts/*, 16, 14, 12, 10
-ARG NODE_VERSION="none"
-RUN if [ "${NODE_VERSION}" != "none" ]; then su vscode -c "umask 0002 && . /usr/local/share/nvm/nvm.sh && nvm install ${NODE_VERSION} 2>&1"; fi
+# ARG NODE_VERSION="none"
+# RUN if [ "${NODE_VERSION}" != "none" ]; then su vscode -c "umask 0002 && . /usr/local/share/nvm/nvm.sh && nvm install ${NODE_VERSION} 2>&1"; fi
+
+
+# Install Cuda packages
+RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin && \
+   mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600 && \
+   wget https://developer.download.nvidia.com/compute/cuda/11.3.0/local_installers/cuda-repo-ubuntu2004-11-3-local_11.3.0-465.19.01-1_amd64.deb && \
+   dpkg -i cuda-repo-ubuntu2004-11-3-local_11.3.0-465.19.01-1_amd64.deb && \
+   apt-key add /var/cuda-repo-ubuntu2004-11-3-local/7fa2af80.pub && \
+   ls -la && \ 
+   rm cuda-repo-ubuntu2004-11-3-local_11.3.0-465.19.01-1_amd64.deb
+
+# Install Dotnet to run Archmage Bot
+RUN wget https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
+   dpkg -i packages-microsoft-prod.deb  && \
+   rm packages-microsoft-prod.deb 
 
 RUN apt-get update && \
-   apt-get install -y \
+   apt-get install --no-install-recommends --yes \
    ffmpeg \
    libsm6 \
    libxext6 \
-   vim
+   vim \
+   cuda-toolkit-11-3 \
+   apt-transport-https \
+   dotnet-sdk-6.0 && \
+   rm -rf /var/lib/apt/lists/* 
 
 RUN python3 -m pip install --upgrade pip
 
@@ -23,26 +42,6 @@ COPY requirements /tmp/pip-tmp/requirements
 RUN /tmp/pip-tmp/requirements/install ${BUILD_TYPE}
 
 ENV BUILD_TYPE=${BUILD_TYPE}
-
-# Install Dotnet to run Archmage Bot
-RUN wget https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
-   sudo dpkg -i packages-microsoft-prod.deb  && \
-   rm packages-microsoft-prod.deb 
-
-RUN apt-get update && \
-   apt-get install -y \
-   apt-transport-https \
-   dotnet-sdk-6.0
-
-# Install Cuda packages
-RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin
-RUN sudo mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
-RUN wget https://developer.download.nvidia.com/compute/cuda/11.3.0/local_installers/cuda-repo-ubuntu2004-11-3-local_11.3.0-465.19.01-1_amd64.deb
-RUN sudo dpkg -i cuda-repo-ubuntu2004-11-3-local_11.3.0-465.19.01-1_amd64.deb
-RUN sudo apt-key add /var/cuda-repo-ubuntu2004-11-3-local/7fa2af80.pub
-RUN apt-get update && \
-   apt-get install -y \
-   cuda-toolkit-11-3
 
 # [Optional] Uncomment this section to install additional OS packages.
 # RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \

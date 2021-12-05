@@ -65,7 +65,7 @@ def get_text(staminaAreas: dict, train: bool = False):
 
     # build template dictionary
     digits = {}
-    numbersFolder = GV.stamina_templates_path
+    numbersFolder = GV.DATABASE_STAMINA_TEMPLATES_DIR
 
     referenceFolders = os.listdir(numbersFolder)
     for folder in referenceFolders:
@@ -126,11 +126,11 @@ def get_text(staminaAreas: dict, train: bool = False):
 
 @ cachedproperty
 def signature_template_mask(templates: dict):
-    siFolders = os.listdir(GV.si_base_path)
+    siFolders = os.listdir(GV.SI_TEMPLATE_DIR)
     si_dict = {}
 
     for folder in siFolders:
-        SIDir = os.path.join(GV.si_base_path, folder)
+        SIDir = os.path.join(GV.SI_TEMPLATE_DIR, folder)
         SIPhotos = os.listdir(SIDir)
         if folder == "40":
             continue
@@ -316,10 +316,10 @@ def signatureItemFeatures(hero: np.array,
 def _furniture_template_mask(templates: dict):
 
     fi_dict = {}
-    fi_folders = os.listdir(GV.fi_base_path)
+    fi_folders = os.listdir(GV.FI_TEMPLATE_DIR)
 
     for folder in fi_folders:
-        fi_dir = os.path.join(GV.fi_base_path, folder)
+        fi_dir = os.path.join(GV.FI_TEMPLATE_DIR, folder)
         fi_photos = os.listdir(fi_dir)
         for image_name in fi_photos:
             fi_image = templates[folder]["image"]
@@ -569,7 +569,7 @@ def digitFeatures(digit: np.array, save_dir=None):
         None
     """
 
-    base_dir = GV.stamina_templates_path
+    base_dir = GV.DATABASE_STAMINA_TEMPLATES_DIR
     if save_dir:
         base_dir = save_dir
     digitFolders = os.listdir(base_dir)

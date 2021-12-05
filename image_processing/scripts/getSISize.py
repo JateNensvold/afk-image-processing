@@ -99,7 +99,7 @@ def getLevelDigit(sourceImage, digitDict: np.array, train: bool = False):
 
     results = {}
     for folder in folders:
-        folderPath = os.path.join(GV.lvl_path, folder)
+        folderPath = os.path.join(GV.DATABASE_LEVELS_DATA_DIR, folder)
         folderFiles = os.listdir(folderPath)
         if folder not in results:
             results[folder] = []
@@ -132,7 +132,7 @@ def getLevelDigit(sourceImage, digitDict: np.array, train: bool = False):
 
 
 def trainLevels(image):
-    stamina.digitFeatures(image, save_dir=GV.lvl_path)
+    stamina.digitFeatures(image, save_dir=GV.DATABASE_LEVELS_DATA_DIR)
 
 
 if __name__ == '__main__':
@@ -213,7 +213,7 @@ if __name__ == '__main__':
         # print("Actual - h: {}".format(si_height))
 
     fi_file = open(
-        os.path.join(GV.fi_path, "fi_data.txt"), "r")
+        os.path.join(GV.FI_DIR, "fi_data.txt"), "r")
 
     fi_field_names = ["path", "left", "bottom", "right", "top", "label"]
     fi_reader = csv.DictReader(fi_file, fi_field_names)
