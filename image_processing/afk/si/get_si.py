@@ -1,9 +1,7 @@
 import time
-import threading
 import warnings
 import cv2
 
-import image_processing.build_db as BD
 import image_processing.globals as GV
 import image_processing.load_images as load
 import image_processing.processing as processing
@@ -35,7 +33,7 @@ ASCENSION_STAR_LABELS = {
 }
 
 
-def get_si(roster_image, image_name, debug_raw=None, imageDB=None,
+def get_si(roster_image, image_name, debug_raw=None,
            hero_dict=None, faction=False):
     """
     Detect AFK Arena heroes from a roster screenshot and for each hero detect
@@ -46,9 +44,6 @@ def get_si(roster_image, image_name, debug_raw=None, imageDB=None,
             are placed under this name in return dictionary
         debug_raw: flag to add raw values for SI, FI and Ascension detection
             to return dictionary
-        imageDB: If this variable is None, imageDB is generated otherwise it
-            is assumed imageDB is a fully initialized
-            image_processing.database.imageDB.imageSearch object
         hero_dict: If this variable is not None, its assumed to be an empty
             dictionary that to return the hero segmentation dictionary
             detected from roster_image
@@ -209,7 +204,7 @@ def detect_features(name, image_info):
         classes = border_results.pred_classes.cpu().tolist()
 
         scores = border_results.scores.cpu().tolist()
-        class_list = list(zip([BORDER_MODEL_LABELS[class_num]
+        class_list = list(zip([LM.BORDER_MODEL_LABELS[class_num]
                           for class_num in classes], scores))
         if len(class_list) > 0:
             best_class = class_list[0]
