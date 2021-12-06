@@ -5,6 +5,8 @@ import image_processing.afk.roster.ColumnObjects as CO
 import image_processing.afk.roster.row as RO
 import image_processing.afk.roster.DimensionsObject as DO
 
+from typing import Callable
+
 
 class matrix():
 
@@ -21,7 +23,7 @@ class matrix():
         self.source_height = source_height
         self.source_width = source_width
         self.spacing = spacing
-        self._heads: dict[int, callable[[], int]] = {}
+        self._heads: dict[int, Callable[[], int]] = {}
         self._row_list: list[RO.row] = []
         self._idx = 0
         self.columns = CO.ColumnObjects(self)
@@ -289,12 +291,12 @@ class matrix():
                     _prune_list.append(_index)
             _row_object.sort()
         if len(_prune_list) > 0:
-            if GV.VERBOSE_LEVEL >= 1:
+            if GV.verbosity(1):
                 print("Deleting ({}) row objects({}) from matrix. Ensure that "
                       "getHeroes was successful".format(
                           len(_prune_list), _prune_list))
             for _index in sorted(_prune_list, reverse=True):
-                if GV.VERBOSE_LEVEL >= 1:
+                if GV.verbosity(1):
                     print("Deleted row object ({}) of len ({})".format(
                         self._row_list[_index], len(self._row_list[_index])))
                 self._row_list.pop(_index)

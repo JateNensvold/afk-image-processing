@@ -1,3 +1,4 @@
+from typing import Union
 import image_processing.globals as GV
 import image_processing.load_images as load
 import numpy as np
@@ -21,7 +22,8 @@ class DimensionsObject:
             full_number: flag to enforce all 'DimensionObject' values to
                 be whole numbers during its lifetime
         """
-        self.__dict__["full_number"] = full_number
+        self.full_number = full_number
+        # self.__dict__["full_number"] = full_number
         self.x = dimensions[0]
         self.y = dimensions[1]
         self.w = dimensions[2]
@@ -44,12 +46,12 @@ class DimensionsObject:
         dimension_index = [self.x, self.y, self.w, self.h]
         try:
             return dimension_index[index]
-        except IndexError:
+        except IndexError as e:
             raise IndexError(
-                "DimensionObject index({}) out of range({})".format(
-                    index, len(dimension_index)))
+                f"DimensionObject index({index}) out of "
+                f"range({len(dimension_index)})") from e
 
-    def __setattr__(self, name, value):
+    def __setattr__(self, name: str, value: Union[int, float]):
         """
         Sets 'name' equal to value
         If self.full_number is true all number types will be truncated to int
@@ -108,7 +110,7 @@ class DimensionsObject:
 
             def print_fail(size_type, current_size, new_size, size_boundary,
                            size_change):
-                if GV.VERBOSE_LEVEL >= 1:
+                if GV.verbosity(1):
                     print("Failed to update {} from ({}) to ({}) due to"
                           " boundary limit({}) < boundary size({:.2f})".format(
                               size_type, current_size, new_size, size_boundary,

@@ -296,7 +296,7 @@ def signatureItemFeatures(hero: np.array,
         _best_match = numberScore[_folder][-1]
         _score_loc = _best_match[2][0]
         _coords = _best_match[2][1]
-        if GV.VERBOSE_LEVEL >= 1:
+        if GV.verbosity(1):
             cv2.rectangle(hero_copy, _score_loc, _coords, (255, 0, 0), 1)
             font = cv2.FONT_HERSHEY_SIMPLEX
             fontScale = 0.5
@@ -543,7 +543,7 @@ def _furnitureItemFeatures(hero: np.array, fi_dict: dict,
         _t = [_num for _num in numberScore[_folder]
               if not math.isinf(_num[0])]
         if len(_t) == 0:
-            if GV.VERBOSE_LEVEL >= 1:
+            if GV.verbosity(1):
                 print("Failed to find FI", _folder,  numberScore[_folder])
             _best_match = (0, 0, ((0, 0), (0, 0)))
         else:

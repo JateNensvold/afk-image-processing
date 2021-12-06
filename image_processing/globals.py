@@ -2,15 +2,18 @@ import os
 import argparse
 import logging
 import threading
-import typing
-import numpy
 import pathlib
-
 import shlex
 
+from typing import Callable, TYPE_CHECKING
+
+import numpy
+
 import image_processing.helpers.load_images as load
-if typing.TYPE_CHECKING:
+
+if TYPE_CHECKING:
     import image_processing.database.imageDB as imageSearchDB
+
 
 parser = argparse.ArgumentParser(description='AFK arena object extraction and '
                                  'image analysis.')
@@ -33,6 +36,8 @@ parser.add_argument("-t", "--truth", help="Argument to pass in a truth value"
                     "to file being ran",
                     action="store_true")
 
+import torch
+from detectron2.engine import DefaultPredictor
 
 ARGS: argparse.Namespace = None
 TRUTH: bool = None
@@ -42,13 +47,29 @@ PARALLEL: bool = None
 image_ss: numpy.ndarray = None
 IMAGE_SS_NAME: str = None
 VERBOSE_LEVEL: int = None
-MODEL = None
-BORDER_MODEL = None
+MODEL: torch.Tensor = None
+BORDER_MODEL: DefaultPredictor = None
 IMAGE_DB: "imageSearchDB.imageSearch" = None
 
 # Stores cached function results
 CACHED = {}
 THREADS: dict[str, threading.Thread] = {}
+
+
+def verbosity(verbose_level: int) -> bool:
+    """
+    Check if verbose level is verbosity level is higher than the level passed
+        in. Provides an easy callable to code that should only be accessible
+        when the passed verbose_level is of a certain level.
+
+    Args:
+        verbose_level (int): needed level of verbosity
+
+    Returns:
+        [bool]: True if verbosity passed in meets the global verbosity levels,
+            False otherwise
+    """
+    return VERBOSE_LEVEL >= verbose_level
 
 
 def global_parse_args(arg_string: str = None):
@@ -81,7 +102,7 @@ def reload_globals():
     """
     Process global variables after they are loaded/reloaded
     """
-    global VERBOSE_LEVEL  # pylint: disable=global-statement
+    # global VERBOSE_LEVEL  # pylint: disable=global-statement
     if VERBOSE_LEVEL == 0:
         logging.disable(logging.INFO)
 
@@ -100,7 +121,9 @@ except KeyError as e:
 
 
 ############################
-# All of the following Global variables are dynamically built paths to locations within this repo used to load or train objects that are subject to changing location during development
+# All of the following Global variables are dynamically built paths to
+# locations within this repo used to load or train objects that are subject to
+# changing location during development
 ############################
 
 # Paths to Image Processing Modules/Directories

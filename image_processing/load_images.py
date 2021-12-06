@@ -18,7 +18,7 @@ def display_image(image, multiple=False, display=GV.DEBUG, color_correct=True,
     # backend = matplotlib.get_backend()
 
     # if backend.lower() != 'tkagg':
-    #     if GV.VERBOSE_LEVEL >= 1:
+    #     if GV.verbosity(1):
     #         print("Backend: {}".format(backend))
     #     plt.switch_backend("tkagg")
 

@@ -1,15 +1,18 @@
 import os
 import time
 import pickle
-import cv2
+import typing
 
-import image_processing.load_images as load
-import image_processing.globals as GV
+import cv2
 import dill
 
-from image_processing.database.imageDB import imageSearch
-
+import image_processing.globals as GV
+import image_processing.load_images as load
 import image_processing.afk.hero_object as hero_object
+
+
+if typing.TYPE_CHECKING:
+    from image_processing.database.imageDB import imageSearch
 
 
 def recurse_dir(path: str, file_dict: dict):
@@ -50,7 +53,7 @@ def buildDB(enriched_db: bool = False) -> "imageSearch":
         "imageSearch" database object
     """
     file_dict = {}
-    if GV.VERBOSE_LEVEL >= 1:
+    if GV.verbosity(1):
         print("Building database!")
     start_time = time.time()
     recurse_dir(GV.HERO_ICON_DIR, file_dict)
@@ -82,9 +85,8 @@ def buildDB(enriched_db: bool = False) -> "imageSearch":
     end_time = time.time()
     with open(GV.DATABASE_PICKLE_PATH, 'wb') as handle:
         dill.dump(imageDB, handle)
-    if GV.VERBOSE_LEVEL >= 1:
-        print("Database built! Built in {} seconds".format(
-            end_time-start_time))
+    if GV.verbosity(1):
+        print(f"Database built! Built in {end_time-start_time} seconds")
     return imageDB
 
 
@@ -96,25 +98,40 @@ def loadDB() -> "imageSearch":
         "imageSearch" database object
     """
     if os.path.exists(GV.DATABASE_PICKLE_PATH):
-        if GV.VERBOSE_LEVEL >= 1:
+        if GV.verbosity(1):
             print("Loading database!")
         start_time = time.time()
         with open(GV.DATABASE_PICKLE_PATH, 'rb') as handle:
             db: "imageSearch" = pickle.load(handle)
         end_time = time.time()
-        if GV.VERBOSE_LEVEL >= 1:
-            print("Database loaded! Loaded in {} seconds".format(
-                end_time - start_time))
+        if GV.verbosity(1):
+            print(
+                f"Database loaded! Loaded in {end_time - start_time} seconds")
         db.matcher.train()
 
     else:
         raise FileNotFoundError(
-            "Unable to find {}. Please call image_processing.build_db.buildDB "
-            "to generate a new database".format(GV.DATABASE_PICKLE_PATH))
+            f"Unable to find {GV.DATABASE_PICKLE_PATH}. Please call "
+            "image_processing.build_db.buildDB to generate a new database")
     return db
 
 
-def get_db(rebuild=GV.REBUILD, enriched_db=True):
+def get_db(rebuild: bool = GV.REBUILD, enriched_db=True):
+    """
+    Try to fetch 'imageSearch' database from disk, rebuild the database if
+        the fetch fails
+
+    Args:
+        rebuild ([bool], optional): Flag to rebuild the database when its True.
+             Defaults to GV.REBUILD.
+        enriched_db (bool, optional): flag to add every hero to the database a
+            second time with parts of the the image border removed from each 
+            side, only valid when database is being built/rebuild.
+            Defaults to True.
+
+    Returns:
+        [type]: [description]
+    """
     if rebuild:
         DB = buildDB(enriched_db=enriched_db)
     else:

@@ -10,5 +10,5 @@ def print_verbose(message: str, verbose_level: int = 1):
         verbose_level: minimum level of verbosity to print message at
     """
 
-    if GV.VERBOSE_LEVEL >= verbose_level:
+    if GV.verbosity(verbose_level):
         print(message)

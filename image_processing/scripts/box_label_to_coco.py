@@ -1,17 +1,19 @@
-import requests
 import time
-import cv2
 import json
 import os
 import pathlib
 import datetime
 
+from io import BytesIO
+from typing import Dict, Any
+
+import requests
+import cv2
+
 import numpy as np
 import image_processing.globals as GV
 
 from PIL import Image
-from io import BytesIO
-from typing import Dict, Any
 from pycocotools import mask as cocomask
 
 
@@ -118,15 +120,15 @@ def get_annotation(mask: np.ndarray):
         if contour.size >= 6:
             segmentation.append(contour.flatten().tolist())
     polygons = cocomask.frPyObjects(segmentation, mask.shape[0], mask.shape[1])
-    RLE = cocomask.merge(polygons)
-    area = cocomask.area(RLE)
-    [x, y, w, h] = cv2.boundingRect(mask)
+    run_length_encoding = cocomask.merge(polygons)
+    area = cocomask.area(run_length_encoding)
+    [x_coord, y_coord, width, height] = cv2.boundingRect(mask)
 
-    return segmentation, [x, y, w, h], area
+    return segmentation, [x_coord, y_coord, width, height], area
 
 
-def convert_format(input_data: dict, output_dir: str = "./", license: int = 0,
-                   type: str = "instances", split=(98, 1, 1)):
+def convert_format(input_data: dict, output_dir: str = "./", license_index: int = 0,
+                   type_label: str = "instances", _split=(98, 1, 1)):
     '''
     Converts https://labelbox.com/ instance segmentation JSON file to COCO
         Folder/JSON format
@@ -137,8 +139,9 @@ def convert_format(input_data: dict, output_dir: str = "./", license: int = 0,
         input_data: dictionary of input JSON data, loaded from file using
             json.loads
         output_dir: location to create COCO output at
-        license: index of license to be used from global variable LICENSES
-        type: label for JSON output that gets written to disk, doesn't
+        license_index: index of license to be used from global variable
+            LICENSES
+        type_label: label for JSON output that gets written to disk, doesn't
             actually change anything besides label tag in the top level JSON
             dict
 
@@ -168,7 +171,7 @@ def convert_format(input_data: dict, output_dir: str = "./", license: int = 0,
         # Image Data
         temp_image_data_dict = {}
         image_name = segmentation_image["External ID"]
-        print("Starting:{} {} ...".format(image_id, image_name))
+        print(f"Starting:{image_id} {image_name} ...")
         image_path = os.path.join(coco_train, image_name)
         image = np.array(
             Image.open(BytesIO(requests.get(
@@ -176,7 +179,7 @@ def convert_format(input_data: dict, output_dir: str = "./", license: int = 0,
         height, width = image.shape[:2]
         cv2.imwrite(image_path, image)
         temp_image_data_dict["id"] = image_id
-        temp_image_data_dict["license"] = LICENSES[license]["id"]
+        temp_image_data_dict["license"] = LICENSES[license_index]["id"]
         temp_image_data_dict["file_name"] = image_name
         temp_image_data_dict["height"] = height
         temp_image_data_dict["width"] = width
@@ -207,23 +210,23 @@ def convert_format(input_data: dict, output_dir: str = "./", license: int = 0,
             annotation_id += 1
         finish_time = time.time()
         annotation_data_list.append(temp_annotation_data_dict)
-        print("Finished:{} {} in {}".format(
-            image_id, image_name, finish_time - start_time))
+        print(
+            f"Finished:{image_id} {image_name} in {finish_time - start_time}")
 
     coco_train_json = os.path.join(coco_train, "coco.json")
 
     json_data = {"info": INFO,
                  "images": image_data_list,
                  "licenses": LICENSES,
-                 "type": type,
+                 "type": type_label,
                  "annotations": annotation_data_list,
                  "categories": [category for _name, category
                                 in CATEGORIES.items()]}
 
-    with open(coco_train_json, "w") as fp:
+    with open(coco_train_json, "w", encoding="utf-8") as coco_json_file:
         json_dump = json.dumps(json_data)
 
-        fp.write(json_dump)
+        coco_json_file.write(json_dump)
 
 
 if __name__ == "__main__":
@@ -231,6 +234,6 @@ if __name__ == "__main__":
     #   dataset
     json_path = os.path.join(
         GV.GLOBALS_DIR, "export-2021-08-06T03_10_14.517Z.json")
-    with open(json_path, "r") as json_file:
+    with open(json_path, "r", encoding="utf-8") as json_file:
         box_label_data = json.loads(json_file.read())
     convert_format(box_label_data)

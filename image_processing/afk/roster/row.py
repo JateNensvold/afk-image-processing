@@ -283,7 +283,7 @@ class row():
         _collision_tuple = _collision_row_item.dimensions._overlap_percent(
             new_row_item.dimensions)
         if _collision_tuple[2] < collision_overlap:
-            if GV.VERBOSE_LEVEL >= 1:
+            if GV.verbosity(1):
                 print("Collision overlap({}) was below collision"
                       " threshold({}), returning collision ID with"
                       " no update".format(

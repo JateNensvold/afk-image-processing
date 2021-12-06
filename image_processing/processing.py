@@ -1,6 +1,7 @@
 
 # from skimage.feature import canny
-from typing import Sequence
+from typing import Dict, Sequence, Any, Union, TypeVar
+from typing_extensions import TypeAlias
 
 import numpy as np
 import cv2
@@ -17,11 +18,14 @@ import image_processing.afk.roster.DimensionsObject as DO
 import image_processing.afk.roster.matrix as MA
 import image_processing.afk.roster.RowItem as RI
 
+HERO_INFO = Dict[str, Union[np.ndarray, RI.RowItem]]
+HERO_DICT = Dict[str, Union[HERO_INFO, Dict]]
+
 
 def blur_image(image: np.ndarray, dilate=False,
-               hsv_range: Sequence[np.array] = None,
-               rgb_range: Sequence[np.array] = None,
-               reverse: bool = False) -> np.ndarray:
+               hsv_range: Sequence[np.array]=None,
+               rgb_range: Sequence[np.array]=None,
+               reverse: bool=False) -> np.ndarray:
     """
     Applies Gaussian Blurring or HSV thresholding to image in an attempt to
         reduce noise in the image. Additionally dilation can be applied to
@@ -291,13 +295,12 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, display=None,
     return valid_sizes
 
 
-def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
-              maxHeroes: bool = True,
-              #   hsv_range: bool = False,
-              removeBG: bool = False,
-              si_adjustment: int = 0.2,
-              row_eliminate: int = 5,
-              blur_args: dict = {}):
+def getHeroes(image: np.array, sizeAllowanceBoundary: int=0.15,
+              maxHeroes: bool=True,
+              removeBG: bool=False,
+              si_adjustment: int=0.2,
+              row_eliminate: int=5,
+              blur_args: dict={}):
     """
     Parse a screenshot or image of an AFK arena hero roster into sub
         components that represent all the heroes in the image
@@ -325,9 +328,9 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
     original_modifiable = image.copy()
     original_unmodifiable = image.copy()
 
-    heroes = {}
+    hero_dict: HERO_DICT = {}
     baseArgs = (original_modifiable, sizeAllowanceBoundary)
-    multi_valid: list[dict[str, DO.DimensionsObject]] = []
+    multi_valid: list[Dict[str, DO.DimensionsObject]] = []
 
     # if maxHeroes:
     # multi_valid.append(getHeroContours(*baseArgs, dilate=True))
@@ -465,8 +468,8 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
                         single=False)
                     cv2.rectangle(GV.image_ss, _merged_coords[0],
                                   _merged_coords[1], (255, 0, 0), 2)
-            heroes[_hero_name] = {}
-            if GV.VERBOSE_LEVEL >= 1:
+            hero_dict[_hero_name] = {}
+            if GV.verbosity(1):
                 h, w = ROI.shape[:2]
                 _coords = _merged_row_item.dimensions.coords(single=False)
                 cv2.rectangle(
@@ -482,9 +485,9 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
                 ROI,
                 model_image_size,
                 interpolation=cv2.INTER_CUBIC)
-            heroes[_hero_name]["image"] = ROI
+            hero_dict[_hero_name]["image"] = ROI
 
-            heroes[_hero_name]["object"] = _Row_item
+            hero_dict[_hero_name]["object"] = _Row_item
 
         # columns = [_row.columns.find_column(_row_item) for _row_item in _row]
         # print(columns)
@@ -492,7 +495,7 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int = 0.15,
         #                    for _row_item in _row], multiple=True,
         #                    display=True)
 
-    return heroes, hero_matrix
+    return hero_dict, hero_matrix
 
 
 if __name__ == "__main__":
