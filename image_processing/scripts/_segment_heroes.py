@@ -2,12 +2,13 @@ import os
 import time
 import cv2
 
-import image_processing.afk.si.get_si as GS
+import image_processing.afk.detect_image_attributes as detect
 import image_processing.build_db as BD
 import image_processing.globals as GV
 
 
-def parse_dict(json_dict: dict, hero_dict: dict, hero_dir: str, file_name: str):
+def parse_dict(json_dict: dict, hero_dict: dict, hero_dir: str,
+               file_name: str):
     """
     Accept a dictionary with hero results and generate directories under
         database/hero_validation/sorted_heroes for all segmented images/heros
@@ -15,7 +16,7 @@ def parse_dict(json_dict: dict, hero_dict: dict, hero_dir: str, file_name: str):
     Args:
         json_dict: dictionary returned by GS.get_si
         hero_dict: dictionary/arg 0 returned by
-            image_processing.processing.getHeroes
+            image_processing.processing.get_heroes
         hero_dir: directory under database/hero_validation to generate new
             directories in
         file_name: name of source image that json_dict was generated from,
@@ -80,15 +81,15 @@ if __name__ == "__main__":
 
     if GV.TRUTH:
 
-
-        for image_file_name in os.listdir(GV.ATABASE_HERO_VALIDATION_PATH):
+        for image_file_name in os.listdir(GV.DATABASE_HERO_VALIDATION_PATH):
             print(f"Starting {image_file_name}")
             start_time = time.time()
             if image_file_name.endswith(".png") or image_file_name.endswith(".jpg"):
-                file_path = os.path.join(GV.HERO_VALIDATION_DIR, image_file_name)
+                file_path = os.path.join(
+                    GV.HERO_VALIDATION_DIR, image_file_name)
                 image = cv2.imread(file_path)
                 image_hero_dict = {}
-                hero_json_dict = GS.get_si(
+                hero_json_dict = detect.get_si(
                     image, image_file_name, imageDB=imageDB, hero_dict=image_hero_dict,
                     faction=True)
                 image_hero_dict = image_hero_dict["hero_dict"]
@@ -99,10 +100,10 @@ if __name__ == "__main__":
             print(f"Finished {image_file_name} in {end_time-start_time}")
     else:
         # When running in single image mode(i.e. GV.TRUTH is false) pass image
-        #   in with GV.image_ss(i.e. --image/-i)
-        image = GV.image_ss
+        #   in with GV.IMAGE_SS(i.e. --image/-i)
+        image = GV.IMAGE_SS
         image_hero_dict = {}
-        hero_json_dict = GS.get_si(
+        hero_json_dict = detect.get_si(
             image, GV.IMAGE_SS_NAME, imageDB=imageDB, hero_dict=image_hero_dict,
             faction=True)
         image_hero_dict = image_hero_dict["hero_dict"]

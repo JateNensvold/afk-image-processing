@@ -1,3 +1,5 @@
+from typing import Callable
+
 import numpy as np
 
 import image_processing.globals as GV
@@ -5,10 +7,13 @@ import image_processing.afk.roster.ColumnObjects as CO
 import image_processing.afk.roster.row as RO
 import image_processing.afk.roster.DimensionsObject as DO
 
-from typing import Callable
 
-
-class matrix():
+class Matrix():
+    # pylint: disable=protected-access
+    """
+    A matrix Object used to store two dimensional objects that tracks
+        row, columns object size and more
+    """
 
     def __init__(self, source_height: int, source_width: int,
                  spacing: int = 10):
@@ -46,7 +51,7 @@ class matrix():
             return self._row_list[self._idx - 1]
         except IndexError:
             self._idx = 0
-            raise StopIteration
+            raise StopIteration  # pylint: disable=raise-missing-from
 
     def __len__(self):
         return len(self._row_list)
@@ -75,7 +80,7 @@ class matrix():
         """
         Return the average height of RowItems in the matrix
         """
-        avg_height = [_row._get_avg_height() for _row in self._row_list]
+        avg_height = [row._get_avg_height() for row in self._row_list]
         return np.mean(avg_height)
 
     def get_avg_row_gap(self):
@@ -118,11 +123,11 @@ class matrix():
             _temp_dimensions = dimensions
         else:
             _temp_dimensions = DO.DimensionsObject(dimensions)
-        y = _temp_dimensions.y
+        y_coord = _temp_dimensions.y
         _row_index = None
         for _index, _head in self._heads.items():
             # If there are no close rows set flag to create new row
-            if abs(_head() - y) < self.spacing:
+            if abs(_head() - y_coord) < self.spacing:
                 _row_index = _index
                 break
         if _row_index is not None:
@@ -292,13 +297,13 @@ class matrix():
             _row_object.sort()
         if len(_prune_list) > 0:
             if GV.verbosity(1):
-                print("Deleting ({}) row objects({}) from matrix. Ensure that "
-                      "getHeroes was successful".format(
-                          len(_prune_list), _prune_list))
+                print(f"Deleting ({len(_prune_list)}) "
+                      f"row objects({_prune_list}) from matrix. Ensure that "
+                      "get_heroes was successful")
             for _index in sorted(_prune_list, reverse=True):
                 if GV.verbosity(1):
-                    print("Deleted row object ({}) of len ({})".format(
-                        self._row_list[_index], len(self._row_list[_index])))
+                    print(f"Deleted row object ({self._row_list[_index]}) of "
+                          f"len ({len(self._row_list[_index])})")
                 self._row_list.pop(_index)
                 del self._heads[_index]
 
@@ -324,7 +329,7 @@ class matrix():
             _adjusted_row_top = _row_bottom - adjusted_avg_h
 
             for _row_item in _row:
-                # _row_item.dimensions._display(GV.image_ss, display=True)
+                # _row_item.dimensions._display(GV.IMAGE_SS, display=True)
                 _index = self.columns.find_column(_row_item)
                 _column = self.columns[_index]
                 if _row_item.dimensions.x < _column.x:
@@ -360,5 +365,5 @@ class matrix():
                         (_row_bottom - avg_h))
                     _row_item.dimensions.y2 = _row_item.dimensions.y + avg_h
                 # print(self.columns)
-                # _row_item.dimensions._display(GV.image_ss, display=True)
-                # self.columns._display(GV.image_ss, display=True)
+                # _row_item.dimensions._display(GV.IMAGE_SS, display=True)
+                # self.columns._display(GV.IMAGE_SS, display=True)

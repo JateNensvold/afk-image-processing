@@ -1,15 +1,16 @@
 import os
-import json
-import cv2
+import math
 
+import cv2
+import imutils
 import numpy as np
 import matplotlib.pyplot as plt
-import image_processing.load_images as load
+
 import image_processing.processing as processing
 import image_processing.globals as GV
-import imutils
 # Need this import to use imutils.contours.sort_contours,
 #   without it Module raises AttributeError
+# pylint: disable=unused-import
 from imutils import contours  # noqa
 
 
@@ -28,55 +29,77 @@ def cachedproperty(func):
     return cache
 
 
-def get_stamina_area(rows: list, heroes: dict, sourceImage: np.array):
-    numRows = len(rows)
-    staminaCount = {}
+def get_stamina_area(rows: list, heroes: dict, source_image: np.array):
+    """[summary]
+
+    Args:
+        rows (list): [description]
+        heroes (dict): [description]
+        sourceImage (np.array): [description]
+
+    Returns:
+        [type]: [description]
+    """
+    num_rows = len(rows)
+    stamina_count = {}
     # iterate across length of row
-    averageHeight = 0
+    average_height = 0
     samples = 0
-    for j in range(numRows):
+    for j in range(num_rows):
         for i in range(len(rows[j])):
             # iterate over column
             # Last row
-            unitName = rows[j][i][1]
-            y = heroes[unitName]["dimensions"]["y"]
-            x = heroes[unitName]["dimensions"]["x"]
-            gapStartX = x[0]
-            gapStartY = y[1]
-            gapWidth = x[1] - x[0]
-            if (j + 1) == numRows:
-                gapBottom = gapStartY + int(averageHeight)
+            hero_pseudo_name = rows[j][i][1]
+            y_coord = heroes[hero_pseudo_name]["dimensions"]["y"]
+            x_coord = heroes[hero_pseudo_name]["dimensions"]["x"]
+            gap_start_x_coord = x_coord[0]
+            gap_start_y_coord = y_coord[1]
+            gap_width = x_coord[1] - x_coord[0]
+            if (j + 1) == num_rows:
+                gap_bottom = gap_start_y_coord + int(average_height)
             else:
-                gapBottom = heroes[rows[j+1][i][1]]["dimensions"]["y"][0]
+                gap_bottom = heroes[rows[j+1][i][1]]["dimensions"]["y"][0]
 
                 samples += 1
-                a = 1/samples
-                b = 1 - a
-                averageHeight = (a * (gapBottom - gapStartY)
-                                 ) + (b * averageHeight)
-            staminaArea = sourceImage[gapStartY:gapBottom,
-                                      gapStartX:gapStartX + gapWidth]
-            staminaCount[unitName] = staminaArea
+                samples_ratio = 1/samples
+                reverse_samples_ratio = 1 - samples_ratio
+                average_height = (samples_ratio *
+                                  (gap_bottom - gap_start_y_coord)
+                                  ) + (reverse_samples_ratio * average_height)
+            stamina_area = source_image[
+                gap_start_y_coord:gap_bottom,
+                gap_start_x_coord:gap_start_x_coord + gap_width]
+            stamina_count[hero_pseudo_name] = stamina_area
 
-    return staminaCount
+    return stamina_count
 
 
-def get_text(staminaAreas: dict, train: bool = False):
+def get_text(stamina_areas: dict, train: bool = False):
+    """
+    Detect stamina on AFK arena Abyssal Expedition Roster Screenshots
+
+    Args:
+        stamina_areas (dict): [description]
+        train (bool, optional): [description]. Defaults to False.
+
+    Returns:
+        [type]: [description]
+    """
 
     # build template dictionary
     digits = {}
-    numbersFolder = GV.DATABASE_STAMINA_TEMPLATES_DIR
-
-    referenceFolders = os.listdir(numbersFolder)
-    for folder in referenceFolders:
-        if folder not in digits:
-            digits[folder] = {}
-        digitFolder = os.path.join(numbersFolder, folder)
-        for i in os.listdir(digitFolder):
-            name, ext = os.path.splitext(i)
-            digits[folder][name] = cv2.imread(os.path.join(digitFolder, i))
+    stamina_digit_directories = os.listdir(GV.DATABASE_STAMINA_TEMPLATES_DIR)
+    for digit_directory in stamina_digit_directories:
+        if digit_directory not in digits:
+            digits[digit_directory] = {}
+        digit_folder = os.path.join(
+            GV.DATABASE_STAMINA_TEMPLATES_DIR, digit_directory)
+        for digit_file in os.listdir(digit_folder):
+            name, _extension = os.path.splitext(digit_file)
+            digits[digit_directory][name] = cv2.imread(
+                os.path.join(digit_folder, digit_file))
     output = {}
-    for name, stamina_image in staminaAreas.items():
+    for name, stamina_image in stamina_areas.items():
         original = stamina_image.copy()
 
         lower = np.array([0, 0, 176])
@@ -96,102 +119,113 @@ def get_text(staminaAreas: dict, train: bool = False):
         digit_contours = imutils.contours.sort_contours(
             digit_contours,
             method="left-to-right")[0]
-        digitText = []
+        digit_text = []
         for digit in digit_contours:
-            x, y, w, h = cv2.boundingRect(digit)
-            if w > 6 and h > 12:
-                ROI = stamina_image[y:y+h, x:x+w]
-                sizedROI = cv2.resize(ROI, (57, 88))
+            x_coord, y_coord, width, height = cv2.boundingRect(digit)
+            if width > 6 and height > 12:
+                text_image = stamina_image[y_coord:y_coord +
+                                           height, x_coord:x_coord+width]
+                sized_text_image = cv2.resize(text_image, (57, 88))
                 if train:
-                    digitFeatures(sizedROI)
+                    digit_features(sized_text_image)
                 else:
-                    numberScore = []
-                    for digitName, digitDICT in digits.items():
+                    number_score = []
+                    for digit_name, digit_dict in digits.items():
                         scores = []
-                        for digitIteration, digitImage in digitDICT.items():
-                            templateMatch = cv2.matchTemplate(
-                                sizedROI, digitImage, cv2.TM_CCOEFF)
-                            (_, score, _, _) = cv2.minMaxLoc(templateMatch)
+                        for _digit_iteration, digit_image in digit_dict.items():
+                            template_match = cv2.matchTemplate(
+                                sized_text_image, digit_image, cv2.TM_CCOEFF)
+                            (_, score, _, _) = cv2.minMaxLoc(template_match)
                             scores.append(score)
-                        avgScore = sum(scores)/len(scores)
-                        numberScore.append((digitName, avgScore))
+                        avg_score = sum(scores)/len(scores)
+                        number_score.append((digit_name, avg_score))
                     temp = sorted(
-                        numberScore, key=lambda x: x[1], reverse=True)
-                    digitText.append(temp[0][0])
+                        number_score,
+                        key=lambda x_coord: x_coord[1], reverse=True)
+                    digit_text.append(temp[0][0])
 
-        text = "".join(digitText)
+        text = "".join(digit_text)
         output[name] = text
     return output
 
 
 @ cachedproperty
 def signature_template_mask(templates: dict):
-    siFolders = os.listdir(GV.SI_TEMPLATE_DIR)
+    """[summary]
+
+    Args:
+        templates (dict): [description]
+
+    Returns:
+        [type]: [description]
+    """
+    si_folders = os.listdir(GV.SI_TEMPLATE_DIR)
     si_dict = {}
 
-    for folder in siFolders:
-        SIDir = os.path.join(GV.SI_TEMPLATE_DIR, folder)
-        SIPhotos = os.listdir(SIDir)
+    for folder in si_folders:
+        si_directory = os.path.join(GV.SI_TEMPLATE_DIR, folder)
+        si_template_directories = os.listdir(si_directory)
         if folder == "40":
             continue
-        for imageName in SIPhotos:
+        for _si_template_name in si_template_directories:
 
-            siImage = templates[folder]["image"]
+            si_template_image = templates[folder]["image"]
 
-            templateImage = templates[folder].get(
+            template_image = templates[folder].get(
                 "crop", templates[folder].get("image"))
-            mask = np.zeros_like(templateImage)
+            mask = np.zeros_like(template_image)
 
             if "morph" in templates[folder] and templates[folder]["morph"]:
 
                 hsv_range = [np.array([0, 0, 206]), np.array([159, 29, 255])]
 
                 thresh = processing.blur_image(
-                    templateImage, hsv_range=hsv_range, reverse=True)
+                    template_image, hsv_range=hsv_range, reverse=True)
 
             else:
-                templateGray = cv2.cvtColor(templateImage, cv2.COLOR_BGR2GRAY)
+                template_gray = cv2.cvtColor(
+                    template_image, cv2.COLOR_BGR2GRAY)
 
                 thresh = cv2.threshold(
-                    templateGray, 0, 255,
+                    template_gray, 0, 255,
                     cv2.THRESH_OTSU + cv2.THRESH_BINARY)[1]
 
             inverted = cv2.bitwise_not(thresh)
-            x, y = inverted.shape[:2]
-            cv2.rectangle(inverted, (0, 0), (y, x), (255, 0, 0), 1)
+            x_coord, y_coord = inverted.shape[:2]
+            cv2.rectangle(inverted, (0, 0), (y_coord, x_coord), (255, 0, 0), 1)
 
             if folder == "0" or folder == "10":
                 pass
             else:
                 inverted = cv2.bitwise_not(inverted)
 
-            siCont = cv2.findContours(
+            si_cont = cv2.findContours(
                 inverted, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-            siCont = imutils.grab_contours(siCont)
+            si_cont = imutils.grab_contours(si_cont)
             if folder == "0":
 
-                siCont = sorted(siCont, key=cv2.contourArea, reverse=True)[
+                si_cont = sorted(si_cont, key=cv2.contourArea, reverse=True)[
                     1:templates[folder]["contourNum"]+1]
             else:
-                siCont = sorted(siCont, key=cv2.contourArea, reverse=True)[
+                si_cont = sorted(si_cont, key=cv2.contourArea, reverse=True)[
                     :templates[folder]["contourNum"]]
-            cv2.fillPoly(mask, siCont, [255, 255, 255])
+            cv2.fillPoly(mask, si_cont, [255, 255, 255])
 
             if folder not in si_dict:
                 si_dict[folder] = {}
             # si_dict[folder]["image"] = SIGray
-            si_dict[folder]["template"] = templateImage
-            si_dict[folder]["source"] = siImage
+            si_dict[folder]["template"] = template_image
+            si_dict[folder]["source"] = si_template_image
             si_dict[folder]["mask"] = mask
 
     return si_dict
 
 
-def signatureItemFeatures(hero: np.array,
+def detect_signature_item(hero: np.array,
                           si_dict: dict):
     """
     Runs template matching SI identification against the 'hero' passed in.
-        When lvlRatioDict is passed in the templates will be rescaled to
+        When lvl_ratio_dict is passed in the templates will be rescaled to
         attempt and find the best template size for detecting SI objects
 
     Args:
@@ -209,7 +243,7 @@ def signatureItemFeatures(hero: np.array,
     hero_copy = hero.copy()
 
     crop_hero = hero[0: int(hero_height/y_div), 0: int(hero_width/x_div)]
-    numberScore = {}
+    number_score = {}
 
     # si_name_size = {"30": {"lower": 0.35, "upper": 0.55},
     #                 "20": {"lower": 0.35, "upper": 0.55},
@@ -223,8 +257,8 @@ def signatureItemFeatures(hero: np.array,
     # 50%
     end_percent = 50
 
-    for folder_name, imageDict in si_dict.items():
-        si_image = imageDict["template"]
+    for folder_name, image_dict in si_dict.items():
+        si_image = image_dict["template"]
         # si_height, si_width = si_image.shape[:2]
         # sourceSIImage = imageDict["source"]
 
@@ -247,7 +281,7 @@ def signatureItemFeatures(hero: np.array,
             hero_gray = cv2.cvtColor(crop_hero, cv2.COLOR_BGR2GRAY)
 
             mask = cv2.resize(
-                imageDict["mask"], (new_si_width, new_si_height))
+                image_dict["mask"], (new_si_width, new_si_height))
             mask_gray = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
             # mask_gray = mask
 
@@ -261,10 +295,10 @@ def signatureItemFeatures(hero: np.array,
 
             try:
                 try:
-                    templateMatch = cv2.matchTemplate(
+                    template_match = cv2.matchTemplate(
                         hero_gray, si_image_gray, cv2.TM_CCOEFF_NORMED,
                         mask=mask_gray)
-                except Exception:
+                except cv2.error as _e:
 
                     if crop_hero.shape[0] < si_image_gray.shape[0] or \
                             crop_hero.shape[1] < si_image_gray.shape[1]:
@@ -274,38 +308,38 @@ def signatureItemFeatures(hero: np.array,
                                          0: max(int(hero_width/x_div),
                                                 int(_width*1.2))]
                         hero_gray = cv2.cvtColor(crop_hero, cv2.COLOR_BGR2GRAY)
-                    templateMatch = cv2.matchTemplate(
+                    template_match = cv2.matchTemplate(
                         hero_gray, si_image_gray, cv2.TM_CCOEFF_NORMED,
                         mask=mask_gray)
-                (_, score, _, scoreLoc) = cv2.minMaxLoc(templateMatch)
+                (_, score, _, score_loc) = cv2.minMaxLoc(template_match)
                 height, width = si_image.shape[:2]
-                coords = (scoreLoc[0] + width, scoreLoc[1] + height)
-            except Exception as e:
+                coords = (score_loc[0] + width, score_loc[1] + height)
+            except Exception as exception_handle:
                 raise IndexError(
-                    "Si Size({}) is larger than source image({}),"
-                    " check if source image is valid".format(
-                        si_image.shape[:2], hero.shape[:2])) from e
+                    (f"Si Size({si_image.shape[:2]}) is larger than source "
+                     f"image({hero.shape[:2]}), check if source image is "
+                     "valid")) from exception_handle
 
-            if folder_name not in numberScore:
-                numberScore[folder_name] = []
-            numberScore[folder_name].append(
-                (score, height_percent, (scoreLoc, coords)))
+            if folder_name not in number_score:
+                number_score[folder_name] = []
+            number_score[folder_name].append(
+                (score, height_percent, (score_loc, coords)))
     best_score = {}
-    for _folder, _si_scores in numberScore.items():
-        numberScore[_folder] = sorted(_si_scores, key=lambda x: x[0])
-        _best_match = numberScore[_folder][-1]
+    for _folder, _si_scores in number_score.items():
+        number_score[_folder] = sorted(_si_scores, key=lambda x: x[0])
+        _best_match = number_score[_folder][-1]
         _score_loc = _best_match[2][0]
         _coords = _best_match[2][1]
         if GV.verbosity(1):
             cv2.rectangle(hero_copy, _score_loc, _coords, (255, 0, 0), 1)
             font = cv2.FONT_HERSHEY_SIMPLEX
-            fontScale = 0.5
+            font_scale = 0.5
             color = (255, 0, 0)
             thickness = 2
 
             cv2.putText(
-                hero_copy, _folder, _coords, font, fontScale, color, thickness,
-                cv2.LINE_AA)
+                hero_copy, _folder, _coords, font, font_scale, color,
+                thickness, cv2.LINE_AA)
         best_score[_folder] = round(_best_match[0], 3)
     # print(best_score)
     # load.display_image(hero_copy, display=True)
@@ -321,21 +355,22 @@ def _furniture_template_mask(templates: dict):
     for folder in fi_folders:
         fi_dir = os.path.join(GV.FI_TEMPLATE_DIR, folder)
         fi_photos = os.listdir(fi_dir)
-        for image_name in fi_photos:
+        for _image_name in fi_photos:
             fi_image = templates[folder]["image"]
             template_image = templates[folder].get(
                 "crop", templates[folder]["image"])
             mask = np.zeros_like(template_image)
 
             if "morph" in templates[folder] and templates[folder]["morph"]:
-                se = np.ones((2, 2), dtype='uint8')
+                morph_kernel = np.ones((2, 2), dtype='uint8')
                 # inverted = cv2.bitwise_not(inverted)
 
                 lower = np.array([0, 8, 0])
                 upper = np.array([179, 255, 255])
                 hsv = cv2.cvtColor(template_image, cv2.COLOR_BGR2HSV)
                 thresh = cv2.inRange(hsv, lower, upper)
-                thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, se)
+                thresh = cv2.morphologyEx(
+                    thresh, cv2.MORPH_CLOSE, morph_kernel)
                 thresh = cv2.bitwise_not(thresh)
 
             else:
@@ -346,8 +381,8 @@ def _furniture_template_mask(templates: dict):
                     template_gray, 147, 255,
                     cv2.THRESH_BINARY)[1]
                 inverted = thresh
-            x, y = inverted.shape[:2]
-            cv2.rectangle(inverted, (0, 0), (y, x), (255, 0, 0), 1)
+            x_coord, y_coord = inverted.shape[:2]
+            cv2.rectangle(inverted, (0, 0), (y_coord, x_coord), (255, 0, 0), 1)
             inverted = cv2.bitwise_not(inverted)
 
             fi_contours = cv2.findContours(
@@ -361,7 +396,6 @@ def _furniture_template_mask(templates: dict):
 
             if folder not in fi_dict:
                 fi_dict[folder] = {}
-            # si_dict[folder][imageName] = siImage
             fi_dict[folder]["template"] = template_image
             fi_dict[folder]["source"] = fi_image
 
@@ -372,42 +406,42 @@ def _furniture_template_mask(templates: dict):
 
 # Deprecated function, functionality replaced with Yolov5 model at
 #   image_processing/afk/fi/fi_detection/data/models
-def _furnitureItemFeatures(hero: np.array, fi_dict: dict,
-                           lvlRatioDict: dict = None):
+def _detect_furniture_item(hero: np.ndarray, fi_dict: dict,
+                           lvl_ratio_dict: dict = None):
     """
     Runs template matching FI identification against the 'hero' passed in.
-        When lvlRatioDict is passed in the templates will be rescaled to
+        When lvl_ratio_dict is passed in the templates will be rescaled to
         attempt and find the best template size for detecting FI objects
 
     Args:
         hero: np.array(x,y.3) representing an rgb image
         fi_dict: dictionary of information about each FI template to get ran
             against the image
-        lvlRatioDict: dictionary that contains the predicted height of each
+        lvl_ratio_dict: dictionary that contains the predicted height of each
             signature item based on precomputed text to si scaling calculations
     Returns:
         dictionary with best "score" that each template achieved on the 'hero'
             image
     """
     # variable_multiplier =
-    x, y, _ = hero.shape
+    x_coord, y_coord, _ = hero.shape
     x_div = 2.4
     y_div = 2.0
-    x_offset = int(x*0.1)
-    y_offset = int(y*0.30)
+    x_offset = int(x_coord*0.1)
+    y_offset = int(y_coord*0.30)
     # hero_copy = hero.copy()
 
-    crop_hero = hero[y_offset: int(y*0.6), x_offset: int(x*0.4)]
+    crop_hero = hero[y_offset: int(y_coord*0.6), x_offset: int(x_coord*0.4)]
 
-    numberScore = {}
+    number_score = {}
     neighborhood_size = 7
-    sigmaColor = sigmaSpace = 75.
+    sigma_color = sigma_space = 75.
 
     # size_multiplier = 4
 
     old_crop_hero = crop_hero
     crop_hero = cv2.bilateralFilter(
-        crop_hero, neighborhood_size, sigmaColor, sigmaSpace)
+        crop_hero, neighborhood_size, sigma_color, sigma_space)
 
     # rgb_range = [
     #     np.array([190, 34, 0]), np.array([255, 184, 157])]
@@ -421,7 +455,7 @@ def _furnitureItemFeatures(hero: np.array, fi_dict: dict,
     #     default_blur, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     # hero_crop_contours = imutils.grab_contours(hero_crop_contours)
 
-    # # TODO add contour detection instead of template matching for low
+    # TODO add contour detection instead of template matching for low
     #   resolution images
     # hsv_range = [
     #     np.array([0, 50, 124]), np.array([49, 255, 255])]
@@ -474,19 +508,19 @@ def _furnitureItemFeatures(hero: np.array, fi_dict: dict,
     # blur_hero = crop_hero
     for pixel_offset in range(-5, 15, 1):
 
-        for folder_name, imageDict in fi_dict.items():
-            fi_image = imageDict["template"]
+        for folder_name, image_dict in fi_dict.items():
+            fi_image = image_dict["template"]
 
-            sourceSIImage = imageDict["source"]
-            hero_h, hero_w = sourceSIImage.shape[:2]
+            source_template_image = image_dict["source"]
+            hero_height, _hero_width = source_template_image.shape[:2]
 
             original_height, original_width = fi_image.shape[:2]
 
-            base_height_ratio = original_height/hero_h
+            base_height_ratio = original_height/hero_height
             # resize_height
             base_new_height = max(round(
-                lvlRatioDict[folder_name]["height"]), 12)+pixel_offset
-            # base_new_height = round(lvlRatioDict[folder_name]["height"])
+                lvl_ratio_dict[folder_name]["height"]), 12)+pixel_offset
+            # base_new_height = round(lvl_ratio_dict[folder_name]["height"])
 
             new_height = round(base_new_height * base_height_ratio)
             scale_ratio = new_height/original_height
@@ -498,7 +532,7 @@ def _furnitureItemFeatures(hero: np.array, fi_dict: dict,
             #   Min = 0, BMin = 0), (RMax = 255 , GMax = 246, BMax = 255)
 
             mask = cv2.resize(
-                imageDict["mask"], (new_width, new_height))
+                image_dict["mask"], (new_width, new_height))
             # mask_gray = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
             # hero_gray = cv2.cvtColor(crop_hero, cv2.COLOR_BGR2GRAY)
 
@@ -510,41 +544,40 @@ def _furnitureItemFeatures(hero: np.array, fi_dict: dict,
             #     mask_gray = cv2.bitwise_not(mask_gray)
 
             try:
-                templateMatch = cv2.matchTemplate(
+                template_match = cv2.matchTemplate(
                     blur_hero, fi_image, cv2.TM_CCOEFF_NORMED,
                     mask=mask)
-            except Exception:
+            except cv2.error as _exception:
                 if blur_hero.shape[0] < fi_image.shape[0] or \
                         blur_hero.shape[1] < fi_image.shape[1]:
                     _height, _width = fi_image.shape[:2]
                     blur_hero = hero[
-                        y_offset: max(int(y/y_div),
+                        y_offset: max(int(y_coord/y_div),
                                       int(_height * 1.2)+y_offset),
-                        x_offset: max(int(x/x_div),
+                        x_offset: max(int(x_coord/x_div),
                                       int(_width * 1.2)+x_offset), ]
                     # blur_hero = crop_hero
                     # hero_gray = cv2.cvtColor(crop_hero, cv2.COLOR_BGR2GRAY)
-                templateMatch = cv2.matchTemplate(
+                _template_match = cv2.matchTemplate(
                     blur_hero, fi_image, cv2.TM_CCOEFF_NORMED,
                     mask=mask)
 
-            (_, score, _, scoreLoc) = cv2.minMaxLoc(templateMatch)
-            scoreLoc = (scoreLoc[0], scoreLoc[1])
-            coords = (scoreLoc[0] + width, scoreLoc[1] + height)
+            (_, score, _, score_loc) = cv2.minMaxLoc(template_match)
+            score_loc = (score_loc[0], score_loc[1])
+            coords = (score_loc[0] + width, score_loc[1] + height)
 
-            if folder_name not in numberScore:
-                numberScore[folder_name] = []
-            numberScore[folder_name].append(
-                (score, pixel_offset, (scoreLoc, coords)))
+            if folder_name not in number_score:
+                number_score[folder_name] = []
+            number_score[folder_name].append(
+                (score, pixel_offset, (score_loc, coords)))
     best_score = {}
-    import math
-    for _folder, _fi_scores in numberScore.items():
-        numberScore[_folder] = sorted(_fi_scores, key=lambda x: x[0])
-        _t = [_num for _num in numberScore[_folder]
+    for _folder, _fi_scores in number_score.items():
+        number_score[_folder] = sorted(_fi_scores, key=lambda x: x[0])
+        _t = [_num for _num in number_score[_folder]
               if not math.isinf(_num[0])]
         if len(_t) == 0:
             if GV.verbosity(1):
-                print("Failed to find FI", _folder,  numberScore[_folder])
+                print("Failed to find FI", _folder,  number_score[_folder])
             _best_match = (0, 0, ((0, 0), (0, 0)))
         else:
             _best_match = _t[-1]
@@ -558,7 +591,7 @@ def _furnitureItemFeatures(hero: np.array, fi_dict: dict,
     return best_score
 
 
-def digitFeatures(digit: np.array, save_dir=None):
+def digit_features(digit: np.array, save_dir=None):
     """
     Save a presized digit to whatever number is entered
     Args:
@@ -572,7 +605,7 @@ def digitFeatures(digit: np.array, save_dir=None):
     base_dir = GV.DATABASE_STAMINA_TEMPLATES_DIR
     if save_dir:
         base_dir = save_dir
-    digitFolders = os.listdir(base_dir)
+    digit_folders = os.listdir(base_dir)
     plt.figure()
     plt.imshow(digit)
     plt.ion()
@@ -583,49 +616,54 @@ def digitFeatures(digit: np.array, save_dir=None):
 
     plt.close()
 
-    if number not in digitFolders:
-        print("No such folder {}".format(number))
+    if number not in digit_folders:
+        print(f"No such folder {number}")
         number = "none"
 
-    numberDir = os.path.join(base_dir, number)
-    numberLen = str(len(os.listdir(numberDir)))
-    numberName = os.path.join(numberDir, numberLen)
+    number_dir = os.path.join(base_dir, number)
+    number_len = str(len(os.listdir(number_dir)))
+    number_name = os.path.join(number_dir, number_len)
 
-    cv2.imwrite("{}.png".format(numberName), digit)
+    cv2.imwrite(f"{number_name}.png", digit)
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    # Load in base truth/reference images
-    files = load.findFiles("../hero_icon/*")
-    baseImages = []
-    for i in files:
-        hero = cv2.imread(i)
-        baseName = os.path.basename(i)
-        name, ext = os.path.splitext(baseName)
+#     # Load in base truth/reference images
+#     files = load.find_files("../hero_icon/*")
+#     baseImages = []
+#     for i in files:
+#         hero = cv2.imread(i)
+#         baseName = os.path.basename(i)
+#         name, ext = os.path.splitext(baseName)
 
-        baseImages.append((name, hero))
+#         baseImages.append((name, hero))
 
-    # load in screenshot of heroes
-    stamina_image = cv2.imread("./stamina.jpg")
-    heroesDict, rows = processing.getHeroes(stamina_image)
+#     # load in screenshot of heroes
 
-    cropHeroes = load.crop_heroes(heroesDict)
-    imageDB = load.build_flann(baseImages)
+#     lower_hsv = np.array([0, 0, 0])
+#     upper_hsv = np.array([179, 255, 192])
 
-    for k, v in cropHeroes.items():
+#     hsv_range = [lower_hsv, upper_hsv]
+#     blur_args = {"hsv_range": hsv_range}
+#     heroesDict, rows = processing.get_heroes(GV.IMAGE_SS, blur_args)
 
-        hero_info, baseHeroImage = imageDB.search(v, display=False)
-        heroesDict[k]["label"] = hero_info.name
+#     cropHeroes = load.crop_heroes(heroesDict)
+#     imageDB = load.build_flann(baseImages)
 
-    staminaAreas = get_stamina_area(rows, heroesDict, stamina_image)
-    staminaOutput = get_text(staminaAreas)
-    output = {}
+#     for k, v in cropHeroes.items():
 
-    for name, text in staminaOutput.items():
-        label = heroesDict[name]["label"]
-        if label not in output:
-            output[label] = {}
-        output[label]["stamina"] = text
+#         hero_info, baseHeroImage = imageDB.search(v, display=False)
+#         heroesDict[k]["label"] = hero_info.name
 
-    outputJson = json.dumps(output)
+#     staminaAreas = get_stamina_area(rows, heroesDict, GV.IMAGE_SS)
+#     staminaOutput = get_text(staminaAreas)
+#     output = {}
+
+#     for name, text in staminaOutput.items():
+#         label = heroesDict[name]["label"]
+#         if label not in output:
+#             output[label] = {}
+#         output[label]["stamina"] = text
+
+#     outputJson = json.dumps(output)

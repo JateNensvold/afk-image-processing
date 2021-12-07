@@ -1,10 +1,8 @@
-import time
 from typing import Tuple, Dict
 import warnings
 import cv2
 
 import image_processing.globals as GV
-import image_processing.load_images as load
 import image_processing.processing as processing
 import image_processing.models.model_attributes as MA
 import image_processing.afk.roster.matrix as matrix
@@ -44,8 +42,8 @@ def get_si(roster_image: np.ndarray, debug_raw: bool = None,
 
     hsv_range = [lower_hsv, upper_hsv]
     blur_args = {"hsv_range": hsv_range}
-    heroes_dict, hero_matrix = processing.getHeroes(
-        roster_image, blur_args=blur_args)
+    heroes_dict, hero_matrix = processing.get_heroes(
+        roster_image, blur_args)
 
     reduced_values: list[Tuple[str, Dict]] = []
     for pseudo_name, image_info in heroes_dict.items():
@@ -97,7 +95,7 @@ def get_si(roster_image: np.ndarray, debug_raw: bool = None,
 
 def label_hero_feature(roster_image: np.ndarray,
                        hero_data: processing.HERO_INFO,
-                       hero_matrix: matrix.matrix):
+                       hero_matrix: matrix.Matrix):
     """
     Write hero data such as FI/SI/Stars onto the roster image those attributes
         were derived from
@@ -109,7 +107,6 @@ def label_hero_feature(roster_image: np.ndarray,
         hero_matrix (matrix.matrix): matrix of hero data in the same horizontal
             and vertical order they were detected in
     """
-    global FONT, COLOR, THICKNESS
 
     font_scale = 0.5 * (hero_matrix.get_avg_width()/100)
 
@@ -142,16 +139,17 @@ def detect_features(pseudo_name: str, image_info: processing.HERO_INFO):
 
     test_img = image_info["image"]
     test_img = test_img[..., ::-1]
-    results = GV.MODEL([test_img], size=416) # pylint: disable=not-callable
+    results = GV.MODEL([test_img], size=416)  # pylint: disable=not-callable
 
     results_array = results.pandas().xyxy[0]
-    RA = results_array
-    fi_filtered_results = RA.loc[RA['class'].isin(MA.FI_LABELS.keys())]
+    fi_filtered_results = results_array.loc[results_array['class'].isin(
+        MA.FI_LABELS.keys())]
 
-    star_filtered_results = RA.loc[RA['class'].isin(
+    star_filtered_results = results_array.loc[results_array['class'].isin(
         MA.ASCENSION_STAR_LABELS.keys())]
 
-    si_filtered_results = RA.loc[RA['class'].isin(MA.SI_LABELS.keys())]
+    si_filtered_results = results_array.loc[results_array['class'].isin(
+        MA.SI_LABELS.keys())]
 
     if len(fi_filtered_results) > 0:
         fi_final_results = fi_filtered_results.sort_values(
@@ -191,7 +189,9 @@ def detect_features(pseudo_name: str, image_info: processing.HERO_INFO):
         best_si = "0"
         si_scores = {best_si: 1.0}
     if not star:
-        raw_border_results = GV.BORDER_MODEL(test_img) # pylint: disable=not-callable
+        # pylint: disable=not-callable
+        raw_border_results = GV.BORDER_MODEL(
+            test_img)
         border_results = raw_border_results["instances"]
 
         classes = border_results.pred_classes.cpu().tolist()
@@ -223,28 +223,28 @@ def detect_features(pseudo_name: str, image_info: processing.HERO_INFO):
     return return_dict
 
 
-if __name__ == "__main__":
-    start_time = time.time()
-    json_dict = get_si(GV.image_ss, detect_faction=False)
-    if GV.verbosity(1):
-        end_time = time.time()
-        print(f"Detected features in: {end_time - start_time}")
-        load.display_image(GV.image_ss, display=True)
-    if GV.VERBOSE_LEVEL == 0:
-        print(f"{{\"heroes\": {json_dict[GV.IMAGE_SS_NAME]['heroes']}}}")
-    else:
-        print("Heroes:")
-        print(f"Rows: {json_dict[GV.IMAGE_SS_NAME]['rows']}")
-        print(f"Columns: {json_dict[GV.IMAGE_SS_NAME]['columns']}")
-        indent_level = 0
-        hero_count = 0
-        for row_index, row in enumerate(json_dict[GV.IMAGE_SS_NAME]['heroes']):
-            tab_string = "\t" * indent_level
-            print(f"{tab_string}Row {row_index + 1}")
-            indent_level += 1
-            tab_string = "\t" * indent_level
-            for hero_index, hero_info in enumerate(row):
-                print(f"{tab_string}Hero: {hero_count + 1} {tab_string} "
-                      f"{hero_info}")
-                hero_count += 1
-            indent_level -= 1
+# if __name__ == "__main__":
+#     start_time = time.time()
+#     json_dict = get_si(GV.IMAGE_SS, detect_faction=False)
+#     if GV.verbosity(1):
+#         end_time = time.time()
+#         print(f"Detected features in: {end_time - start_time}")
+#         load.display_image(GV.IMAGE_SS, display=True)
+#     if GV.VERBOSE_LEVEL == 0:
+#         print(f"{{\"heroes\": {json_dict[GV.IMAGE_SS_NAME]['heroes']}}}")
+#     else:
+#         print("Heroes:")
+#         print(f"Rows: {json_dict[GV.IMAGE_SS_NAME]['rows']}")
+#         print(f"Columns: {json_dict[GV.IMAGE_SS_NAME]['columns']}")
+#         indent_level = 0
+#         hero_count = 0
+#         for row_index, row in enumerate(json_dict[GV.IMAGE_SS_NAME]['heroes']):
+#             tab_string = "\t" * indent_level
+#             print(f"{tab_string}Row {row_index + 1}")
+#             indent_level += 1
+#             tab_string = "\t" * indent_level
+#             for hero_index, hero_info in enumerate(row):
+#                 print(f"{tab_string}Hero: {hero_count + 1} {tab_string} "
+#                       f"{hero_info}")
+#                 hero_count += 1
+#             indent_level -= 1

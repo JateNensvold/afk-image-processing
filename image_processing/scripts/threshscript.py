@@ -1,15 +1,35 @@
 import cv2
-# import sys
 import numpy as np
-import argparse
+
 import image_processing.globals as GV
 
+GV.parser.add_argument(
+    "-c", "--COLOR", help="Runs the program in RGB mode",
+    action="store_true")
 
-def nothing(x):
-    pass
+GV.reload_globals()
+
+IMAGE_SIZE_MULTIPLIER = 4
 
 
-def threshold(image):
+def nothing(_x: None):
+    """
+    Stub Function used as a fake callback
+    Args:
+        _x (None): empty value passed to callback function
+    """
+    return
+
+
+def threshold(image: np.ndarray):
+    """
+    Run a program that allows the user to set different
+        Hue, Saturation and Value thresholds on the image to see how a filter
+        with those values would look
+
+    Args:
+        image (np.ndarray): image to threshold
+    """
 
     # Create a window
     cv2.namedWindow('image', cv2.WINDOW_NORMAL)
@@ -29,26 +49,28 @@ def threshold(image):
     cv2.setTrackbarPos('VMax', 'image', 255)
 
     # Initialize to check if HSV min/max value changes
-    hMin = sMin = vMin = hMax = sMax = vMax = 0
-    phMin = psMin = pvMin = phMax = psMax = pvMax = 0
+    hue_min = saturation_min = value_min = hue_max = saturation_max = \
+        value_max = 0
+    print_hue_min = print_saturation_min = print_value_min = print_hue_max = \
+        print_saturation_max = print_value_max = 0
 
     output = image
     wait_time = 33
 
-    while(1):
+    while True:
 
         # get current positions of all trackbars
-        hMin = cv2.getTrackbarPos('HMin', 'image')
-        sMin = cv2.getTrackbarPos('SMin', 'image')
-        vMin = cv2.getTrackbarPos('VMin', 'image')
+        hue_min = cv2.getTrackbarPos('HMin', 'image')
+        saturation_min = cv2.getTrackbarPos('SMin', 'image')
+        value_min = cv2.getTrackbarPos('VMin', 'image')
 
-        hMax = cv2.getTrackbarPos('HMax', 'image')
-        sMax = cv2.getTrackbarPos('SMax', 'image')
-        vMax = cv2.getTrackbarPos('VMax', 'image')
+        hue_max = cv2.getTrackbarPos('HMax', 'image')
+        saturation_max = cv2.getTrackbarPos('SMax', 'image')
+        value_max = cv2.getTrackbarPos('VMax', 'image')
 
         # Set minimum and max HSV values to display
-        lower = np.array([hMin, sMin, vMin])
-        upper = np.array([hMax, sMax, vMax])
+        lower = np.array([hue_min, saturation_min, value_min])
+        upper = np.array([hue_max, saturation_max, value_max])
 
         # Create HSV Image and threshold into a range.
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
@@ -56,17 +78,21 @@ def threshold(image):
         output = cv2.bitwise_and(image, image, mask=mask)
 
         # Print if there is a change in HSV value
-        if((phMin != hMin) | (psMin != sMin) | (pvMin != vMin) |
-                (phMax != hMax) | (psMax != sMax) | (pvMax != vMax)):
-            print("(hMin = %d , sMin = %d, vMin = %d), (hMax = %d , sMax = %d,"
-                  " vMax = %d)" % (
-                      hMin, sMin, vMin, hMax, sMax, vMax))
-            phMin = hMin
-            psMin = sMin
-            pvMin = vMin
-            phMax = hMax
-            psMax = sMax
-            pvMax = vMax
+        if((print_hue_min != hue_min) |
+           (print_saturation_min != saturation_min) |
+           (print_value_min != value_min) | (print_hue_max != hue_max) |
+           (print_saturation_max != saturation_max) |
+           (print_value_max != value_max)):
+            print(f"(hue_min = {hue_min} , saturation_min = {saturation_min}, "
+                  f"value_min = {value_min}), (hue_max = {hue_max} , "
+                  f"saturation_max = {saturation_max}, "
+                  f"value_max = {value_max})")
+            print_hue_min = hue_min
+            print_saturation_min = saturation_min
+            print_value_min = value_min
+            print_hue_max = hue_max
+            print_saturation_max = saturation_max
+            print_value_max = value_max
 
         # Display output image
         cv2.imshow('image', output)
@@ -78,62 +104,72 @@ def threshold(image):
     cv2.destroyAllWindows()
 
 
-def color_threshold(image):
+def color_threshold(image: np.ndarray):
+    """
+    Run a program that allows the user to set different
+        Red, Green and Blue thresholds on the image to see how a filter with
+        those values would look
+
+    Args:
+        image (np.ndarray): image to threshold
+    """
     cv2.namedWindow('image', cv2.WINDOW_NORMAL)
     # cv2.window
     # create trackbars for color change
     # Hue is from 0-179 for Opencv
-    cv2.createTrackbar('RMin', 'image', 0, 255, nothing)
-    cv2.createTrackbar('GMin', 'image', 0, 255, nothing)
-    cv2.createTrackbar('BMin', 'image', 0, 255, nothing)
-    cv2.createTrackbar('RMax', 'image', 0, 255, nothing)
-    cv2.createTrackbar('GMax', 'image', 0, 255, nothing)
-    cv2.createTrackbar('BMax', 'image', 0, 255, nothing)
+    cv2.createTrackbar('red_min', 'image', 0, 255, nothing)
+    cv2.createTrackbar('green_min', 'image', 0, 255, nothing)
+    cv2.createTrackbar('blue_min', 'image', 0, 255, nothing)
+    cv2.createTrackbar('red_max', 'image', 0, 255, nothing)
+    cv2.createTrackbar('green_max', 'image', 0, 255, nothing)
+    cv2.createTrackbar('blue_max', 'image', 0, 255, nothing)
 
     # Set default value for MAX HSV trackbars.
-    cv2.setTrackbarPos('RMax', 'image', 255)
-    cv2.setTrackbarPos('GMax', 'image', 255)
-    cv2.setTrackbarPos('BMax', 'image', 255)
+    cv2.setTrackbarPos('red_max', 'image', 255)
+    cv2.setTrackbarPos('green_max', 'image', 255)
+    cv2.setTrackbarPos('blue_max', 'image', 255)
 
     # Initialize to check if HSV min/max value changes
-    RMin = GMin = BMin = RMax = GMax = BMax = 0
-    pRMin = pGMin = pBMin = pRMax = pGMax = pBMax = 0
+    red_min = green_min = blue_min = red_max = green_max = blue_max = 0
+    print_red_min = print_green_min = print_blue_min = print_red_max = \
+        print_green_max = print_blue_max = 0
 
     output = image
     wait_time = 33
 
-    while(1):
+    while True:
 
         # get current positions of all trackbars
-        RMin = cv2.getTrackbarPos('RMin', 'image')
-        GMin = cv2.getTrackbarPos('GMin', 'image')
-        BMin = cv2.getTrackbarPos('BMin', 'image')
+        red_min = cv2.getTrackbarPos('red_min', 'image')
+        green_min = cv2.getTrackbarPos('green_min', 'image')
+        blue_min = cv2.getTrackbarPos('blue_min', 'image')
 
-        RMax = cv2.getTrackbarPos('RMax', 'image')
-        GMax = cv2.getTrackbarPos('GMax', 'image')
-        BMax = cv2.getTrackbarPos('BMax', 'image')
+        red_max = cv2.getTrackbarPos('red_max', 'image')
+        green_max = cv2.getTrackbarPos('green_max', 'image')
+        blue_max = cv2.getTrackbarPos('blue_max', 'image')
 
         # Set minimum and max HSV values to display
-        lower = np.array([RMin, GMin, BMin])
-        upper = np.array([RMax, GMax, BMax])
+        lower = np.array([red_min, green_min, blue_min])
+        upper = np.array([red_max, green_max, blue_max])
 
         # Create HSV Image and threshold into a range.
-        RGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        mask = cv2.inRange(RGB, lower, upper)
+        rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        mask = cv2.inRange(rgb_image, lower, upper)
         output = cv2.bitwise_and(image, image, mask=mask)
 
         # Print if there is a change in HSV value
-        if((pRMin != RMin) | (pGMin != GMin) | (pBMin != BMin) |
-           (pRMax != RMax) | (pGMax != GMax) | (pBMax != BMax)):
-            print("(RMin = %d , GMin = %d, BMin = %d), (RMax = %d , GMax = %d,"
-                  " BMax = %d)" % (
-                      RMin, GMin, BMin, RMax, GMax, BMax))
-            pRMin = RMin
-            pGMin = GMin
-            pBMin = BMin
-            pRMax = RMax
-            pGMax = GMax
-            pBMax = BMax
+        if((print_red_min != red_min) | (print_green_min != green_min) |
+                (print_blue_min != blue_min) | (print_red_max != red_max) |
+                (print_green_max != green_max) | (print_blue_max != blue_max)):
+            print(f"(red_min = {red_min} , green_min = {green_min}, "
+                  f"blue_min = {blue_min}), (red_max = {red_max} , "
+                  f"green_max = {green_max}, blue_max = {blue_max})")
+            print_red_min = red_min
+            print_green_min = green_min
+            print_blue_min = blue_min
+            print_red_max = red_max
+            print_green_max = green_max
+            print_blue_max = blue_max
 
         # Display output image
         cv2.imshow('image', output)
@@ -147,29 +183,12 @@ def color_threshold(image):
 
 if __name__ == "__main__":
     # Load image with --image or -i found in image_processing.globals.py
-    image = GV.image_ss
 
-    parser = argparse.ArgumentParser(
-        description='Threshold determination script.')
-    parser.add_argument(
-        "-c", "--COLOR", help="Runs the program in RGB mode",
-        action="store_true")
-    parser.add_argument(
-        "-i", "--IMAGE", help="Image to load")
-
-    args = parser.parse_args()
-
-    COLOR = args.COLOR
-    IMAGE = args.IMAGE
-
-    if IMAGE:
-        image = cv2.imread(IMAGE)
-
-    if COLOR:
-        print("color")
-        multiplier = 4
-        image = cv2.resize(
-            image, (image.shape[1]*multiplier, image.shape[0]*multiplier))
-        color_threshold(image)
+    if GV.ARGS.COLOR:
+        print("Running in RGB mode")
+        color_threshold(
+            cv2.resize(GV.IMAGE_SS,
+                       (GV.IMAGE_SS.shape[1]*IMAGE_SIZE_MULTIPLIER,
+                        GV.IMAGE_SS.shape[0]*IMAGE_SIZE_MULTIPLIER)))
     else:
-        threshold(image)
+        threshold(GV.IMAGE_SS)

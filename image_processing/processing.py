@@ -1,31 +1,32 @@
-
-# from skimage.feature import canny
-from typing import Dict, Sequence, Any, Union, TypeVar
-from typing_extensions import TypeAlias
-
-import numpy as np
-import cv2
-import os
-import imutils
-import rtree
 import statistics
 
-import image_processing.build_db as BD
+from typing import Dict, Sequence, Tuple, Union
+
+import cv2
+import rtree
+import imutils
+# Need this import to use imutils.contours.sort_contours,
+#   without it Module raises AttributeError
+# pylint: disable=unused-import
+from imutils import contours  # noqa
+import numpy as np
+
 import image_processing.globals as GV
-import image_processing.processing as pr
 import image_processing.load_images as load
 import image_processing.afk.roster.DimensionsObject as DO
 import image_processing.afk.roster.matrix as MA
 import image_processing.afk.roster.RowItem as RI
 
+# pylint: disable=invalid-name
 HERO_INFO = Dict[str, Union[np.ndarray, RI.RowItem]]
+# pylint: disable=invalid-name
 HERO_DICT = Dict[str, Union[HERO_INFO, Dict]]
 
 
 def blur_image(image: np.ndarray, dilate=False,
-               hsv_range: Sequence[np.array]=None,
-               rgb_range: Sequence[np.array]=None,
-               reverse: bool=False) -> np.ndarray:
+               hsv_range: Sequence[np.array] = None,
+               rgb_range: Sequence[np.array] = None,
+               reverse: bool = False) -> np.ndarray:
     """
     Applies Gaussian Blurring or HSV thresholding to image in an attempt to
         reduce noise in the image. Additionally dilation can be applied to
@@ -65,13 +66,13 @@ def blur_image(image: np.ndarray, dilate=False,
     else:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-        v = np.median(image)
+        image_median_value = np.median(image)
         sigma = 0.33
 
         # ---- apply optimal Canny edge detection using the computed median----
         # automated
-        lower_thresh = int(max(0, (1.0 - sigma) * v))
-        upper_thresh = int(min(255, (1.0 + sigma) * v))
+        lower_thresh = int(max(0, (1.0 - sigma) * image_median_value))
+        upper_thresh = int(min(255, (1.0 + sigma) * image_median_value))
 
         # preset
         # lower_thresh = (hMin = 0 , sMin = 0, vMin = 0)
@@ -123,7 +124,7 @@ def remove_background(img):
 
     # Find the contours
 
-    contours, hierarchy = cv2.findContours(
+    detected_contours, hierarchy = cv2.findContours(
         binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     # get the actual inner list of hierarchy descriptions
@@ -133,37 +134,39 @@ def remove_background(img):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
     # Create a mask with all the same channels as img
     mask = np.zeros_like(img)
-    for index, component in enumerate(zip(contours, hierarchy)):
-        currentContour = component[0]
-        currentHierarchy = component[1]
-        x, y, w, h = cv2.boundingRect(currentContour)
-        if currentHierarchy[2] < 0:
+    for index, component in enumerate(zip(detected_contours, hierarchy)):
+        current_contour = component[0]
+        current_hierarchy = component[1]
+        if current_hierarchy[2] < 0:
             # these are the innermost child components
             pass
-        elif currentHierarchy[3] < 0:
+        elif current_hierarchy[3] < 0:
             # these are the outermost parent components
 
-            arclen = cv2.arcLength(currentContour, True)
+            arclen = cv2.arcLength(current_contour, True)
             eps = 0.0005
             epsilon = arclen * eps
-            bestapprox = cv2.approxPolyDP(currentContour, epsilon, True)
+            polygon_curve_approximation = cv2.approxPolyDP(
+                current_contour, epsilon, True)
 
-            for pt in bestapprox:
-                cv2.circle(canvas, (pt[0][0], pt[0][1]), 7, (0, 255, 0), -1)
-                cv2.drawContours(canvas, [bestapprox], -1,
+            for point in polygon_curve_approximation:
+                cv2.circle(
+                    canvas, (point[0][0], point[0][1]), 7, (0, 255, 0), -1)
+                cv2.drawContours(canvas, [polygon_curve_approximation], -1,
                                  (0, 0, 255), 2, cv2.LINE_AA)
 
         # Draw the countours onto the mask
-        cv2.drawContours(mask, contours, index, (255,)*img.shape[2], -1)
+        cv2.drawContours(mask, detected_contours,
+                         index, (255,)*img.shape[2], -1)
 
         # Combine mask and img to replace contours of original image with
         #   transparent background
         out = cv2.bitwise_and(img, mask)
-    return out, bestapprox
+    return out, polygon_curve_approximation
 
 
-def getHeroContours(image: np.array, sizeAllowanceBoundary, display=None,
-                    **blurKwargs):
+def get_hero_contours(image: np.array, size_allowance_boundary: float,
+                      **blurKwargs):
     """
     Args:
         image: hero roster screenshot
@@ -179,18 +182,13 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, display=None,
         load.display_image(dilate)
 
     # Find contours
-    import imutils
-    import imutils.contours
-    contours = cv2.findContours(
+    detected_contours = cv2.findContours(
         dilate, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    # contours = contours[0] if len(contours) == 2 else contours[1]
-    contours = imutils.grab_contours(contours)
-    # contours = imutils.contours.sort_contours(contours,
-    #                                       method="left-to-right")[0]
-    contours = sorted(contours, key=cv2.contourArea,
-                      reverse=True)
+    detected_contours = imutils.grab_contours(detected_contours)
+    detected_contours = sorted(detected_contours, key=cv2.contourArea,
+                               reverse=True)
 
-    # Iterate through contours and filter for ROI
+    # Iterate through contours and filter for detected_hero
     image_number = 0
     sizes: dict[int, list[DO.DimensionsObject]] = {}
     heights = []
@@ -198,37 +196,33 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, display=None,
 
     idx = rtree.index.Index()
 
-    for _index, c in enumerate(contours):
+    for _index, detected_contour in enumerate(detected_contours):
 
-        x, y, w, h = cv2.boundingRect(c)
-        _dim_object = DO.DimensionsObject((x, y, w, h))
-        diff = abs(h-w)
-        avg_h_w = ((h+w)/2)
+        x_coord, y_coord, width, height = cv2.boundingRect(detected_contour)
+        dim_object = DO.DimensionsObject((x_coord, y_coord, width, height))
+        diff = abs(height-width)
+        avg_h_w = ((height+width)/2)
         tolerance = avg_h_w * 0.2
 
         # if GV.DEBUG and display:
-        _idx_coords = _dim_object.coords()
-        _intersections = list(idx.intersection(_idx_coords))
-        if _intersections:
-            for _collision in _intersections:
-                # print(_collision)
-                pass
-        else:
-            idx.insert(_index, _idx_coords)
-            _split_coords = _dim_object.coords(single=False)
+        idx_coords = dim_object.coords()
+        intersections = list(idx.intersection(idx_coords))
+        if not intersections:
+            idx.insert(_index, idx_coords)
+            _split_coords = dim_object.coords(single=False)
             cv2.rectangle(
                 image, _split_coords[0], _split_coords[1], (0, 0, 255), 2)
 
             # print("cnt", x, y)
-            # ROI = image[y:
-            #             y+h,
+            # detected_hero = image[y:
+            #             y+height,
             #             x:
-            #             x+w]
+            #             x+width]
             # cv2.drawContours(image, [c], -1, (0, 0, 255), thickness=2)
 
-            # cv2.rectangle(image, (x, y), (x+w, y+h), (255, 0, 0), 2)
-        if diff < tolerance and (_dim_object.size()) > 2500:
-            _split_coords = _dim_object.coords(single=False)
+            # cv2.rectangle(image, (x, y), (x+width, y+height), (255, 0, 0), 2)
+        if diff < tolerance and (dim_object.size()) > 2500:
+            _split_coords = dim_object.coords(single=False)
 
             # outside = []
 
@@ -244,15 +238,15 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, display=None,
             #         break
             # if not addStatus:
             #     continue
-            _size = _dim_object.size()
-            if _size not in sizes:
-                sizes[_size] = []
-            # sizes[h*w].append((h, w, x, y))
-            sizes[_size].append(_dim_object)
+            size = dim_object.size()
+            if size not in sizes:
+                sizes[size] = []
+            # sizes[height*width].append((height, width, x, y))
+            sizes[size].append(dim_object)
 
             # customContour.append(outside)
-            heights.append(_dim_object.h)
-            widths.append(_dim_object.w)
+            heights.append(dim_object.height)
+            widths.append(dim_object.width)
 
         image_number += 1
     load.display_image(image, display=(True and GV.DEBUG))
@@ -262,31 +256,31 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, display=None,
     w_mean = np.median(widths)
 
     # print("mean: ", mean)
-    lowerBoundary = 1.0 - sizeAllowanceBoundary
-    upperBoundary = 1.0 + sizeAllowanceBoundary
-    h_low = h_mean * lowerBoundary
-    h_high = h_mean * upperBoundary
-    w_low = w_mean * lowerBoundary
-    w_high = w_mean * upperBoundary
+    lower_boundary = 1.0 - size_allowance_boundary
+    upper_boundary = 1.0 + size_allowance_boundary
+    h_low = h_mean * lower_boundary
+    h_high = h_mean * upper_boundary
+    w_low = w_mean * lower_boundary
+    w_high = w_mean * upper_boundary
 
     occurrences = 0
     valid_sizes = {}
-    for _name, _size_list in sizes.items():
+    for _name, size_list in sizes.items():
 
-        for _dimension_object in _size_list:
-            if (h_low <= _dimension_object.h <= h_high) or \
-                    (w_low <= _dimension_object.w <= w_high):
+        for dimension_object in size_list:
+            if (h_low <= dimension_object.height <= h_high) or \
+                    (w_low <= dimension_object.width <= w_high):
                 occurrences += 1
                 # if size not in valid_sizes:
                 #     valid_sizes[size] = []
                 # name = "{}x{}_{}x{}".format(
                 #     _coords[0], _coords[1], _coords[2], _coords[3])
-                name = "{}x{}_{}x{}".format(
-                    *_dimension_object.dimensional_values())
+                x_coord, y_coord, width, height = dimension_object.dimensional_values()
+                name = f"{x_coord}x{y_coord}_{width}x{height}"
 
-                valid_sizes[name] = _dimension_object
+                valid_sizes[name] = dimension_object
 
-    # length = len(contours)
+    # length = len(detected_contour)
     # for i in sizes.values():
     #     length += len(i)
     # print("occurrences: {}/{} {}%".format(occurrences,
@@ -295,24 +289,19 @@ def getHeroContours(image: np.array, sizeAllowanceBoundary, display=None,
     return valid_sizes
 
 
-def getHeroes(image: np.array, sizeAllowanceBoundary: int=0.15,
-              maxHeroes: bool=True,
-              removeBG: bool=False,
-              si_adjustment: int=0.2,
-              row_eliminate: int=5,
-              blur_args: dict={}):
+def get_heroes(image: np.array,  blur_args: dict,
+               size_allowance_boundary: int = 0.15,
+               si_adjustment: int = 0.2,
+               row_eliminate: int = 5,
+               ) -> Tuple(HERO_DICT, MA.Matrix):
     """
     Parse a screenshot or image of an AFK arena hero roster into sub
         components that represent all the heroes in the image
 
     Args:
         image: image/screenshot of hero roster
-        sizeAllowanceBoundary: percentage that each 'contour' boundary must be
+        size_allowance_boundary: percentage that each 'contour' boundary must be
             within the average contour size
-        maxHeroes: flag that tells the function to experiment with multiple
-            preprocessing algorithms to find the maximum number of valid heroes
-        removeBG: flag to attempt to remove the background from each hero
-            returned
         si_adjustment: percent of the image dimensions to take on the left and
             top side of the image to ensure si30/40 capture during hero
             contour re-evaluation(False/None for no adjustment)
@@ -322,50 +311,52 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int=0.15,
         blur_args: keyword arguments for `processing.blur_image` method
 
     Return:
-        dictionary of subimages that represent all heroes from the passed in
-            'image'
+        [Tuple(dict, Ma.Matrix)]
+            (dict) of sub images detected from an 'image',
+            (Ma.Matrix) of positions images were detected in
     """
-    original_modifiable = image.copy()
-    original_unmodifiable = image.copy()
+
+    original_image_modifiable = image.copy()
+    original_image_unmodifiable = image.copy()
 
     hero_dict: HERO_DICT = {}
-    baseArgs = (original_modifiable, sizeAllowanceBoundary)
+    base_args = (original_image_modifiable, size_allowance_boundary)
     multi_valid: list[Dict[str, DO.DimensionsObject]] = []
 
     # if maxHeroes:
-    # multi_valid.append(getHeroContours(*baseArgs, dilate=True))
+    # multi_valid.append(get_hero_contours(*baseArgs, dilate=True))
     del blur_args["hsv_range"]
     hsv_range = [
         np.array([0, 0, 0]), np.array([179, 255, 192])]
-    multi_valid.append(getHeroContours(
-        *baseArgs, hsv_range=hsv_range, **blur_args))
+    multi_valid.append(get_hero_contours(
+        *base_args, hsv_range=hsv_range, **blur_args))
     # (hMin = 19 , sMin = 0, vMin = 36), (hMax = 179 , sMax = 255, vMax = 208)
     # hsv_range = [
     #     np.array([19, 0, 36]), np.array([179, 255, 208])]
-    # multi_valid.append(getHeroContours(
-    #     *baseArgs, hsv_range=hsv_range, **blur_args))
+    # multi_valid.append(get_hero_contours(
+    #     *base_args, hsv_range=hsv_range, **blur_args))
     # (hMin = 0 , sMin = 0, vMin = 74), (hMax = 27 , sMax = 253, vMax = 255)
-    baseArgs = (image.copy(), sizeAllowanceBoundary)
+    base_args = (image.copy(), size_allowance_boundary)
 
     # (RMin = 67 , GMin = 55, BMin = 31), (RMax = 255 , GMax = 223, BMax = 169)
     blur_args["reverse"] = True
 
     # rgb_range = [np.array([67, 55, 31]), np.array([255, 223, 169])]
-    # multi_valid.append(getHeroContours(
-    #     *baseArgs, rgb_range=rgb_range, **blur_args))
+    # multi_valid.append(get_hero_contours(
+    #     *base_args, rgb_range=rgb_range, **blur_args))
 
     hsv_range = [
         np.array([0, 0, 74]), np.array([27, 253, 255])]
-    multi_valid.append(getHeroContours(
-        *baseArgs, hsv_range=hsv_range, **blur_args))
+    multi_valid.append(get_hero_contours(
+        *base_args, hsv_range=hsv_range, **blur_args))
 
     hero_widths = []
     hero_heights = []
 
     for _heroes_list in multi_valid:
         for _object_name, _dimension_object in _heroes_list.items():
-            hero_widths.append(_dimension_object.w)
-            hero_heights.append(_dimension_object.h)
+            hero_widths.append(_dimension_object.width)
+            hero_heights.append(_dimension_object.height)
     hero_widths.sort()
     hero_heights.sort()
 
@@ -374,7 +365,7 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int=0.15,
 
     spacing = round((hero_w_median + hero_h_median)/10)
     image_height, image_width = image.shape[:2]
-    hero_matrix = MA.matrix(image_height, image_width, spacing=spacing)
+    hero_matrix = MA.Matrix(image_height, image_width, spacing=spacing)
     for _hero_list in multi_valid:
         for _object_name, _dimension_object in _hero_list.items():
 
@@ -383,38 +374,38 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int=0.15,
     hero_matrix.sort()
     hero_matrix.prune(threshold=row_eliminate)
 
-    for _row_index, _row in enumerate(hero_matrix):
-        # print("row({}) length: {}".format(_row_index, len(_row)))
-        for _object_index, _Row_item in enumerate(_row):
+    for _row_index, hero_row in enumerate(hero_matrix):
+        # print("row({}) length: {}".format(_row_index, len(hero_row)))
+        for _object_index, row_item in enumerate(hero_row):
 
-            x = _Row_item.dimensions.x
-            y = _Row_item.dimensions.y
+            x_coord = row_item.dimensions.x
+            y_coord = row_item.dimensions.y
 
-            x2 = _Row_item.dimensions.x2
-            y2 = _Row_item.dimensions.y2
+            x2_coord = row_item.dimensions.x2
+            y2_coord = row_item.dimensions.y2
 
-            _hero_name = _Row_item.name
+            _hero_name = row_item.name
 
-            ROI = original_unmodifiable[y:
-                                        y2,
-                                        x:
-                                        x2]
-            # load.display_image(ROI, display=True)
+            detected_hero = original_image_unmodifiable[y_coord:
+                                                        y2_coord,
+                                                        x_coord:
+                                                        x2_coord]
+            # load.display_image(detected_hero, display=True)
 
             if si_adjustment:
-                w = _Row_item.dimensions.w
-                h = _Row_item.dimensions.h
-                x_adjust = round(w * si_adjustment)
-                y_adjust = round(h * si_adjustment)
+                width = row_item.dimensions.width
+                height = row_item.dimensions.height
+                x_adjust = round(width * si_adjustment)
+                y_adjust = round(height * si_adjustment)
 
-                _new_x = max(round(x - x_adjust), 0)
-                _new_y = max(round(y - y_adjust), 0)
-                new_ROI = original_unmodifiable[_new_y:
-                                                y2,
-                                                _new_x:
-                                                x2]
-                modifiable_ROI = new_ROI.copy()
-                blurred = blur_image(modifiable_ROI, reverse=True, hsv_range=[
+                _new_x = max(round(x_coord - x_adjust), 0)
+                _new_y = max(round(y_coord - y_adjust), 0)
+                new_detected_hero = original_image_unmodifiable[_new_y:
+                                                                y2_coord,
+                                                                _new_x:
+                                                                x2_coord]
+                modifiable_detected_hero = new_detected_hero.copy()
+                blurred = blur_image(modifiable_detected_hero, reverse=True, hsv_range=[
                     np.array([4, 69, 83]), np.array([23, 255, 355])])
 
                 new_contours = cv2.findContours(
@@ -423,7 +414,8 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int=0.15,
                 # Get largest contour
                 new_contours = sorted(new_contours, key=cv2.contourArea,
                                       reverse=True)[0]
-                contour_x, contour_y, contour_w, contour_h = cv2.boundingRect(
+                (_contour_x, _contour_y,
+                 contour_w, contour_h) = cv2.boundingRect(
                     new_contours)
                 # if GV.DEBUG:
                 # new_contours = [new_contours]
@@ -432,87 +424,69 @@ def getHeroes(image: np.array, sizeAllowanceBoundary: int=0.15,
 
                 # (dimensions, name)
                 _temp_row_item = RI.RowItem(
-                    (x2-contour_w, y2-contour_h, contour_w, contour_h))
+                    (x2_coord-contour_w, y2_coord-contour_h,
+                     contour_w, contour_h))
 
-                _collision_item_id = _row.check_collision(
+                collision_item_id = hero_row.check_collision(
                     _temp_row_item, size_allowance_boundary=0.07,
                     avg_height=hero_matrix.get_avg_height(),
                     avg_width=hero_matrix.get_avg_width(),
                     avg_value_boundary=True)
-                if _collision_item_id != -1:
-                    _merged_row_item = _row.get(
-                        _collision_item_id, id_lookup=True)
-                    _hero_name = _merged_row_item.name
+                if collision_item_id != -1:
+                    merged_row_item = hero_row.get(
+                        collision_item_id, id_lookup=True)
+                    _hero_name = merged_row_item.name
 
                 w_border_offset = max(
-                    round(0.03 * _merged_row_item.dimensions.w), 2)
+                    round(0.03 * merged_row_item.dimensions.width), 2)
                 h_border_offset = max(
-                    round(0.03 * _merged_row_item.dimensions.h), 2)
-                _merged_row_item.dimensions.x = max(
-                    _merged_row_item.dimensions.x - w_border_offset, 0)
-                _merged_row_item.dimensions.y = max(
-                    _merged_row_item.dimensions.y - h_border_offset, 0)
+                    round(0.03 * merged_row_item.dimensions.height), 2)
+                merged_row_item.dimensions.x = max(
+                    merged_row_item.dimensions.x - w_border_offset, 0)
+                merged_row_item.dimensions.y = max(
+                    merged_row_item.dimensions.y - h_border_offset, 0)
 
-                # _merged_row_item.dimensions._display(GV.image_ss,
+                # merged_row_item.dimensions._display(GV.IMAGE_SS,
                 #                                      display=True)
 
-                ROI = original_unmodifiable[_merged_row_item.dimensions.y:
-                                            _merged_row_item.dimensions.y2,
-                                            _merged_row_item.dimensions.x:
-                                            _merged_row_item.dimensions.x2]
-                # load.display_image([ROI, new_ROI], display=True,
+                detected_hero = original_image_unmodifiable[
+                    merged_row_item.dimensions.y:
+                    merged_row_item.dimensions.y2,
+                    merged_row_item.dimensions.x:
+                    merged_row_item.dimensions.x2]
+                # load.display_image([detected_hero, new_ROI], display=True,
                 #                    multiple=True)
-                # ROI = new_ROI
+                # detected_hero = new_ROI
                 if GV.DEBUG:
-                    _merged_coords = _merged_row_item.dimensions.coords(
+                    _merged_coords = merged_row_item.dimensions.coords(
                         single=False)
-                    cv2.rectangle(GV.image_ss, _merged_coords[0],
+                    cv2.rectangle(GV.IMAGE_SS, _merged_coords[0],
                                   _merged_coords[1], (255, 0, 0), 2)
             hero_dict[_hero_name] = {}
             if GV.verbosity(1):
-                h, w = ROI.shape[:2]
-                _coords = _merged_row_item.dimensions.coords(single=False)
+                height, width = detected_hero.shape[:2]
+                _coords = merged_row_item.dimensions.coords(single=False)
                 cv2.rectangle(
-                    GV.image_ss, _coords[0], _coords[1], (0, 0, 0), 2)
+                    GV.IMAGE_SS, _coords[0], _coords[1], (0, 0, 0), 2)
             # if removeBG:
-            #     out, poly = remove_background(ROI)
+            #     out, poly = remove_background(detected_hero)
 
             #     heroes[_hero_name]["image"] = out
             #     heroes[_hero_name]["poly"] = poly
             # else:
             model_image_size = (416, 416)
-            ROI = cv2.resize(
-                ROI,
+            detected_hero = cv2.resize(
+                detected_hero,
                 model_image_size,
                 interpolation=cv2.INTER_CUBIC)
-            hero_dict[_hero_name]["image"] = ROI
+            hero_dict[_hero_name]["image"] = detected_hero
 
-            hero_dict[_hero_name]["object"] = _Row_item
+            hero_dict[_hero_name]["object"] = row_item
 
-        # columns = [_row.columns.find_column(_row_item) for _row_item in _row]
+        # columns = [hero_row.columns.find_column(_row_item) for _row_item in hero_row]
         # print(columns)
         # load.display_image([heroes[_row_item.name]["image"]
-        #                    for _row_item in _row], multiple=True,
+        #                    for _row_item in hero_row], multiple=True,
         #                    display=True)
 
     return hero_dict, hero_matrix
-
-
-if __name__ == "__main__":
-
-    imageDB = BD.get_db(enriched_db=True)
-
-    siTempPath = os.path.join(GV.si_path, "temp")
-
-    for imagePath in os.listdir(siTempPath):
-        rosterImage = cv2.imread(os.path.join(GV.si_path, "temp", imagePath))
-        heroes = pr.getHeroes(rosterImage)
-        # cropHeroes = load.crop_heroes(heroes)
-
-        for name, imageDict in heroes.items():
-            heroImage = imageDict["image"]
-
-            hero_info, _ = imageDB.search(heroImage)
-            # import matplotlib.pyplot as plt
-            # plt.imshow(heroImage)
-            # plt.show()

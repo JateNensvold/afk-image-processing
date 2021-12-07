@@ -1,5 +1,5 @@
-import collections
 import re
+import collections
 
 import cv2
 import numpy as np
@@ -134,8 +134,9 @@ class ImageSearch():
             of the closest matching image in the database
         """
         if crop_hero:
-            cropHeroes = load.crop_heroes([hero], 0.15, 0.08, 0.25, 0.2)
-            hero = cropHeroes[0]
+            cropped_heroes_list = load.crop_heroes(
+                [hero], 0.15, 0.08, 0.25, 0.2)
+            hero = cropped_heroes_list[0]
 
         _kp, des = self.extractor.detectAndCompute(hero, None)
         matches = self.matcher.knnMatch(np.array(des), k=2)
@@ -148,15 +149,14 @@ class ImageSearch():
             good_features = self.get_good_features(matches, ratio+0.05)
             ratio += 0.05
 
-        assert (len(good_features) >=
-                min_features), "Failed to find enough \"good\" features "\
-            "({}) from database to match a similar image. Expected at least" \
-            " ({}) good features to be found".format(
-                len(good_features), min_features)
+        assert (len(good_features) >= min_features), \
+            (f"Failed to find enough \"good\" features ({len(good_features)}) "
+             "from database to match a similar image. Expected at least "
+             f"({min_features}) good features to be found")
         # if len(good_features) < min_features:
         #     good_features = matches[0]
 
-        hero_result = self._searchResults(good_features)
+        hero_result = self._search_results(good_features)
         best_match_raw = hero_result[0]
         best_match_dict = best_match_raw[1]
         best_match_name = best_match_raw[0]
@@ -168,7 +168,7 @@ class ImageSearch():
 
         return (best_match_info, best_match_image)
 
-    def _searchResults(self, good_features: list):
+    def _search_results(self, good_features: list):
         """
         Organises good_feature matches by hero that each keypoint descriptor
             matched to

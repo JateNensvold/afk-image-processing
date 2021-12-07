@@ -5,14 +5,17 @@ import threading
 import pathlib
 import shlex
 
-from typing import Callable, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 import numpy
+import torch
+
+from detectron2.engine import DefaultPredictor
 
 import image_processing.helpers.load_images as load
 
 if TYPE_CHECKING:
-    import image_processing.database.imageDB as imageSearchDB
+    from image_processing.database.image_database import ImageSearch
 
 
 parser = argparse.ArgumentParser(description='AFK arena object extraction and '
@@ -36,20 +39,18 @@ parser.add_argument("-t", "--truth", help="Argument to pass in a truth value"
                     "to file being ran",
                     action="store_true")
 
-import torch
-from detectron2.engine import DefaultPredictor
 
 ARGS: argparse.Namespace = None
 TRUTH: bool = None
 DEBUG: bool = None
 REBUILD: bool = None
 PARALLEL: bool = None
-image_ss: numpy.ndarray = None
+IMAGE_SS: numpy.ndarray = None
 IMAGE_SS_NAME: str = None
 VERBOSE_LEVEL: int = None
 MODEL: torch.Tensor = None
 BORDER_MODEL: DefaultPredictor = None
-IMAGE_DB: "imageSearchDB.imageSearch" = None
+IMAGE_DB: "ImageSearch" = None
 
 # Stores cached function results
 CACHED = {}
@@ -80,7 +81,7 @@ def global_parse_args(arg_string: str = None):
     Args:
         arg_string (str, optional): string to parse into command line arguments. Defaults to None.
     """
-    global ARGS, TRUTH, DEBUG, REBUILD, PARALLEL, image_ss, IMAGE_SS_NAME, VERBOSE_LEVEL  # pylint: disable=global-statement
+    global ARGS, TRUTH, DEBUG, REBUILD, PARALLEL, IMAGE_SS, IMAGE_SS_NAME, VERBOSE_LEVEL  # pylint: disable=global-statement
     if arg_string is not None:
         parsed_args = shlex.split(arg_string)
     else:
@@ -93,7 +94,7 @@ def global_parse_args(arg_string: str = None):
     PARALLEL = ARGS.parallel
     VERBOSE_LEVEL = ARGS.verbose
 
-    image_ss = load.load_image(ARGS.image_path)
+    IMAGE_SS = load.load_image(ARGS.image_path)
     IMAGE_SS_NAME = os.path.basename(ARGS.image_path)
     reload_globals()
 
