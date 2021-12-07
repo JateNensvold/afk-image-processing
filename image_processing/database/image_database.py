@@ -1,7 +1,7 @@
-import cv2
 import collections
 import re
 
+import cv2
 import numpy as np
 
 import image_processing.globals as GV
@@ -9,7 +9,10 @@ import image_processing.load_images as load
 import image_processing.afk.hero_object as HO
 
 
-class imageSearch():
+FLANN_INDEX_KDTREE = 1
+
+
+class ImageSearch():
     """
     Wrapper around an in memory image database
 
@@ -17,21 +20,21 @@ class imageSearch():
         SIFT features
 
     Args:
-        lowesRatio: ratio to apply to all feature matches(0.0 - 1.0), higher
-            is less unique (https://stackoverflow.com/questions/51197091/
+        lowes_ratio: ratio to apply to all feature matches(0.0 - 1.0), higher
+            is less unique
+                (https://stackoverflow.com/questions/51197091/
                 how-does-the-lowes-ratio-test-work)
     """
 
-    def __init__(self, lowesRatio: int = 0.8):
-        self.ratio = lowesRatio
-        FLANN_INDEX_KDTREE = 1
+    def __init__(self, lowes_ratio: int = 0.8):
+        self.ratio = lowes_ratio
         index_param = {"algorithm": FLANN_INDEX_KDTREE, "trees": 5}
         search_param = {"checks": 50}
-        patchSize = 16
+        patch_size = 16
 
         self.matcher = cv2.FlannBasedMatcher(index_param, search_param)
         # self.matcher = cv2.BFMatcher(cv2.NORM_L1)
-        self.extractor = cv2.SIFT_create(edgeThreshold=patchSize)
+        self.extractor = cv2.SIFT_create(edgeThreshold=patch_size)
 
         # self.extractor = cv2.ORB_create(
         #     edgeThreshold=patchSize, patchSize=patchSize)
@@ -74,9 +77,9 @@ class imageSearch():
                 ratio
         """
         good_features = []
-        for m, n in matches:
-            if m.distance < ratio * n.distance:
-                good_features.append(m)
+        for best_match, second_best_match in matches:
+            if best_match.distance < ratio * second_best_match.distance:
+                good_features.append(best_match)
 
         return good_features
 
@@ -94,24 +97,23 @@ class imageSearch():
         """
         width, height = hero.shape[:2]
         hero = cv2.resize(hero, (height*3, width*3))
-        kp, des = self.extractor.detectAndCompute(hero, None)
+        _kp, des = self.extractor.detectAndCompute(hero, None)
 
         self.matcher.add([des])
 
-        cleanName = re.split(r"(-|_|\.)", hero_info.name.lower())
-        cleanName = cleanName[0]
+        name_regex_results = re.split(r"(-|_|\.)", hero_info.name.lower())
+        clean_name = name_regex_results[0]
         counter = len(self.names)
 
-        self.names[counter] = cleanName
-        if cleanName not in self.image_data:
-            self.image_data[cleanName] = {}
-        self.image_data[cleanName][counter] = hero
-        self.image_data[cleanName]["info"] = hero_info
+        self.names[counter] = clean_name
+        if clean_name not in self.image_data:
+            self.image_data[clean_name] = {}
+        self.image_data[clean_name][counter] = hero
+        self.image_data[clean_name]["info"] = hero_info
         if GV.VERBOSE_LEVEL >= 2:
-            print("Hero: {} Faction: {}".format(
-                hero_info.name, hero_info.faction))
+            print(f"Hero: {hero_info.name} Faction: {hero_info.faction}")
 
-    def search(self, hero: np.array, display: bool = False,
+    def search(self, hero: np.array,
                min_features: int = 5,
                crop_hero: bool = True):
         """
@@ -135,7 +137,7 @@ class imageSearch():
             cropHeroes = load.crop_heroes([hero], 0.15, 0.08, 0.25, 0.2)
             hero = cropHeroes[0]
 
-        kp, des = self.extractor.detectAndCompute(hero, None)
+        _kp, des = self.extractor.detectAndCompute(hero, None)
         matches = self.matcher.knnMatch(np.array(des), k=2)
 
         ratio = self.ratio
@@ -217,3 +219,25 @@ class imageSearch():
         output = sorted(
             heroes.items(), key=lambda hero: hero[1]["total"], reverse=True)
         return output
+
+
+def build_flann(image_list: list[HO.hero_object],
+                ratio: int = 0.8) -> "ImageSearch":
+    """
+    Build database of heroes to match to
+
+    Args:
+        image_list: list of (image(np.array), name(str), faction(str)) tuples
+            to build database from
+
+    Return:
+        An instance of ImageSearch() with image_list added to it with the
+            matcher trained on them
+    """
+    image_database = ImageSearch(lowes_ratio=ratio)
+    for _image_info_index, image_info in enumerate(image_list):
+
+        image_database.add_image(image_info, image_info.image)
+    image_database.matcher.train()
+
+    return image_database
