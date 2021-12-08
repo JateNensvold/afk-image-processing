@@ -1,12 +1,44 @@
+"""
+A module containing all functionality that is related to the Row Class
+
+The Row Class provides a wrapper around a list of RowItems so they can be
+interfaces like they were in a normal list while also benifiting from some
+extended functionality such as RowItem lookup by key values and other helper
+methods to interact with grouped RowItems
+"""
+from typing import TYPE_CHECKING
+
 import rtree
 import numpy as np
 
 import image_processing.globals as GV
 import image_processing.afk.roster.RowItem as RI
-import image_processing.afk.roster.ColumnObjects as CO
 
 
-class row():
+if TYPE_CHECKING:
+    import image_processing.afk.roster.column_objects as CO
+
+
+class RowIntersectionException(Exception):
+    """
+    Error to be raised when two RowItems have a collision
+    """
+
+
+class Row():
+    """
+    A class wrapper for a 1 dimensional series of objects
+
+    Raises:
+        StopIteration: When __next__ is called and the end of the series has
+            been reached
+        KeyError: When a
+        RowIntersectionException: [description]
+
+    Returns:
+        [type]: [description]
+    """
+    # pylint: disable=protected-access
 
     def __init__(self, columns: "CO.ColumnObjects"):
         """
@@ -27,9 +59,9 @@ class row():
         self.avg_width = 0
 
     def __str__(self):
-        return "({} ({}))".format(
-            self.head,
-            "".join([str(_row_item) for _row_item in self._row_items]))
+        return (
+            f"({self.head} "
+            f"({''.join([str(_row_item) for _row_item in self._row_items])}))")
 
     def __iter__(self):
         return self
@@ -43,7 +75,7 @@ class row():
             return self._row_items[self._idx - 1]
         except IndexError:
             self._idx = 0
-            raise StopIteration
+            raise StopIteration  # pylint: disable=raise-missing-from
 
     def __len__(self):
         return len(self._row_items)
@@ -72,13 +104,13 @@ class row():
                 return self._row_items_by_id[name]
             else:
                 return self._row_items_by_name[name]
-        except KeyError:
+        except KeyError as exception_handle:
             if not id_lookup:
                 for _row_item in self._row_items:
                     if name in _row_item.alias:
                         return self._row_items_by_name[_row_item.name]
-            raise KeyError("Key '{}' not found in row '{}'".format(
-                name, self.get_head()))
+            raise KeyError(f"Key '{name}' not found in row "
+                           f"'{self.get_head()}'") from exception_handle
 
     def __getitem__(self, index: int) -> RI.RowItem:
         """
@@ -106,7 +138,7 @@ class row():
         Return:
             avg height (float)
         """
-        output = [_row_item.dimensions.h for _row_item in self._row_items]
+        output = [_row_item.dimensions.height for _row_item in self._row_items]
         return np.mean(output)
 
     def _get_item_gap(self):
@@ -133,8 +165,15 @@ class row():
         else:
             return None
 
-    def get_average(self):
-        width_list = [_row_item.dimensions.w for _row_item in self._row_items]
+    def get_average(self) -> float:
+        """
+        Get average width of all RowItems stored within Row
+
+        Returns:
+            [float]: average width of RowItems
+        """
+        width_list = [
+            _row_item.dimensions.width for _row_item in self._row_items]
         return np.mean(width_list)
 
     def _add_average(self, new_num: int) -> int:
@@ -169,7 +208,7 @@ class row():
         """
         Adds a new RowItem to Row
         Args:
-            dimensions: x,y,w,h of object
+            dimensions: x,y,width,height of object
             name: identifier for row item, can be used for lookup later
             detect_collision: check for object overlap/collisions when
                 appending to row
@@ -178,32 +217,32 @@ class row():
 
             otherwise returns -1(int)
         """
-        _collision_status = -1
-        _temp_RowItem = RI.RowItem(dimensions, name)
+        collision_status = -1
+        temp_row_item = RI.RowItem(dimensions, name)
         if len(self._row_items) == 0:
-            self.head = _temp_RowItem.dimensions.y
+            self.head = temp_row_item.dimensions.y
         if detect_collision:
-            _collision_status = self.check_collision(_temp_RowItem)
+            collision_status = self.check_collision(temp_row_item)
 
             # If collision is successful, don't return\
-            if _collision_status != -1:
-                # output = _temp_RowItem.dimensions.overlap(
-                #     self._row_items_by_id[_collision_status].dimensions)
-                # print("collision", _collision_status,
-                #       output/_temp_RowItem.dimensions.size())
-                return _collision_status
-        _temp_id = id(_temp_RowItem)
-        self._row_items_by_name[name] = _temp_RowItem
-        self._row_items_by_id[_temp_id] = _temp_RowItem
+            if collision_status != -1:
+                # output = temp_row_item.dimensions.overlap(
+                #     self._row_items_by_id[collision_status].dimensions)
+                # print("collision", collision_status,
+                #       output/temp_row_item.dimensions.size())
+                return collision_status
+        temp_id = id(temp_row_item)
+        self._row_items_by_name[name] = temp_row_item
+        self._row_items_by_id[temp_id] = temp_row_item
 
-        # avg_width = self._add_average(_temp_RowItem.dimensions.w)
+        # avg_width = self._add_average(_temp_RowItem.dimensions.width)
         # self.avg_width = avg_width
-        self._row_items.append(_temp_RowItem)
+        self._row_items.append(temp_row_item)
 
-        self.rtree.insert(id(_temp_RowItem),
-                          _temp_RowItem.dimensions.coords())
-        self.columns.find_column(_temp_RowItem)
-        return _collision_status
+        self.rtree.insert(id(temp_row_item),
+                          temp_row_item.dimensions.coords())
+        self.columns.find_column(temp_row_item)
+        return collision_status
 
     def check_collision(self, new_row_item: RI.RowItem,
                         resolve_error: bool = True,
@@ -250,10 +289,10 @@ class row():
                                    collision_overlap,
                                    **dimension_object_kwargs)
 
-            raise Exception("More than one intersection occurred "
-                            "between {} and {}".format(
-                                new_row_item,
-                                [str(_i) for _i in _intersection_objects]))
+            raise RowIntersectionException(
+                "More than one intersection occurred "
+                f"between {new_row_item} and "
+                f"{[str(_i) for _i in _intersection_objects]}")
         else:
             # No intersection at all
             return -1
@@ -278,21 +317,20 @@ class row():
             dimensions.coords()
 
         old_coords = _collision_row_item.dimensions.coords()
-        # old_width = _collision_row_item.dimensions.w
+        # old_width = _collision_row_item.dimensions.width
 
         _collision_tuple = _collision_row_item.dimensions._overlap_percent(
             new_row_item.dimensions)
         if _collision_tuple[2] < collision_overlap:
             if GV.verbosity(1):
-                print("Collision overlap({}) was below collision"
-                      " threshold({}), returning collision ID with"
-                      " no update".format(
-                          _collision_tuple[2], collision_overlap))
+                print(f"Collision overlap({_collision_tuple[2]}) was below "
+                      f"collision threshold({collision_overlap}), returning "
+                      "collision ID with no update")
             return collision_item_id
 
         _collision_row_item.merge(new_row_item, **dimension_object_kwargs)
 
-        # new_width = _collision_row_item.dimensions.w
+        # new_width = _collision_row_item.dimensions.width
         if _collision_row_item.dimensions.coords() != old_coords:
             self.rtree.delete(collision_item_id,
                               _collision_item_coordinates)

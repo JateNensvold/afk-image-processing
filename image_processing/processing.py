@@ -1,3 +1,10 @@
+"""
+Module that contains most of the Screenshot/Roster parsing capabilities
+
+Used to split apart the raw image passed from the CLI to processable
+subsections that can be fed to the Models used to detect AFK Arena Hero
+Attributes
+"""
 import statistics
 
 from typing import Dict, Sequence, Tuple, Union
@@ -13,7 +20,7 @@ import numpy as np
 
 import image_processing.globals as GV
 import image_processing.load_images as load
-import image_processing.afk.roster.DimensionsObject as DO
+import image_processing.afk.roster.dimensions_object as DO
 import image_processing.afk.roster.matrix as MA
 import image_processing.afk.roster.RowItem as RI
 
@@ -293,7 +300,7 @@ def get_heroes(image: np.array,  blur_args: dict,
                size_allowance_boundary: int = 0.15,
                si_adjustment: int = 0.2,
                row_eliminate: int = 5,
-               ) -> Tuple(HERO_DICT, MA.Matrix):
+               ) -> Tuple[HERO_DICT, MA.Matrix]:
     """
     Parse a screenshot or image of an AFK arena hero roster into sub
         components that represent all the heroes in the image

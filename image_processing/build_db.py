@@ -1,5 +1,5 @@
 import os
-from pathlib import PurePath
+from pathlib import Path
 import time
 import pickle
 import typing
@@ -93,18 +93,18 @@ def build_database(enriched_db: bool = False) -> "ImageSearch":
 
 
 def load_database(
-        pickle_path: PurePath = GV.DATABASE_PICKLE_PATH) -> "ImageSearch":
+        pickle_path: Path = GV.DATABASE_PICKLE_PATH) -> "ImageSearch":
     """
     Load hero database from pickle file.
 
     Return:
         "ImageSearch" database object
     """
-    if os.path.exists(pickle_path):
+    if pickle_path.exists():
         if GV.verbosity(1):
             print("Loading database!")
         start_time = time.time()
-        with open(GV.DATABASE_PICKLE_PATH, 'rb') as handle:
+        with open(pickle_path, 'rb') as handle:
             image_db: "ImageSearch" = pickle.load(handle)
         end_time = time.time()
         if GV.verbosity(1):
@@ -145,3 +145,8 @@ def get_db(rebuild: bool = GV.REBUILD, enriched_db=True):
             image_db = build_database(enriched_db=enriched_db)
     GV.IMAGE_DB = image_db
     return image_db
+
+
+if __name__ == "__main__":
+    GV.VERBOSE_LEVEL = 1
+    get_db(rebuild=True, enriched_db=True)

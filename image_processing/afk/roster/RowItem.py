@@ -1,4 +1,4 @@
-import image_processing.afk.roster.DimensionsObject as DO
+import image_processing.afk.roster.dimensions_object as DO
 
 
 class RowItem():

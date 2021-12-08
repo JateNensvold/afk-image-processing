@@ -1,11 +1,19 @@
+"""
+A Module that contains all features and implementations that pertain to the
+Matrix Class
+
+The Matrix Class is used to Store a List of Row instance that in turn stores a
+list of RowItems essentially making the Matrix class a 2 Dimensional Array that
+provides extra features when interacting with groups of Row Objects
+"""
 from typing import Callable
 
 import numpy as np
 
 import image_processing.globals as GV
-import image_processing.afk.roster.ColumnObjects as CO
+import image_processing.afk.roster.column_objects as CO
 import image_processing.afk.roster.row as RO
-import image_processing.afk.roster.DimensionsObject as DO
+import image_processing.afk.roster.dimensions_object as DO
 
 
 class Matrix():
@@ -29,7 +37,7 @@ class Matrix():
         self.source_width = source_width
         self.spacing = spacing
         self._heads: dict[int, Callable[[], int]] = {}
-        self._row_list: list[RO.row] = []
+        self._row_list: list[RO.Row] = []
         self._idx = 0
         self.columns = CO.ColumnObjects(self)
 
@@ -110,7 +118,7 @@ class Matrix():
         Add a new entry into the matrix, either creating a new row or adding to
             an existing row depending on `spacing` settings and distance.
         Args:
-            dimensions: x,y,w,h of object
+            dimensions: x,y,width,height of object
             name: identifier for object
             detect_collision: check for object overlap/collisions when
                 appending to row
@@ -134,7 +142,7 @@ class Matrix():
             self._row_list[_row_index].append(
                 dimensions, name, detect_collision=detect_collision)
         else:
-            _temp_row = RO.row(self.columns)
+            _temp_row = RO.Row(self.columns)
             _temp_row.append(dimensions, name,
                              detect_collision=detect_collision)
             self._heads[len(self._row_list)] = _temp_row.get_head
@@ -349,17 +357,17 @@ class Matrix():
                     # print("y2 edit", _row_item.dimensions.y2, _row_bottom)
                     _row_item.dimensions.y2 = _row_bottom
 
-                if (abs(_row_item.dimensions.w
+                if (abs(_row_item.dimensions.width
                         - adjusted_avg_w) > (width_diff) or
-                        _row_item.dimensions.w -
-                        _row_item.dimensions.h > width_diff):
+                        _row_item.dimensions.width -
+                        _row_item.dimensions.height > width_diff):
                     _row_item.dimensions.x = max(
                         _row_item.dimensions.x, _column.x)
                     _row_item.dimensions.x2 = _row_item.dimensions.x + avg_w
-                if (abs(_row_item.dimensions.h
+                if (abs(_row_item.dimensions.height
                         - adjusted_avg_h) > height_diff or
-                        _row_item.dimensions.h -
-                        _row_item.dimensions.w > height_diff):
+                        _row_item.dimensions.height -
+                        _row_item.dimensions.width > height_diff):
                     _row_item.dimensions.y = max(
                         _row_item.dimensions.y,
                         (_row_bottom - avg_h))

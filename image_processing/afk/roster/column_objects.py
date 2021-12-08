@@ -1,20 +1,36 @@
-import rtree
+"""
+A module that wraps all features and code for the ColumnObjects class
+
+The ColumnObjects is used to wrap a list of DimensionObjects allowing for
+interactions with groupings of DimensionObjects and track how each
+DimensionObject is related to others in the grouping
+"""
+from typing import TYPE_CHECKING
+
 import cv2
+import rtree
 import numpy as np
 
 import image_processing.load_images as load
-import image_processing.afk.roster.DimensionsObject as DO
-import image_processing.afk.roster.matrix as MA
-import image_processing.afk.roster.RowItem as RI
+import image_processing.afk.roster.dimensions_object as DO
+
+if TYPE_CHECKING:
+    import image_processing.afk.roster.matrix as MA
+    import image_processing.afk.roster.RowItem as RI
 
 
 class ColumnObjects:
+    """
+    Class Wrapper around a list of dimensional Column Objects
+        (i.e list of 1 dimensional objects) used to detect overlap between
+        Column Objects
+    """
 
     def __str__(self):
 
         return "".join([str((_c.x, _c.x2)) for _c in self.columns])
 
-    def __init__(self, matrix: "MA.matrix"):
+    def __init__(self, matrix: "MA.Matrix"):
         """
         Create a Columns object used to track the different columns in a
             'image_processing.stamina.matrix'
@@ -70,7 +86,7 @@ class ColumnObjects:
         #   break
         _temp_dimensions_object = DO.DimensionsObject(
             (row_item.dimensions.x, 0,
-             row_item.dimensions.w, self.matrix.source_height))
+             row_item.dimensions.width, self.matrix.source_height))
         _intersections_list = list(self.column_rtree.intersection(
             _temp_dimensions_object.coords()))
 
@@ -135,9 +151,9 @@ class ColumnObjects:
                 #       len(self.columns))
                 return index
             else:
-                raise Exception("More than one intersection occurred "
-                                "between {} and {}".format(
-                                    row_item, intersection_indexes))
+                raise Exception(
+                    "More than one intersection occurred "
+                    f"between {row_item} and {intersection_indexes}")
 
     def balance(self):
         """
@@ -151,7 +167,8 @@ class ColumnObjects:
         max_x = self.columns[-1].x2
 
         columns_width = max_x - min_x
-        avg_column_width = sum([_i.w for _i in self.columns])/len(self.columns)
+        avg_column_width = sum(
+            [_i.width for _i in self.columns])/len(self.columns)
         num_columns = int(columns_width/avg_column_width)
         adjusted_avg_column_w = avg_column_width * 0.75
         last_min = self.columns[0].x2
@@ -188,14 +205,14 @@ class ColumnObjects:
         #             self.y2,
         #             self.x:
         #             self.x2]
-        ROI_list = []
+        image_list = []
         for _d in self.columns:
-            ROI = image[_d.y:_d.y2, _d.x:_d.x2]
-            h, w = ROI.shape[:2]
-            cv2.rectangle(ROI, (0, 0), (w, h), (0, 0, 0), 2)
-            ROI_list.append(ROI)
-        print(len(ROI_list))
-        load.display_image(ROI_list, *args, multiple=True, ** kwargs)
+            sized_image = image[_d.y:_d.y2, _d.x:_d.x2]
+            height, width = sized_image.shape[:2]
+            cv2.rectangle(sized_image, (0, 0), (width, height), (0, 0, 0), 2)
+            image_list.append(sized_image)
+        print(len(image_list))
+        load.display_image(image_list, *args, multiple=True, ** kwargs)
 
     def _sort(self):
         """
@@ -237,7 +254,7 @@ class ColumnObjects:
         """
         column_dimensions_object = DO.DimensionsObject(
             (row_item.dimensions.x, 0,
-             row_item.dimensions.w, self.matrix.source_height))
+             row_item.dimensions.width, self.matrix.source_height))
         new_column_id = id(column_dimensions_object)
         if resize:
             _intersections_list = list(self.column_rtree.intersection(

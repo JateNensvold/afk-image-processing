@@ -1,5 +1,6 @@
 import re
 import collections
+from typing import Any, Dict, TypedDict, Union
 
 import cv2
 import numpy as np
@@ -10,6 +11,15 @@ import image_processing.afk.hero_object as HO
 
 
 FLANN_INDEX_KDTREE = 1
+
+image_search_dict = TypedDict("image_search_dict", {
+                              "images": Dict[str,
+                                             Dict[Union[str, int],
+                                                  Union[np.ndarray,
+                                                  HO.hero_object]]],
+                              "names": Dict[int, str],
+                              "descriptors": Any,
+                              "matcher": cv2.FlannBasedMatcher})
 
 
 class ImageSearch():
@@ -41,16 +51,30 @@ class ImageSearch():
         self.image_data = {}
         self.names = {}
 
-    def __getstate__(self):
+    def __getstate__(self) -> image_search_dict:
+        """
+        Serialize the ImageSearch Object into a savable state
 
-        file_name = GV.DATABASE_FLAN_PATH
+        Returns:
+            [dict]: Dictionary with "images", "names", "matcher" and
+                "descriptors" as keys
+        """
+
+        file_name = str(GV.DATABASE_FLAN_PATH)
         self.matcher.write(file_name)
-        return {"images": self.image_data, "names": self.names,
+        return {"images": self.image_data,
+                "names": self.names,
                 "matcher": file_name,
                 "descriptors": self.matcher.getTrainDescriptors()
                 }
 
-    def __setstate__(self, incoming):
+    def __setstate__(self, incoming: image_search_dict):
+        """
+        Deserialize the ImageSearch Object into a savable state
+
+        Args:
+            incoming ([image_search_dict]): [description]
+        """
         self.matcher: cv2.FlannBasedMatcher
         self.__init__()
         self.image_data = incoming["images"]
@@ -58,7 +82,6 @@ class ImageSearch():
         descriptors = incoming["descriptors"]
         for des in descriptors:
             self.matcher.add([des])
-
         self.matcher.read(incoming["matcher"])
 
     def get_good_features(self, matches: list, ratio: int):
@@ -83,7 +106,7 @@ class ImageSearch():
 
         return good_features
 
-    def add_image(self, hero_info: HO.hero_object, hero: np.array):
+    def add_image(self, hero_info: HO.hero_object, hero: np.ndarray):
         """
         Adds image features to image database and stores image
             in internal list for later use

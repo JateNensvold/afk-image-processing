@@ -1,14 +1,21 @@
+"""
+Module that wraps the top level API for the AFK Arena Roster Screenshot and
+Hero processing
+
+Calling detect_features assumes that the image processing environment has been
+initialized and will parse apart an image and feed it into the various models
+needed to detect AFK Arena Hero Features
+"""
 from typing import Tuple, Dict
 import warnings
+
 import cv2
+import numpy as np
 
 import image_processing.globals as GV
 import image_processing.processing as processing
 import image_processing.models.model_attributes as MA
 import image_processing.afk.roster.matrix as matrix
-
-
-import numpy as np
 
 warnings.filterwarnings("ignore")
 FONT = cv2.FONT_HERSHEY_SIMPLEX
@@ -228,7 +235,7 @@ def detect_attributes(pseudo_name: str, image_info: processing.HERO_INFO):
 #     json_dict = get_si(GV.IMAGE_SS, detect_faction=False)
 #     if GV.verbosity(1):
 #         end_time = time.time()
-#         print(f"Detected features in: {end_time - start_time}")
+        # print(f"Detected features in: {end_time - start_time}")
 #         load.display_image(GV.IMAGE_SS, display=True)
 #     if GV.VERBOSE_LEVEL == 0:
 #         print(f"{{\"heroes\": {json_dict[GV.IMAGE_SS_NAME]['heroes']}}}")

@@ -1,3 +1,14 @@
+"""
+File that stores the Config options for the AFK-image-processing package
+When imported will automatically provide a CLI through python argparse for
+initializing all the required information for running AFK Arena Roster
+Image Detection
+
+Raises:
+    EnvironmentError: Raised when the environment variable BUILD_TYPE is not
+        set to a valid build option or not set at all. Refer to the Readme.MD
+        at the root of this Repo to find valid BUILD_TYPE's
+"""
 import os
 import argparse
 import logging
@@ -47,7 +58,7 @@ REBUILD: bool = None
 PARALLEL: bool = None
 IMAGE_SS: numpy.ndarray = None
 IMAGE_SS_NAME: str = None
-VERBOSE_LEVEL: int = None
+VERBOSE_LEVEL: int = 0
 MODEL: torch.Tensor = None
 BORDER_MODEL: DefaultPredictor = None
 IMAGE_DB: "ImageSearch" = None
@@ -55,6 +66,9 @@ IMAGE_DB: "ImageSearch" = None
 # Stores cached function results
 CACHED = {}
 THREADS: dict[str, threading.Thread] = {}
+
+ZMQ_HOST = "127.0.0.1"
+ZMQ_PORT = "5555"
 
 
 def verbosity(verbose_level: int) -> bool:
@@ -84,6 +98,7 @@ def global_parse_args(arg_string: str = None):
     global ARGS, TRUTH, DEBUG, REBUILD, PARALLEL, IMAGE_SS, IMAGE_SS_NAME, VERBOSE_LEVEL  # pylint: disable=global-statement
     if arg_string is not None:
         parsed_args = shlex.split(arg_string)
+        print(parsed_args)
     else:
         parsed_args = None
     ARGS = parser.parse_args(args=parsed_args)
@@ -108,17 +123,15 @@ def reload_globals():
         logging.disable(logging.INFO)
 
 
-global_parse_args()
-
 try:
     ARCHITECTURE = os.environ["BUILD_TYPE"]
     ARCHITECTURE_TYPES = {"CUDA": "cuda",
                           "CPU": "cpu"}
     ARCHITECTURE = ARCHITECTURE_TYPES[ARCHITECTURE]
-except KeyError as e:
+except KeyError as exception_handle:
     raise EnvironmentError(
         "Environment variable 'BUILD_TYPE' not set. Please set BUILD_TYPE to a"
-        " valid option listed in the README") from e
+        " valid option listed in the README.MD") from exception_handle
 
 
 ############################
@@ -128,38 +141,45 @@ except KeyError as e:
 ############################
 
 # Paths to Image Processing Modules/Directories
-GLOBALS_DIR = pathlib.PurePath(os.path.join(os.path.dirname(
+GLOBALS_DIR = pathlib.Path(os.path.join(os.path.dirname(
     os.path.abspath(__file__))))
-DATABASE_DIR = pathlib.PurePath(os.path.join(GLOBALS_DIR, "database"))
+DATABASE_DIR = pathlib.Path(os.path.join(GLOBALS_DIR, "database"))
 AFK_DIR = os.path.join(GLOBALS_DIR, "afk")
 MODELS_DIR = os.path.join(GLOBALS_DIR, "models")
 
 # Paths to data inside the Database directory
-HERO_ICON_DIR = pathlib.PurePath(os.path.join(DATABASE_DIR, "hero_icon"))
-DATABASE_FLAN_PATH = pathlib.PurePath(
+HERO_ICON_DIR = pathlib.Path(os.path.join(DATABASE_DIR, "hero_icon"))
+DATABASE_FLAN_PATH = pathlib.Path(
     os.path.join(DATABASE_DIR, "IMAGE_DB.flann"))
-DATABASE_PICKLE_PATH = pathlib.PurePath(
+DATABASE_PICKLE_PATH = pathlib.Path(
     os.path.join(DATABASE_DIR, 'IMAGE_DB.pickle'))
-DATABASE_LEVELS_DATA_DIR = pathlib.PurePath(
+DATABASE_LEVELS_DATA_DIR = pathlib.Path(
     os.path.join(DATABASE_DIR, "levels"))
-DATABASE_STAMINA_TEMPLATES_DIR = pathlib.PurePath(
+DATABASE_STAMINA_TEMPLATES_DIR = pathlib.Path(
     os.path.join(DATABASE_DIR, "stamina_templates"))
-DATABASE_HERO_VALIDATION_DIR = pathlib.PurePath(
+DATABASE_HERO_VALIDATION_DIR = pathlib.Path(
     os.path.join(DATABASE_DIR, "temp_images"))
 SEGMENTED_HEROES_DIR = os.path.join(
     DATABASE_HERO_VALIDATION_DIR, "segmented_heroes")
 
 # Tests directory
-TESTS_DIR = os.path.join(GLOBALS_DIR, os.path.pardir, "tests")
+TESTS_DIR = pathlib.Path(os.path.join(
+    GLOBALS_DIR, os.path.pardir, "tests"))
 
 # AFK/SI Module paths
-SI_DIR = os.path.join(AFK_DIR, "si")
-SI_TEMPLATE_DIR = os.path.join(SI_DIR, "signature_item_icon")
+SI_DIR = pathlib.Path(os.path.join(AFK_DIR, "si"))
+SI_TEMPLATE_DIR = pathlib.Path(os.path.join(SI_DIR, "signature_item_icon"))
 
 # AFK/Fi Module paths
-FI_DIR = os.path.join(AFK_DIR, "fi")
-FI_TEMPLATE_DIR = os.path.join(FI_DIR, "furniture_icons")
+FI_DIR = pathlib.Path(os.path.join(AFK_DIR, "fi"))
+FI_TEMPLATE_DIR = pathlib.Path(os.path.join(FI_DIR, "furniture_icons"))
 
 # Yolov5(Stars, FI) and Detectron(Ascension) Model output
-FINAL_MODELS_DIR = os.path.join(MODELS_DIR, "final_models")
-YOLOV5_DIR = os.path.join(MODELS_DIR, "yolov5")
+FINAL_MODELS_DIR = pathlib.Path(os.path.join(MODELS_DIR, "final_models"))
+YOLOV5_DIR = pathlib.Path(os.path.join(MODELS_DIR, "yolov5"))
+
+# Path to Detectron2 and Yolov5 models
+FI_SI_STARS_MODEL_PATH = pathlib.Path(
+    os.path.join(FINAL_MODELS_DIR, "fi_si_star_model.pt"))
+ASCENSION_BORDER_MODEL_PATH = pathlib.Path(
+    os.path.join(FINAL_MODELS_DIR, "ascension_border.pt"))

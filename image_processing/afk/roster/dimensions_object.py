@@ -1,3 +1,10 @@
+"""
+A module that wraps all features and code for the DimensionObject class
+
+The DimensionsObject is used to wrap/interact with objects that existing in
+space at a certain location, storing information such as the x and y
+coordinates as well as the width and height of the object
+"""
 from typing import Union
 
 import numpy as np
@@ -29,8 +36,7 @@ class DimensionsObject:
             full_number: flag to enforce all 'DimensionObject' values to
                 be whole numbers during its lifetime
         """
-        self.full_number = full_number
-        # self.__dict__["full_number"] = full_number
+        self.__dict__["full_number"] = full_number
         self.x = dimensions[0]
         self.y = dimensions[1]
         self.width = dimensions[2]
@@ -66,7 +72,7 @@ class DimensionsObject:
             will also be automatically updated
         """
         if isinstance(value, (int, float)):
-            if self.full_number:
+            if self.full_number: #pylint: disable=no-member
                 self.__dict__[name] = int(value)
             if (name in ["x", "x2"] and "x" in self.__dict__ and "x2" in
                     self.__dict__):

@@ -92,7 +92,7 @@ def load_fi_model(model_path: str):
     start_time = time.time()
 
     fi_si_model = torch.hub.load(
-        GV.YOLOV5_DIR,
+        str(GV.YOLOV5_DIR),
         "custom",
         model_path,
         source="local")

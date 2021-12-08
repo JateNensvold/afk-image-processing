@@ -88,8 +88,11 @@ To print more detailed details about feature recognition
 To rebuild the character recognition database from source images run the feature detection command with the -r flag
 Ex. 
 ``` python
-python3 image_processing/afk/si/get_si.py ... -r
+python3 image_processing/build_db.py 
 ```
+or 
+
+
 ### Debug mode
 To see feature detection at various checkpoints as well as verbose output run the program with -d
 Ex. 
