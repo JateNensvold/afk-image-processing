@@ -184,4 +184,4 @@ YOLOV5_DIR = pathlib.Path(os.path.join(MODELS_DIR, "yolov5"))
 FI_SI_STARS_MODEL_PATH = pathlib.Path(
     os.path.join(FINAL_MODELS_DIR, "fi_si_star_model.pt"))
 ASCENSION_BORDER_MODEL_PATH = pathlib.Path(
-    os.path.join(FINAL_MODELS_DIR, "ascension_border.pt"))
+    os.path.join(FINAL_MODELS_DIR, "hero_ascension_model.pt"))

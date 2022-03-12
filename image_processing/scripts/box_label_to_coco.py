@@ -3,6 +3,7 @@ import json
 import os
 import pathlib
 import datetime
+import argparse
 
 from io import BytesIO
 from typing import Dict, Any
@@ -152,7 +153,7 @@ def convert_format(input_data: dict, output_dir: str = "./", license_index: int 
     for _file_name in output_dir_files:
         if "coco_data" in _file_name:
             coco_dir_count += 1
-    coco_dir = os.path.join(output_dir, "coco_data" + coco_dir_count)
+    coco_dir = os.path.join(output_dir, "coco_data" + str(coco_dir_count))
 
     pathlib.Path(coco_dir).mkdir(parents=True, exist_ok=True)
     coco_train = os.path.join(coco_dir, "train")
@@ -230,10 +231,15 @@ def convert_format(input_data: dict, output_dir: str = "./", license_index: int 
 
 
 if __name__ == "__main__":
-    # Replace the following line with the json file downloaded from boxlabel
-    #   dataset
-    json_path = os.path.join(
-        GV.GLOBALS_DIR, "export-2021-08-06T03_10_14.517Z.json")
-    with open(json_path, "r", encoding="utf-8") as json_file:
+    parser = argparse.ArgumentParser(
+        description="Convert boxlabel file into COCO formated files")
+    parser.add_argument("box_label_file", type=str,
+                        help="Path to box Label JSON file")
+    parser.add_argument(
+        "output_dir", type=str,
+        help="Path to directory where coco files will get generated at")
+    args = parser.parse_args()
+    boxlabel_json_path = args.box_label_file
+    with open(boxlabel_json_path, "r", encoding="utf-8") as json_file:
         box_label_data = json.loads(json_file.read())
-    convert_format(box_label_data)
+    convert_format(box_label_data, output_dir=args.output_dir)

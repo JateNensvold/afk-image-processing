@@ -1,0 +1,1 @@
+# This folder is the location that training models will be placed into after running training scripts

@@ -1,0 +1,1 @@
+# This folder exists to place models (used to detect Hero Ascension) after they were trained by detectron2

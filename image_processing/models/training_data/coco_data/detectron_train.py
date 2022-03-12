@@ -2,6 +2,7 @@
 import os
 import cv2
 import glob
+import argparse
 
 import image_processing.globals as GV
 
@@ -67,7 +68,17 @@ def find_json(folder_path: str):
 
 
 if __name__ == "__main__":
-    base_path = os.path.join(BASE_PATH, "coco_data")
+
+    parser = argparse.ArgumentParser(
+        description="Train a detectron2 model on coco data")
+    parser.add_argument("coco_folder_path", type=str,
+                        help="Path to directory containing coco_data")
+    parser.add_argument("model_output_dir", type=str,
+                        help="Path to directory where model output will be exported to")
+
+    args = parser.parse_args()
+
+    base_path = args.coco_folder_path
     train_path = os.path.join(base_path, "train")
     val_path = os.path.join(base_path, "valid")
     test_path = os.path.join(base_path, "test")
@@ -80,6 +91,8 @@ if __name__ == "__main__":
                             os.path.join(test_path, "coco.json"), test_path)
 
     cfg = get_cfg()
+    # Set output directory to models folder
+    cfg.OUTPUT_DIR = parser.model_output_dir
     set_config(cfg, "border_dataset_train", "border_dataset_val", 12)
     train_model(cfg)
     # test_model(cfg)
