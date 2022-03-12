@@ -19,10 +19,12 @@ RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86
    ls -la && \ 
    rm cuda-repo-ubuntu2004-11-3-local_11.3.0-465.19.01-1_amd64.deb
 
-# Install Dotnet to run Archmage Bot
-RUN wget https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
-   dpkg -i packages-microsoft-prod.deb  && \
-   rm packages-microsoft-prod.deb 
+
+
+# # Install Dotnet to run Archmage Bot
+# RUN wget https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
+#    dpkg -i packages-microsoft-prod.deb  && \
+#    rm packages-microsoft-prod.deb 
 
 RUN apt-get update && \
    apt-get install --no-install-recommends --yes \
@@ -31,8 +33,10 @@ RUN apt-get update && \
    libxext6 \
    vim \
    cuda-toolkit-11-3 \
-   apt-transport-https \
-   dotnet-sdk-6.0 && \
+   apt-transport-https && \
+   # postgresql \
+   # postgresql-contrib \
+   # dotnet-sdk-6.0 && \
    rm -rf /var/lib/apt/lists/* 
 
 RUN python3 -m pip install --upgrade pip

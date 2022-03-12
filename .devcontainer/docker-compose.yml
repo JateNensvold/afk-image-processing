@@ -5,6 +5,7 @@ services:
     build: 
       context: ..
       dockerfile: .devcontainer/Dockerfile
+      network: host
       args: 
         BUILD_TYPE: "CUDA"
         VARIANT: 3.9
@@ -15,9 +16,13 @@ services:
       - /var/run/docker.sock:/var/run/docker-host.sock 
       # Update this to wherever you want VS Code to mount the folder of your project
       - ..:/workspace/afk-image-processing:cached
-      - /home/nate/projects/archmage-bot:/workspace/archmage-bot:cached
+      - ${HOME}/projects/archmage-bot:/workspace/archmage-bot:cached
+      - ${HOME}/projects/albedo-bot:/workspace/albedo-bot:cached
+      - ${HOME}/.ssh:/home/vscode/.ssh
+      # - $SSH_AUTH_SOCK:/ssh-agent # Forward local machine SSH key to docker
 
-
+    # environment:
+    #     SSH_AUTH_SOCK: /ssh-agent
     networks:
       - devnet
     # Overrides default command so things don't shut down after the process ends.
@@ -36,20 +41,41 @@ services:
     #   - seccomp:unconfined
 
     # Uncomment the next line to use a non-root user for all processes.
-    # user: vscode
+    user: vscode
 
     # Use "forwardPorts" in **devcontainer.json** to forward an app port locally. 
     # (Adding the "ports" property to this file will not forward from a Codespace.)
-  redis:
-    build:
-      context: ./redis
-      dockerfile: Dockerfile
-    command: redis-server
+  # redis:
+  #   build:
+  #     context: ./redis
+  #     dockerfile: Dockerfile
+  #     network: host
+  #   command: redis-server
+  #   networks:
+  #     devnet:
+  #       ipv4_address: 172.20.0.6
+  #   ports:
+  #    - "6379:6379"
+  db:
+    image: postgres:latest
+    restart: unless-stopped
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: postgres
+
     networks:
       devnet:
-        ipv4_address: 172.20.0.6
-    ports:
-     - "6379:6379"
+        ipv4_address: 172.20.0.7
+
+    # Add "forwardPorts": ["5432"] to **devcontainer.json** to forward PostgreSQL locally.
+    # (Adding the "ports" property to this file will not forward from a Codespace.)
+
+volumes:
+  postgres-data:
+
 networks:
   devnet:
     ipam:

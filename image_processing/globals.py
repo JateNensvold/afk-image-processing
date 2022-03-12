@@ -62,6 +62,8 @@ VERBOSE_LEVEL: int = 0
 MODEL: torch.Tensor = None
 BORDER_MODEL: DefaultPredictor = None
 IMAGE_DB: "ImageSearch" = None
+ROOT_DIR: pathlib.Path = pathlib.Path(os.path.dirname(__file__)).absolute()
+
 
 # Stores cached function results
 CACHED = {}

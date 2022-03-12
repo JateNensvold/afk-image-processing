@@ -10,3 +10,4 @@ opencv-python
 pyyaml
 tqdm
 pyzmq
+-e ..

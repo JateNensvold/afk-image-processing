@@ -47,7 +47,7 @@
 		"ms-python.python",
 		"ms-python.vscode-pylance",
 		"streetsidesoftware.code-spell-checker",
-		"ms-dotnettools.csharp",
+		// "ms-dotnettools.csharp",
 		"ms-azuretools.vscode-docker",
 		"njpwerner.autodocstring"
 	],
@@ -66,5 +66,5 @@
 		"docker-from-docker": "latest",
 		"git": "os-provided"
 	},
-	"postStartCommand": "pip3 install -e /workspace/afk-image-processing"
+	"postStartCommand": "pip3 install -r /workspace/albedo-bot/requirements.txt"
 }

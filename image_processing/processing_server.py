@@ -7,6 +7,7 @@ and already loaded
 """
 import json
 import time
+from numpy import byte
 
 import zmq
 
@@ -22,14 +23,17 @@ if __name__ == "__main__":
     socket.bind(f"tcp://*:{GV.ZMQ_PORT}")
 
     GV.VERBOSE_LEVEL = 1
-    LM.load_files(str(GV.FI_SI_STARS_MODEL_PATH), str(GV.ASCENSION_BORDER_MODEL_PATH))
+    LM.load_files(str(GV.FI_SI_STARS_MODEL_PATH),
+                  str(GV.ASCENSION_BORDER_MODEL_PATH))
     while True:
         #  Wait for next request from client
-        message = socket.recv_string()
+        byte_message: byte = socket.recv()
+        message = byte_message.decode("utf-8")
         GV.global_parse_args(message)
         start_time = time.time()
         json_dict = detect.detect_features(GV.IMAGE_SS, detect_faction=False)
         print(f"Detected features in: {time.time() - start_time}")
 
         #  Send reply back to client
-        socket.send_json(json.dumps(json_dict))
+        socket.send(json.dumps(json_dict).encode("utf-8"))
+        # socket.send_json(json.dumps(json_dict))
