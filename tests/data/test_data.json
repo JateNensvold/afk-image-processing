@@ -1,5 +1,5 @@
 {
-    "/home/nate/projects/afk-image-processing/tests/data/images/image0.png": {
+    "tests/data/images/image0.png": {
         "rows": 2,
         "columns": 5,
         "heroes": [
@@ -12,14 +12,14 @@
             ],
             [
                 "kren 000",
-                "raspen 000",
+                "respen 000",
                 "peggy 000",
                 "food 000",
                 "food 000"
             ]
         ]
     },
-    "/home/nate/projects/afk-image-processing/tests/data/images/image1.png": {
+    "tests/data/images/image1.png": {
         "rows": 2,
         "columns": 5,
         "heroes": [
@@ -39,7 +39,7 @@
             ]
         ]
     },
-    "/home/nate/projects/afk-image-processing/tests/data/images/image2.png": {
+    "tests/data/images/image2.png": {
         "rows": 7,
         "columns": 1,
         "heroes": [
@@ -48,7 +48,7 @@
                 "mortas 000",
                 "thane 000",
                 "rigby 000",
-                "raspen 003"
+                "respen 003"
             ],
             [
                 "fawkes 100",
@@ -87,7 +87,7 @@
             ]
         ]
     },
-    "/home/nate/projects/afk-image-processing/tests/data/images/image3.png": {
+    "tests/data/images/image3.png": {
         "rows": 6,
         "columns": 5,
         "heroes": [
@@ -135,14 +135,14 @@
             ]
         ]
     },
-    "/home/nate/projects/afk-image-processing/tests/data/images/image4.png": {
+    "tests/data/images/image4.png": {
         "rows": 6,
         "columns": 5,
         "heroes": [
             [
                 "eironn 309",
                 "lyca 209",
-                "farael 309",
+                "ferael 309",
                 "ezio 209",
                 "gwyneth 203"
             ],
@@ -183,7 +183,7 @@
             ]
         ]
     },
-    "/home/nate/projects/afk-image-processing/tests/data/images/image5.png": {
+    "tests/data/images/image5.png": {
         "rows": 3,
         "columns": 5,
         "heroes": [
@@ -210,7 +210,7 @@
             ]
         ]
     },
-    "/home/nate/projects/afk-image-processing/tests/data/images/image6.png": {
+    "tests/data/images/image6.png": {
         "rows": 6,
         "columns": 5,
         "heroes": [
@@ -258,7 +258,7 @@
             ]
         ]
     },
-    "/home/nate/projects/afk-image-processing/tests/data/images/image7.png": {
+    "tests/data/images/image7.png": {
         "rows": 6,
         "columns": 5,
         "heroes": [
@@ -267,7 +267,7 @@
                 "eironn 309",
                 "ezio 209",
                 "drez 209",
-                "farael 303"
+                "ferael 303"
             ],
             [
                 "vurk 203",
@@ -306,7 +306,7 @@
             ]
         ]
     },
-    "/home/nate/projects/afk-image-processing/tests/data/images/image8.png": {
+    "tests/data/images/image8.png": {
         "rows": 6,
         "columns": 5,
         "heroes": [
@@ -349,12 +349,12 @@
                 "mehira 000",
                 "mortas 000",
                 "thane 200",
-                "raspen 103",
+                "respen 103",
                 "ukyo 000"
             ]
         ]
     },
-    "/home/nate/projects/afk-image-processing/tests/data/images/image9.png": {
+    "tests/data/images/image9.png": {
         "rows": 7,
         "columns": 5,
         "heroes": [
@@ -405,11 +405,11 @@
                 "lorsan 100",
                 "ukyo 100",
                 "izold 309",
-                "farael 309"
+                "ferael 309"
             ]
         ]
     },
-    "/home/nate/projects/afk-image-processing/tests/data/images/image10.png": {
+    "tests/data/images/image10.png": {
         "rows": 6,
         "columns": 5,
         "heroes": [
@@ -424,7 +424,7 @@
                 "rigby 100",
                 "satrana 100",
                 "solise 100",
-                "raspen 100",
+                "respen 100",
                 "eluard 100"
             ],
             [
@@ -444,7 +444,7 @@
             [
                 "rosaline 000",
                 "alna 000",
-                "raspen 000",
+                "respen 000",
                 "orthros 000",
                 "khasos 000"
             ],
@@ -457,7 +457,7 @@
             ]
         ]
     },
-    "/home/nate/projects/afk-image-processing/tests/data/images/image11.png": {
+    "tests/data/images/image11.png": {
         "rows": 7,
         "columns": 5,
         "heroes": [
@@ -512,7 +512,7 @@
             ]
         ]
     },
-    "/home/nate/projects/afk-image-processing/tests/data/images/image12.png": {
+    "tests/data/images/image12.png": {
         "rows": 7,
         "columns": 5,
         "heroes": [
@@ -524,7 +524,7 @@
                 "izold 309"
             ],
             [
-                "farael 309",
+                "ferael 309",
                 "rowan 303",
                 "nakoruru 203",
                 "gwyneth 203",
@@ -567,7 +567,7 @@
             ]
         ]
     },
-    "/home/nate/projects/afk-image-processing/tests/data/images/image13.png": {
+    "tests/data/images/image13.png": {
         "rows": 7,
         "columns": 5,
         "heroes": [
@@ -622,7 +622,7 @@
             ]
         ]
     },
-    "/home/nate/projects/afk-image-processing/tests/data/images/image14.png": {
+    "tests/data/images/image14.png": {
         "rows": 7,
         "columns": 5,
         "heroes": [
@@ -631,7 +631,7 @@
                 "belinda 100",
                 "queen 100",
                 "dastan 100",
-                "raspen 309"
+                "respen 309"
             ],
             [
                 "fawkes 100",
@@ -677,7 +677,7 @@
             ]
         ]
     },
-    "/home/nate/projects/afk-image-processing/tests/data/images/image15.png": {
+    "tests/data/images/image15.png": {
         "rows": 7,
         "columns": 5,
         "heroes": [
@@ -720,7 +720,7 @@
                 "ukyo 000",
                 "solise 000",
                 "kaz 000",
-                "raspen 000",
+                "respen 000",
                 "thane 000"
             ],
             [
@@ -732,14 +732,14 @@
             ]
         ]
     },
-    "/home/nate/projects/afk-image-processing/tests/data/images/image16.png": {
+    "tests/data/images/image16.png": {
         "rows": 7,
         "columns": 5,
         "heroes": [
             [
                 "gwyneth 309",
                 "grezhul 309",
-                "farael 309",
+                "ferael 309",
                 "lyca 209",
                 "ainz 309"
             ],
@@ -787,7 +787,7 @@
             ]
         ]
     },
-    "/home/nate/projects/afk-image-processing/tests/data/images/image17.png": {
+    "tests/data/images/image17.png": {
         "rows": 7,
         "columns": 5,
         "heroes": [
@@ -796,7 +796,7 @@
                 "lyca 203",
                 "ezio 209",
                 "albedo 303",
-                "farael 303"
+                "ferael 303"
             ],
             [
                 "tasi 203",
@@ -822,7 +822,7 @@
             [
                 "eironn 309",
                 "drez 203",
-                "raspen 203",
+                "respen 203",
                 "talene 309",
                 "nakoruru 203"
             ],
@@ -842,7 +842,7 @@
             ]
         ]
     },
-    "/home/nate/projects/afk-image-processing/tests/data/images/image18.png": {
+    "tests/data/images/image18.png": {
         "rows": 8,
         "columns": 5,
         "heroes": [
@@ -869,7 +869,7 @@
             ],
             [
                 "theowyn 103",
-                "raspen 103",
+                "respen 103",
                 "rigby 100",
                 "queen 100",
                 "eluard 100"
@@ -904,7 +904,7 @@
             ]
         ]
     },
-    "/home/nate/projects/afk-image-processing/tests/data/images/image19.png": {
+    "tests/data/images/image19.png": {
         "rows": 6,
         "columns": 5,
         "heroes": [
@@ -952,7 +952,7 @@
             ]
         ]
     },
-    "/home/nate/projects/afk-image-processing/tests/data/images/image20.png": {
+    "tests/data/images/image20.png": {
         "rows": 7,
         "columns": 5,
         "heroes": [
@@ -999,7 +999,7 @@
                 "skriath 103"
             ],
             [
-                "farael 309",
+                "ferael 309",
                 "drez 203",
                 "silas 303",
                 "talene 303",
@@ -1007,7 +1007,7 @@
             ]
         ]
     },
-    "/home/nate/projects/afk-image-processing/tests/data/images/image21.png": {
+    "tests/data/images/image21.png": {
         "rows": 7,
         "columns": 5,
         "heroes": [
@@ -1019,7 +1019,7 @@
                 "queen 000"
             ],
             [
-                "raspen 100",
+                "respen 100",
                 "gorvo 203",
                 "lucius 000",
                 "raku 309",
@@ -1062,7 +1062,7 @@
             ]
         ]
     },
-    "/home/nate/projects/afk-image-processing/tests/data/images/image22.png": {
+    "tests/data/images/image22.png": {
         "rows": 7,
         "columns": 5,
         "heroes": [
@@ -1071,7 +1071,7 @@
                 "lyca 209",
                 "ainz 309",
                 "grezhul 209",
-                "farael 309"
+                "ferael 309"
             ],
             [
                 "ezio 209",
@@ -1117,7 +1117,7 @@
             ]
         ]
     },
-    "/home/nate/projects/afk-image-processing/tests/data/images/image23.png": {
+    "tests/data/images/image23.png": {
         "rows": 7,
         "columns": 5,
         "heroes": [
@@ -1143,7 +1143,7 @@
                 "talene 309"
             ],
             [
-                "raspen 203",
+                "respen 203",
                 "skriath 003",
                 "lucretia 309",
                 "ezizh 309",
@@ -1172,7 +1172,7 @@
             ]
         ]
     },
-    "/home/nate/projects/afk-image-processing/tests/data/images/image24.png": {
+    "tests/data/images/image24.png": {
         "rows": 7,
         "columns": 5,
         "heroes": [
@@ -1186,7 +1186,7 @@
             [
                 "eironn 309",
                 "albedo 309",
-                "farael 309",
+                "ferael 309",
                 "rowan 303",
                 "saurus 303"
             ],
@@ -1227,7 +1227,7 @@
             ]
         ]
     },
-    "/home/nate/projects/afk-image-processing/tests/data/images/partial_row.png": {
+    "tests/data/images/partial_row.png": {
         "rows": 7,
         "columns": 5,
         "heroes": [
@@ -1249,8 +1249,8 @@
                 "safiya 000",
                 "belinda 000",
                 "lorsan 000",
-                "skriath 000",
-                "food 000"
+                "flora 000",
+                "skriath 000"
             ],
             [
                 "food 000",
@@ -1261,7 +1261,7 @@
             ],
             [
                 "food 000",
-                "food 0003",
+                "food 000",
                 "food 000",
                 "food 000",
                 "food 000"

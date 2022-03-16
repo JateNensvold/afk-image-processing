@@ -27,7 +27,7 @@ import image_processing.afk.roster.RowItem as RI
 # pylint: disable=invalid-name
 HERO_INFO = Dict[str, Union[np.ndarray, RI.RowItem]]
 # pylint: disable=invalid-name
-HERO_DICT = Dict[str, Union[HERO_INFO, Dict]]
+HERO_DICT = Dict[str, "SegmentResult"]
 
 
 def blur_image(image: np.ndarray, dilate=False,
@@ -296,7 +296,29 @@ def get_hero_contours(image: np.array, size_allowance_boundary: float,
     return valid_sizes
 
 
-def get_heroes(image: np.array,  blur_args: dict,
+class SegmentResult:
+    """
+    class with info describing the location of a segmented image that was
+        detected from a larger image the roster_image
+
+        Ex. A Hero Portrait from a Hero Roster in AFK Arena
+    """
+
+    def __init__(self, segment_name: str, segment_image: np.ndarray,
+                 segment_location: RI.RowItem):
+        """_summary_
+
+        Args:
+            segment_name (str): _description_
+            segment_image (np.ndarray): _description_
+            segment_location (RI.RowItem): _description_
+        """
+        self.name = segment_name
+        self.image = segment_image
+        self.segment_location = segment_location
+
+
+def get_heroes(image: np.ndarray,  blur_args: dict,
                size_allowance_boundary: int = 0.15,
                si_adjustment: int = 0.2,
                row_eliminate: int = 5,
@@ -318,8 +340,8 @@ def get_heroes(image: np.array,  blur_args: dict,
         blur_args: keyword arguments for `processing.blur_image` method
 
     Return:
-        [Tuple(dict, Ma.Matrix)]
-            (dict) of sub images detected from an 'image',
+        [Tuple(HERO_DICT, Ma.Matrix)]
+            (HERO_DICT) of hero portraits segmented from a hero roster,
             (Ma.Matrix) of positions images were detected in
     """
 
@@ -393,11 +415,11 @@ def get_heroes(image: np.array,  blur_args: dict,
 
             _hero_name = row_item.name
 
-            detected_hero = original_image_unmodifiable[y_coord:
-                                                        y2_coord,
-                                                        x_coord:
-                                                        x2_coord]
-            # load.display_image(detected_hero, display=True)
+            segmented_image = original_image_unmodifiable[y_coord:
+                                                          y2_coord,
+                                                          x_coord:
+                                                          x2_coord]
+            # load.display_image(segmented_hero, display=True)
 
             if si_adjustment:
                 width = row_item.dimensions.width
@@ -407,12 +429,12 @@ def get_heroes(image: np.array,  blur_args: dict,
 
                 _new_x = max(round(x_coord - x_adjust), 0)
                 _new_y = max(round(y_coord - y_adjust), 0)
-                new_detected_hero = original_image_unmodifiable[_new_y:
-                                                                y2_coord,
-                                                                _new_x:
-                                                                x2_coord]
-                modifiable_detected_hero = new_detected_hero.copy()
-                blurred = blur_image(modifiable_detected_hero, reverse=True, hsv_range=[
+                segmented_image_copy = original_image_unmodifiable[_new_y:
+                                                                   y2_coord,
+                                                                   _new_x:
+                                                                   x2_coord]
+                modifiable_segmented_image = segmented_image_copy.copy()
+                blurred = blur_image(modifiable_segmented_image, reverse=True, hsv_range=[
                     np.array([4, 69, 83]), np.array([23, 255, 355])])
 
                 new_contours = cv2.findContours(
@@ -456,14 +478,14 @@ def get_heroes(image: np.array,  blur_args: dict,
                 # merged_row_item.dimensions._display(GV.IMAGE_SS,
                 #                                      display=True)
 
-                detected_hero = original_image_unmodifiable[
+                segmented_image = original_image_unmodifiable[
                     merged_row_item.dimensions.y:
                     merged_row_item.dimensions.y2,
                     merged_row_item.dimensions.x:
                     merged_row_item.dimensions.x2]
-                # load.display_image([detected_hero, new_ROI], display=True,
+                # load.display_image([segmented_image, new_ROI], display=True,
                 #                    multiple=True)
-                # detected_hero = new_ROI
+                # segmented_image = new_ROI
                 if GV.DEBUG:
                     _merged_coords = merged_row_item.dimensions.coords(
                         single=False)
@@ -471,24 +493,22 @@ def get_heroes(image: np.array,  blur_args: dict,
                                   _merged_coords[1], (255, 0, 0), 2)
             hero_dict[_hero_name] = {}
             if GV.verbosity(1):
-                height, width = detected_hero.shape[:2]
+                height, width = segmented_image.shape[:2]
                 _coords = merged_row_item.dimensions.coords(single=False)
                 cv2.rectangle(
                     GV.IMAGE_SS, _coords[0], _coords[1], (0, 0, 0), 2)
             # if removeBG:
-            #     out, poly = remove_background(detected_hero)
+            #     out, poly = remove_background(segmented_image)
 
             #     heroes[_hero_name]["image"] = out
             #     heroes[_hero_name]["poly"] = poly
             # else:
             model_image_size = (416, 416)
-            detected_hero = cv2.resize(
-                detected_hero,
+            segmented_image = cv2.resize(
+                segmented_image,
                 model_image_size,
                 interpolation=cv2.INTER_CUBIC)
-            hero_dict[_hero_name]["image"] = detected_hero
-
-            hero_dict[_hero_name]["object"] = row_item
+            hero_dict[_hero_name] = SegmentResult(_hero_name, segmented_image, row_item)
 
         # columns = [hero_row.columns.find_column(_row_item) for _row_item in hero_row]
         # print(columns)

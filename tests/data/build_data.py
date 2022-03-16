@@ -1,13 +1,13 @@
-import cv2
 import os
 import random
 import time
 import json
 import shutil
 
+import cv2
 import numpy as np
 
-import image_processing.afk.si.get_si as si
+import image_processing.afk.detect_image_attributes as detect
 import image_processing.build_db as BD
 
 
@@ -25,24 +25,22 @@ except ImportError:
 HERO_SELECTION_RATIO = 0.05
 
 
-def generate_data(json_dict: dict, image_name: str, image: np.array, imageDB,
+def generate_data(image_name: str, image: np.array,
                   debug_raw=True):
 
-    print("Starting processing {}".format(image_name))
+    print(f"Starting processing {image_name}")
 
     start_time = time.time()
-    output_dict = si.get_si(
-        image, image_name, imageDB=imageDB, debug_raw=debug_raw)
-    json_dict[image_name] = output_dict[image_name]
+    output_dict = detect.detect_features(
+        image, debug_raw=debug_raw)
     end_time = time.time()
-    print("Image: {} Elapsed: {}".format(image_name, end_time - start_time))
-    return json_dict
+    print(f"Image: {image_name} Elapsed: {end_time - start_time}")
+    return output_dict
 
 
 if __name__ == "__main__":
     files = os.listdir(SOURCE_DIR)
 
-    imageDB = BD.get_db(enriched_db=True)
     sizes = []
 
     for _file in files:
@@ -67,7 +65,7 @@ if __name__ == "__main__":
         _file_name = _image_tuple[1]
         new_image_name = os.path.join(
             CUR_DIR, "images", "image{}.png".format(_index))
-        json_data = generate_data(json_dict, new_image_name, _image, imageDB)
+        json_data = generate_data(json_dict, new_image_name, _image)
         print(new_image_name)
         shutil.copy(_file_name, new_image_name)
         # json_data[_file_name]["path"] = new_image_name

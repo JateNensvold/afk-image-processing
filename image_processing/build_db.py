@@ -9,7 +9,7 @@ import dill
 
 import image_processing.globals as GV
 import image_processing.load_images as load
-import image_processing.afk.hero_object as HO
+import image_processing.afk.hero.hero_data as HO
 from image_processing.database.image_database import build_flann
 
 
@@ -66,13 +66,13 @@ def build_database(enriched_db: bool = False) -> "ImageSearch":
             for hero_path in _hero_paths:
                 if not os.path.exists(hero_path):
                     raise FileNotFoundError(hero_path)
-                hero = cv2.imread(hero_path)
-                if hero is None:
+                hero_image = cv2.imread(hero_path)
+                if hero_image is None:
                     raise FileNotFoundError(
-                        f"Hero not found: {hero_path}")
+                        f"Hero Image not found: {hero_path}")
 
-                base_images.append(HO.hero_object(
-                    _hero_name, _faction, hero))
+                base_images.append(HO.HeroImage(
+                    _hero_name, hero_image))
 
     image_db: "ImageSearch" = build_flann(base_images)
 

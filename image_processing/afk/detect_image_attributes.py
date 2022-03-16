@@ -6,26 +6,28 @@ Calling detect_features assumes that the image processing environment has been
 initialized and will parse apart an image and feed it into the various models
 needed to detect AFK Arena Hero Features
 """
-from typing import Tuple, Dict
-import warnings
-
 import cv2
 import numpy as np
+from typing import List
+import warnings
 
 import image_processing.globals as GV
-import image_processing.processing as processing
-import image_processing.models.model_attributes as MA
-import image_processing.afk.roster.matrix as matrix
+from image_processing.processing import get_heroes, SegmentResult
+from image_processing.models.model_attributes import (
+    ASCENSION_STAR_LABELS, BORDER_MODEL_LABELS, FI_LABELS, ModelResult,
+    SI_LABELS)
+from image_processing.afk.roster.matrix import Matrix
+from image_processing.afk.hero.hero_data import (
+    DetectedHeroData, HeroImage, RosterData)
 
+# Silence Module loading warnings from pytofrch
 warnings.filterwarnings("ignore")
 FONT = cv2.FONT_HERSHEY_SIMPLEX
 COLOR = (255, 255, 0)
-
 THICKNESS = 2
 
 
-def detect_features(roster_image: np.ndarray, debug_raw: bool = None,
-                    detect_faction: bool = False):
+def detect_features(roster_image: np.ndarray, debug_raw: bool = None):
     """
     Detect AFK Arena heroes from a roster screenshot and for each hero detect
         "FI", "SI", "Ascension", and "hero Name"
@@ -34,8 +36,6 @@ def detect_features(roster_image: np.ndarray, debug_raw: bool = None,
 
         debug_raw: flag to add raw values for SI, FI and Ascension detection
             to return dictionary
-        detect_faction: flag to add faction output to hero feature list in the
-            return dict
     """
 
     if debug_raw is None:
@@ -49,185 +49,153 @@ def detect_features(roster_image: np.ndarray, debug_raw: bool = None,
 
     hsv_range = [lower_hsv, upper_hsv]
     blur_args = {"hsv_range": hsv_range}
-    heroes_dict, hero_matrix = processing.get_heroes(
-        roster_image, blur_args)
+    # Run HSV segmentation on hero roster to get hero
+    segment_dict, segment_matrix = get_heroes(roster_image, blur_args)
 
-    reduced_values: list[Tuple[str, Dict]] = []
-    for pseudo_name, image_info in heroes_dict.items():
-        # detect features with models
-        results = detect_attributes(
-            pseudo_name, image_info)
-        reduced_values.append((pseudo_name, results))
+    detected_hero_data: list[DetectedHeroData] = []
+    for _pseudo_segment_name, segment_info in segment_dict.items():
+        hero_image_info, _template_image = GV.IMAGE_DB.search(
+            segment_info.image)
 
-    return_dict = {}
+        detected_hero_result = detect_attributes(hero_image_info, segment_info)
+        detected_hero_data.append(detected_hero_result)
 
-    hero_count = 0
-
-    for pseudo_name, hero_data in reduced_values:
-        hero_info, _template_image = GV.IMAGE_DB.search(
-            heroes_dict[pseudo_name]["image"])
-        # Add detected hero name to start of result list
-        hero_data["result"].insert(0, hero_info.name)
-
-        # Add faction to end of result list if
-        if detect_faction:
-            hero_data["result"].append(hero_info.faction)
-
-        return_dict[pseudo_name] = hero_data
+       # When debuggin Draw hero info on image
         if GV.verbosity(1):
-            label_hero_feature(roster_image, hero_data, hero_matrix)
+            label_hero_feature(roster_image, segment_info,
+                               detected_hero_result, segment_matrix)
 
-        hero_count += 1
-
-    json_dict = {}
-
-    json_dict["rows"] = len(hero_matrix)
-    json_dict["columns"] = max([len(_row) for _row in hero_matrix])
-
-    json_dict["heroes"] = []
-
-    for _row in hero_matrix:
-        temp_list = []
-        for _row_item in _row:
-            hero_data = return_dict[_row_item.name]["result"]
-            if hero_data[0].lower() != "food":
-                if debug_raw:
-                    _raw_score = return_dict[_row_item.name]["score"]
-                    hero_data.append(_raw_score)
-                temp_list.append(hero_data)
-        json_dict["heroes"].append(temp_list)
-
-    return json_dict
+    return RosterData(detected_hero_data, segment_matrix).json()
 
 
 def label_hero_feature(roster_image: np.ndarray,
-                       hero_data: processing.HERO_INFO,
-                       hero_matrix: matrix.Matrix):
+                       segment_info: SegmentResult,
+                       detected_hero_result: DetectedHeroData,
+                       hero_matrix: Matrix):
     """
     Write hero data such as FI/SI/Stars onto the roster image those attributes
         were derived from
 
     Args:
-        roster_image (np.ndarray): roster/image of heroes
-        hero_data (processing.HERO_INFO): data about a hero on the
-            'roster_image'
+        roster_image (np.ndarray): roster of heroes
+        segment_info (processing.SegmentResult): class with info describing the
+            location of the detected_hero_results in the roster_image
+        detected_hero_result (DetectedHeroData): data about a hero in the
+            'roster_image' generated by 'detect_attributes'
         hero_matrix (matrix.matrix): matrix of hero data in the same horizontal
             and vertical order they were detected in
     """
 
     font_scale = 0.5 * (hero_matrix.get_avg_width()/100)
 
-    result = str(hero_data["result"])
-    coords = hero_data["coords"]
+    result = str(detected_hero_result)
+
+    hero_pixel_coordinate = (segment_info.segment_location.dimensions.x,
+                             segment_info.segment_location.dimensions.y)
     text_size = cv2.getTextSize(result, FONT, font_scale, THICKNESS)
     height = text_size[0][1]
-    coords = (coords[0], coords[1] + round(5 * height))
+    bottom_left_coordinate = (hero_pixel_coordinate[0],
+                              hero_pixel_coordinate[1] + round(5 * height))
 
-    cv2.putText(
-        roster_image, result, coords, FONT, abs(
-            font_scale), COLOR, THICKNESS,
-        cv2.LINE_AA)
+    cv2.putText(roster_image, result, bottom_left_coordinate, FONT,
+                abs(font_scale), COLOR, THICKNESS, cv2.LINE_AA)
 
 
-def detect_attributes(pseudo_name: str, image_info: processing.HERO_INFO):
+def detect_attributes(hero_image_info: HeroImage, segment_info: SegmentResult):
     """
     Detect hero features such as FI, SI, Stars and ascension level using'
         custom trained yolov5 and detectron2 image recognition models
 
     Args:
-        pseudo_name (str): name generated for hero during matrix detection
-        image_info (processing.HERO_INFO): dictionary of hero information
-            including image to be passed to model
+        hero_image_info (HeroImage): info about the HeroImage that was detected
+            from image database
+        segment_info (processing.SegmentResult): class with info describing the
+            location of the detected_hero_results in the roster_image
     Returns:
         [type]: [description]
     """
 
-    return_dict = {}
+    test_img = segment_info.image[..., ::-1]
+    # pylint: disable=not-callable
+    raw_model_results = GV.FI_SI_STAR_MODEL(
+        [test_img], size=416)
 
-    test_img = image_info["image"]
-    test_img = test_img[..., ::-1]
-    results = GV.MODEL([test_img], size=416)  # pylint: disable=not-callable
+    labeled_model_results = raw_model_results.pandas().xyxy[0]
+    detected_furniture = labeled_model_results.loc[
+        labeled_model_results['class'].isin(FI_LABELS.keys())]
 
-    results_array = results.pandas().xyxy[0]
-    fi_filtered_results = results_array.loc[results_array['class'].isin(
-        MA.FI_LABELS.keys())]
+    detected_ascension_stars = labeled_model_results.loc[
+        labeled_model_results['class'].isin(ASCENSION_STAR_LABELS.keys())]
 
-    star_filtered_results = results_array.loc[results_array['class'].isin(
-        MA.ASCENSION_STAR_LABELS.keys())]
+    detected_signature_items = labeled_model_results.loc[
+        labeled_model_results['class'].isin(SI_LABELS.keys())]
 
-    si_filtered_results = results_array.loc[results_array['class'].isin(
-        MA.SI_LABELS.keys())]
+    furniture_result = ModelResult("0", 0)
 
-    if len(fi_filtered_results) > 0:
-        fi_final_results = fi_filtered_results.sort_values(
+    if len(detected_furniture) > 0:
+        best_furniture_match = detected_furniture.sort_values(
             "confidence").iloc[0]
-        best_fi = MA.FI_LABELS[fi_final_results["class"]]
+        best_furniture_label = FI_LABELS[best_furniture_match["class"]]
 
-        fi_scores = {best_fi:
-                     fi_final_results["confidence"]}
-        if fi_final_results["confidence"] < 0.85:
-            best_fi = "0"
-            fi_scores = {best_fi: 1.0}
-    else:
-        best_fi = "0"
-        fi_scores = {best_fi: 1.0}
-    star = False
-    if len(star_filtered_results) > 0:
-        final_star_results = star_filtered_results.sort_values(
+        if best_furniture_match["confidence"] >= 0.85:
+            furniture_result = ModelResult(
+                best_furniture_label, best_furniture_match["confidence"])
+
+    ascension_result = ModelResult("E", 0)
+
+    if len(detected_ascension_stars) > 0:
+        best_ascension_stars_match = detected_ascension_stars.sort_values(
             "confidence", ascending=False).iloc[0]
-        best_ascension = MA.ASCENSION_STAR_LABELS[final_star_results["class"]]
+        best_ascension_stars_label = ASCENSION_STAR_LABELS[
+            best_ascension_stars_match["class"]]
 
-        ascension_scores = {best_ascension:
-                            final_star_results["confidence"]}
-        if final_star_results["confidence"] > 0.75:
-            star = True
+        ascension_result = ModelResult(
+            best_ascension_stars_label, best_ascension_stars_match["confidence"])
 
-    if len(si_filtered_results) > 0:
-        final_si_results = si_filtered_results.sort_values(
+    signature_item_result = ModelResult("0", 0)
+
+    if len(detected_signature_items) > 0:
+        best_signature_item_match = detected_signature_items.sort_values(
             "confidence", ascending=False).iloc[0]
-        best_si = MA.SI_LABELS[final_si_results["class"]]
+        best_signature_item_label = SI_LABELS[best_signature_item_match["class"]]
 
-        si_scores = {best_si:
-                     final_si_results["confidence"]}
-        if final_si_results["confidence"] < 0.85:
-            best_si = "0"
-            si_scores = {best_si: 1.0}
-    else:
-        best_si = "0"
-        si_scores = {best_si: 1.0}
-    if not star:
+        if best_signature_item_match["confidence"] >= 0.85:
+            signature_item_result = ModelResult(
+                best_signature_item_label, best_signature_item_match["confidence"])
+
+    engraving_result = ModelResult("0", 0)
+
+    if ascension_result.score > 0.75:
         # pylint: disable=not-callable
-        raw_border_results = GV.BORDER_MODEL(
+        raw_detected_ascension_borders = GV.ASCENSION_BORDER_MODEL(
             test_img)
-        border_results = raw_border_results["instances"]
+        detected_ascension_borders = raw_detected_ascension_borders["instances"]
 
-        classes = border_results.pred_classes.cpu().tolist()
+        ascension_border_labels = detected_ascension_borders.pred_classes.cpu().tolist()
+        ascension_border_scores = detected_ascension_borders.scores.cpu().tolist()
 
-        scores = border_results.scores.cpu().tolist()
-        class_list = list(zip([MA.BORDER_MODEL_LABELS[class_num]
-                          for class_num in classes], scores))
-        if len(class_list) > 0:
-            best_class = class_list[0]
-            best_ascension = best_class[0]
-            ascension_scores = {best_ascension: best_class[1]}
-        else:
-            best_ascension = "E"
-            ascension_scores = {best_ascension: 1.0}
+        ascension_border_results: List[ModelResult] = []
 
-    coords = (image_info["object"].dimensions.x,
-              image_info["object"].dimensions.y)
-    detection_results = [best_si, best_fi, best_ascension]
+        for ascension_border_index, ascension_border_class_label in enumerate(ascension_border_labels):
+            ascension_border_score = ascension_border_scores[ascension_border_index]
+            ascension_border_result = ModelResult(BORDER_MODEL_LABELS[ascension_border_class_label],
+                                                  ascension_border_score)
+            ascension_border_results.append(ascension_border_result)
 
-    return_dict["score"] = {}
-    return_dict["score"]["si"] = si_scores
-    return_dict["score"]["fi"] = fi_scores
-    return_dict["score"]["ascension"] = ascension_scores
+        ascension_border_results.sort(
+            key=lambda model_result: model_result.score)
 
-    return_dict["result"] = detection_results
-    if GV.verbosity(1):
-        return_dict["pseudo_name"] = pseudo_name
-    return_dict["coords"] = coords
-    return return_dict
+        if len(ascension_border_results) > 0:
+            best_ascension_border = ascension_border_results[0]
+            ascension_result = best_ascension_border
+    else:
+        # TODO detect engravings here
+        pass
+
+    hero_data = DetectedHeroData(hero_image_info.name, signature_item_result,
+                                 furniture_result, ascension_result,
+                                 engraving_result, segment_info.image)
+    return hero_data
 
 
 # if __name__ == "__main__":
@@ -235,7 +203,7 @@ def detect_attributes(pseudo_name: str, image_info: processing.HERO_INFO):
 #     json_dict = get_si(GV.IMAGE_SS, detect_faction=False)
 #     if GV.verbosity(1):
 #         end_time = time.time()
-        # print(f"Detected features in: {end_time - start_time}")
+    # print(f"Detected features in: {end_time - start_time}")
 #         load.display_image(GV.IMAGE_SS, display=True)
 #     if GV.VERBOSE_LEVEL == 0:
 #         print(f"{{\"heroes\": {json_dict[GV.IMAGE_SS_NAME]['heroes']}}}")

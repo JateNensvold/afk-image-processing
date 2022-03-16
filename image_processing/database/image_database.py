@@ -7,7 +7,7 @@ import numpy as np
 
 import image_processing.globals as GV
 import image_processing.load_images as load
-import image_processing.afk.hero_object as HO
+import image_processing.afk.hero.hero_data as HeroData
 
 
 FLANN_INDEX_KDTREE = 1
@@ -16,7 +16,7 @@ image_search_dict = TypedDict("image_search_dict", {
                               "images": Dict[str,
                                              Dict[Union[str, int],
                                                   Union[np.ndarray,
-                                                  HO.hero_object]]],
+                                                  HeroData.HeroImage]]],
                               "names": Dict[int, str],
                               "descriptors": Any,
                               "matcher": cv2.FlannBasedMatcher})
@@ -106,13 +106,13 @@ class ImageSearch():
 
         return good_features
 
-    def add_image(self, hero_info: HO.hero_object, hero: np.ndarray):
+    def add_image(self, hero_info: HeroData.HeroImage, hero: np.ndarray):
         """
         Adds image features to image database and stores image
             in internal list for later use
 
         Args:
-            name: image_processing.hero_object.hero_object representing hero
+            name: image_processing.hero_data.HeroImage representing hero
                 info
             hero: image to add to database
         Return:
@@ -152,7 +152,7 @@ class ImageSearch():
                 hero image passed in
         Returns:
             Tuple containing
-                (hero_info: image_processing.hero_object.hero_object,
+                (hero_info: image_processing.hero_data.HeroImage,
                  image: np.ndarray)
             of the closest matching image in the database
         """
@@ -186,7 +186,7 @@ class ImageSearch():
 
         best_match_image: np.ndarray = self.image_data[best_match_name][
             max(best_match_dict["base"], key=best_match_dict["base"].get)]
-        best_match_info: HO.hero_object = self.image_data[best_match_name][
+        best_match_info: HeroData.HeroImage = self.image_data[best_match_name][
             "info"]
 
         return (best_match_info, best_match_image)
@@ -244,7 +244,7 @@ class ImageSearch():
         return output
 
 
-def build_flann(image_list: list[HO.hero_object],
+def build_flann(image_list: list[HeroData.HeroImage],
                 ratio: int = 0.8) -> "ImageSearch":
     """
     Build database of heroes to match to

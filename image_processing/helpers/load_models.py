@@ -35,18 +35,18 @@ def load_files(model_path: str, border_model_path: str, enriched_db=True,
         GV.THREADS["IMAGE_DB"] = db_thread
         db_thread.start()
 
-    if GV.MODEL is None:
+    if GV.FI_SI_STAR_MODEL is None:
         model_thread = threading.Thread(
             args=[model_path],
             target=LM.load_fi_model)
-        GV.THREADS["MODEL"] = model_thread
+        GV.THREADS["FI_SI_STAR_MODEL"] = model_thread
         model_thread.start()
 
-    if GV.BORDER_MODEL is None:
+    if GV.ASCENSION_BORDER_MODEL is None:
         border_model_thread = threading.Thread(
             args=[border_model_path, MA.BORDER_MODEL_LABELS],
             target=LM.load_border_model)
-        GV.THREADS["BORDER_MODEL"] = border_model_thread
+        GV.THREADS["ASCENSION_BORDER_MODEL"] = border_model_thread
         border_model_thread.start()
 
     if thread_wait:
@@ -79,12 +79,12 @@ def load_border_model(model_path: str, border_labels: list):
     end_time = time.time()
     VP.print_verbose(f"Loaded Border_model in: {end_time - start_time}",
                      verbose_level=1)
-    GV.BORDER_MODEL = border_model
+    GV.ASCENSION_BORDER_MODEL = border_model
 
 
 def load_fi_model(model_path: str):
     """
-    Load hero FI/SI/Stars model into GV.MODEL
+    Load hero FI/SI/Stars model into GV.FI_SI_STAR_MODEL
 
     Args:
         model_path (str): path to model being loaded
@@ -100,4 +100,4 @@ def load_fi_model(model_path: str):
     end_time = time.time()
     VP.print_verbose(
         f"Loaded FI/SI/Ascension model({model_path}) in: {end_time - start_time}", verbose_level=1)
-    GV.MODEL = fi_si_model
+    GV.FI_SI_STAR_MODEL = fi_si_model
