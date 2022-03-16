@@ -35,11 +35,10 @@ if __name__ == "__main__":
     while True:
         #  Wait for next request from client
         message_id, byte_message = socket.recv_multipart()
-        print(byte_message)
         message = byte_message.decode("utf-8")
-        GV.global_parse_args(message)
-        start_time = time.time()
         try:
+            GV.global_parse_args(message)
+            start_time = time.time()
             json_dict = detect.detect_features(GV.IMAGE_SS)
             print(f"Detected features in: {time.time() - start_time}")
             #  Send reply back to client

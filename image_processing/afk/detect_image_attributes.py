@@ -165,7 +165,7 @@ def detect_attributes(hero_image_info: HeroImage, segment_info: SegmentResult):
 
     engraving_result = ModelResult("0", 0)
 
-    if ascension_result.score > 0.75:
+    if ascension_result.score < 0.75:
         # pylint: disable=not-callable
         raw_detected_ascension_borders = GV.ASCENSION_BORDER_MODEL(
             test_img)

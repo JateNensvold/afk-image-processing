@@ -5,6 +5,7 @@ image/arguments passed to this script
 """
 import sys
 import json
+import pprint
 
 import zmq
 
@@ -48,10 +49,11 @@ def main():
     message = " ".join(sys.argv[1:])
     print(f"Message: {message}")
 
-    socket.send_string(message, zmq.NOBLOCK)
+    socket.send_string(message)
     received = socket.recv()
     json_dict = json.loads(received)
-    print(json_dict)
+    pprint.pprint(json_dict, width=200)
+
 
 if __name__ == "__main__":
     main()

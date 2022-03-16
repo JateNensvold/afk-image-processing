@@ -15,7 +15,7 @@ def load_image(image_path: str, check_path=True) -> np.ndarray:
     """
 
     lower_image_path = image_path.lower()
-    if "discordapp.com" in lower_image_path and lower_image_path.endswith(
+    if "discordapp" in lower_image_path and lower_image_path.endswith(
             (".png", ".jpg")):
 
         resp = requests.get(image_path, stream=True).raw
