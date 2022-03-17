@@ -54,8 +54,7 @@ def detect_features(roster_image: np.ndarray, debug_raw: bool = None):
 
     detected_hero_data: list[DetectedHeroData] = []
     for _pseudo_segment_name, segment_info in segment_dict.items():
-        hero_image_info, _template_image = GV.IMAGE_DB.search(
-            segment_info.image)
+        hero_image_info = GV.IMAGE_DB.search(segment_info)
 
         detected_hero_result = detect_attributes(hero_image_info, segment_info)
         detected_hero_data.append(detected_hero_result)
@@ -65,7 +64,7 @@ def detect_features(roster_image: np.ndarray, debug_raw: bool = None):
             label_hero_feature(roster_image, segment_info,
                                detected_hero_result, segment_matrix)
 
-    return RosterData(detected_hero_data, segment_matrix).json()
+    return RosterData(detected_hero_data, segment_matrix)
 
 
 def label_hero_feature(roster_image: np.ndarray,
@@ -107,8 +106,9 @@ def detect_attributes(hero_image_info: HeroImage, segment_info: SegmentResult):
         custom trained yolov5 and detectron2 image recognition models
 
     Args:
-        hero_image_info (HeroImage): info about the HeroImage that was detected
-            from image database
+        hero_image_info (HeroImage): A wrapper around an image detected from
+            the Flann image database that includes the image itself, the image
+            name and the location the image was loaded from
         segment_info (processing.SegmentResult): class with info describing the
             location of the detected_hero_results in the roster_image
     Returns:

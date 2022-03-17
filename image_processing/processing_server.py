@@ -8,8 +8,7 @@ and already loaded
 import json
 import time
 import traceback
-import sys
-
+from typing import List
 
 import zmq
 
@@ -19,7 +18,10 @@ import image_processing.afk.detect_image_attributes as detect
 
 GV.DISABLE_ARGPARSE = True
 
-if __name__ == "__main__":
+
+def main():
+    """_summary_
+    """
     context = zmq.Context()
     socket = context.socket(zmq.ROUTER)  # pylint: disable=no-member
     address = f"tcp://*:{GV.ZMQ_PORT}"
@@ -34,22 +36,27 @@ if __name__ == "__main__":
     print("Ready to start processing image requests...")
     while True:
         #  Wait for next request from client
-        message_id, byte_message = socket.recv_multipart()
-        message = byte_message.decode("utf-8")
+        message_id, byte_args = socket.recv_multipart()
+        args: List[str] = json.loads(byte_args)
         try:
-            GV.global_parse_args(message)
+            GV.global_parse_args(args)
             start_time = time.time()
-            json_dict = detect.detect_features(GV.IMAGE_SS)
+            roster_data = detect.detect_features(GV.IMAGE_SS)
+
             print(f"Detected features in: {time.time() - start_time}")
             #  Send reply back to client
-            socket.send_multipart([message_id, json.dumps(json_dict).encode("utf-8")])
+            socket.send_multipart(
+                [message_id, json.dumps(roster_data.json()).encode("utf-8")])
         except Exception as _exception:
-            print(traceback.format_exc())
-            json_dict = {"message": "Failed to load image"}
-            socket.send_multipart([message_id, json.dumps(json_dict).encode("utf-8")])
+            exception_message = traceback.format_exc()
+            print(exception_message)
+            json_dict = {"message": exception_message}
+            socket.send_multipart(
+                [message_id, json.dumps(json_dict).encode("utf-8")])
 
         # socket.send_json(json.dumps(json_dict))
-
+if __name__ == "__main__":
+    main()
 
 # GV.DISABLE_ARGPARSE = True
 # context = zmq.asyncio.Context()

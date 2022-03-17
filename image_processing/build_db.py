@@ -1,15 +1,16 @@
 import os
 from pathlib import Path
+import re
 import time
 import pickle
 import typing
+from typing import List, Set, Union, Dict
 
 import cv2
 import dill
 
 import image_processing.globals as GV
-import image_processing.load_images as load
-import image_processing.afk.hero.hero_data as HO
+from image_processing.afk.hero.hero_data import HeroImage
 from image_processing.database.image_database import build_flann
 
 
@@ -17,32 +18,22 @@ if typing.TYPE_CHECKING:
     from image_processing.database.image_database import ImageSearch
 
 
-def recurse_dir(path: str, file_dict: dict):
-    """
+def find_images(folder_path: str, file_dict: Dict[str, Set]):
+    """_summary_
     Recursively iterate through directory adding all ".jpg" and ".png" files
         to file_dict
     Args:
-        path: folder path to recurse through
-        file_dict: file dictionary to add images to
-    Return:
-        None, updates file_dict passed in
-    """
-    hero_name = os.path.basename(path)
-    faction = os.path.basename(os.path.dirname(path))
+        folder_path (str): folder path to recurse through
+        file_dict (dict): file dictionary to add images to
 
-    for _file in os.listdir(path):
-        _file_path = os.path.join(path, _file)
-        # Skip directories with "other" in them or that start with "_"
-        if os.path.isdir(_file_path) and _file_path[0] != "_" and "other" not \
-                in _file_path:
-            recurse_dir(_file_path, file_dict)
-        elif os.path.isfile(_file_path) and (_file_path.endswith(".png") or
-                                             _file_path.endswith(".jpg")):
-            if faction not in file_dict:
-                file_dict[faction] = {}
-            if hero_name not in file_dict[faction]:
-                file_dict[faction][hero_name] = set()
-            file_dict[faction][hero_name].add(_file_path)
+    """
+    for hero_name in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, hero_name)
+        if os.path.isfile(file_path) and (file_path.endswith(".png") or
+                                          file_path.endswith(".jpg")):
+            if hero_name not in file_dict:
+                file_dict[hero_name] = set()
+            file_dict[hero_name].add(file_path)
 
 
 def build_database(enriched_db: bool = False) -> "ImageSearch":
@@ -54,36 +45,27 @@ def build_database(enriched_db: bool = False) -> "ImageSearch":
     Return:
         "ImageSearch" database object
     """
-    file_dict = {}
+    file_dict: Dict[str, Union[Dict, Set]] = {}
     if GV.verbosity(1):
         print("Building database!")
     start_time = time.time()
-    recurse_dir(GV.HERO_ICON_DIR, file_dict)
-    base_images = []
+    for hero_portrait_dir in GV.HERO_PORTRAIT_DIRECTORIES:
+        find_images(hero_portrait_dir, file_dict)
+    base_images: List[HeroImage] = []
 
-    for _faction, _faction_heroes in file_dict.items():
-        for _hero_name, _hero_paths in _faction_heroes.items():
-            for hero_path in _hero_paths:
-                if not os.path.exists(hero_path):
-                    raise FileNotFoundError(hero_path)
-                hero_image = cv2.imread(hero_path)
-                if hero_image is None:
-                    raise FileNotFoundError(
-                        f"Hero Image not found: {hero_path}")
+    for raw_hero_name, hero_path_set in file_dict.items():
+        for hero_path in hero_path_set:
+            if not os.path.exists(hero_path):
+                raise FileNotFoundError(hero_path)
+            hero_image = cv2.imread(hero_path)
+            if hero_image is None:
+                raise FileNotFoundError(
+                    f"Hero Image not found: {hero_path}")
+            hero_name, *_ = re.split("\.", raw_hero_name)
+            base_images.append(HeroImage(
+                hero_name, hero_image, hero_path))
+    image_db: "ImageSearch" = build_flann(base_images, enriched_db=enriched_db)
 
-                base_images.append(HO.HeroImage(
-                    _hero_name, hero_image))
-
-    image_db: "ImageSearch" = build_flann(base_images)
-
-    if enriched_db:
-        cropped_images = load.crop_heroes(
-            [_hero_tuple.image for _hero_tuple in base_images],
-            0.15, 0.08, 0.25, 0.2)
-        for index, cropped_image in enumerate(cropped_images):
-            # load.display_image(cropIMG, display=True)
-            image_db.add_image(base_images[index], cropped_image)
-        image_db.matcher.train()
     end_time = time.time()
     with open(GV.DATABASE_PICKLE_PATH, 'wb') as handle:
         dill.dump(image_db, handle)
@@ -148,5 +130,5 @@ def get_db(rebuild: bool = GV.REBUILD, enriched_db=True):
 
 
 if __name__ == "__main__":
-    GV.VERBOSE_LEVEL = 1
+    GV.VERBOSE_LEVEL = 2
     get_db(rebuild=True, enriched_db=True)

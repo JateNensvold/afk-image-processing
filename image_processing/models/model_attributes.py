@@ -2,7 +2,7 @@
 This Module is used to MAP pytorch model's numerical class labels onto
 feature labels
 """
-from typing import NamedTuple
+from typing import Dict, NamedTuple, Union
 
 
 _SI_FI_MODEL_LABELS = ['0 si', '1 star', '10SI', '2 star', '20 si',
@@ -38,3 +38,21 @@ class ModelResult(NamedTuple):
     """
     label: str
     score: int
+
+    @classmethod
+    def from_dict(cls, model_result: Dict[str, Union[str, int]]):
+        """_summary_
+
+        Args:
+            model_result (Dict[str, str]): _description_
+        """
+
+        return ModelResult(model_result["label"], model_result["score"])
+
+    def to_dict(self):
+        """_summary_
+
+        Returns:
+            _type_: _description_
+        """
+        return {"label": self.label, "score": self.score}

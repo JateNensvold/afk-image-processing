@@ -16,7 +16,7 @@ import threading
 import pathlib
 import shlex
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Union
 
 import numpy
 import torch
@@ -63,7 +63,7 @@ FI_SI_STAR_MODEL: torch.Tensor = None
 ASCENSION_BORDER_MODEL: DefaultPredictor = None
 IMAGE_DB: "ImageSearch" = None
 ROOT_DIR: pathlib.Path = pathlib.Path(os.path.dirname(__file__)).absolute()
-
+PORTRAIT_SIZE = 1024
 
 # Stores cached function results
 CACHED = {}
@@ -89,21 +89,24 @@ def verbosity(verbose_level: int) -> bool:
     return VERBOSE_LEVEL >= verbose_level
 
 
-def global_parse_args(arg_string: str = None):
+def global_parse_args(arg_string: Union[str, List[str]] = None):
     """
     Function to load global arguments from either arg_string or sys.argv.
     The results of the parsing are stored in global argument `ARGS`
 
     Args:
-        arg_string (str, optional): string to parse into command line arguments. Defaults to None.
+        arg_string (str, optional): string to parse into command line
+            arguments, loads sys.argv when this is None. Defaults to None.
     """
     global ARGS, TRUTH, DEBUG, REBUILD, PARALLEL, IMAGE_SS, IMAGE_SS_NAME, VERBOSE_LEVEL  # pylint: disable=global-statement
-    if arg_string is not None:
+    if isinstance(arg_string, str):
         parsed_args = shlex.split(arg_string)
-        print(parsed_args)
+    elif isinstance(arg_string, list):
+        parsed_args = arg_string
     else:
         parsed_args = None
     ARGS = parser.parse_args(args=parsed_args)
+
 
     TRUTH = ARGS.truth
     DEBUG = ARGS.DEBUG
@@ -150,7 +153,11 @@ AFK_DIR = os.path.join(GLOBALS_DIR, "afk")
 MODELS_DIR = os.path.join(GLOBALS_DIR, "models")
 
 # Paths to data inside the Database directory
-HERO_ICON_DIR = pathlib.Path(os.path.join(DATABASE_DIR, "hero_icon"))
+# HERO_ICON_DIR = pathlib.Path(os.path.join(DATABASE_DIR, "hero_icon"))
+HERO_PORTRAIT_DIRECTORIES: List[pathlib.Path] = []
+HERO_PORTRAIT_DIRECTORIES.append(pathlib.Path(
+    os.path.join(DATABASE_DIR, "images", "heroes")))
+
 DATABASE_FLAN_PATH = pathlib.Path(
     os.path.join(DATABASE_DIR, "IMAGE_DB.flann"))
 DATABASE_PICKLE_PATH = pathlib.Path(
@@ -163,6 +170,11 @@ DATABASE_HERO_VALIDATION_DIR = pathlib.Path(
     os.path.join(DATABASE_DIR, "temp_images"))
 SEGMENTED_HEROES_DIR = os.path.join(
     DATABASE_HERO_VALIDATION_DIR, "segmented_heroes")
+
+# AFKBuilder Submodule
+AFKBuilder_dir = pathlib.Path(os.path.join(DATABASE_DIR, "AFKBuilder"))
+HERO_PORTRAIT_DIRECTORIES.append(pathlib.Path(os.path.join(
+    AFKBuilder_dir, "public", "img", "portraits")))
 
 # Tests directory
 TESTS_DIR = pathlib.Path(os.path.join(

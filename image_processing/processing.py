@@ -298,8 +298,7 @@ def get_hero_contours(image: np.array, size_allowance_boundary: float,
 
 class SegmentResult:
     """
-    class with info describing the location of a segmented image that was
-        detected from a larger image the roster_image
+    class with info describing the location of subimage in a larger image 
 
         Ex. A Hero Portrait from a Hero Roster in AFK Arena
     """

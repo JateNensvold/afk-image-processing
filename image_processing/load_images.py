@@ -1,11 +1,20 @@
 import glob
-from typing import List, Union
+from typing import List, NamedTuple, Union
 
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
 import image_processing.globals as GV
+
+
+class CropImageInfo(NamedTuple):
+    """_summary_
+    """
+    x_left: float
+    x_right: float
+    y_top: float
+    y_bottom: float
 
 
 def display_image(image: Union[np.ndarray, List], multiple: bool = False,
@@ -73,8 +82,8 @@ def find_files(path: str, flag=True, lower=False):
     return sorted(valid_images)
 
 
-def crop_heroes(images: list, x_left=None, x_right=None, y_top=None,
-                y_bottom=None, border_width=0.25):
+def crop_heroes(images: list[np.ndarray], crop_info: CropImageInfo,
+                border_width=0.25):
     """
     Args:
         images: list of images to crop frame from
@@ -87,10 +96,10 @@ def crop_heroes(images: list, x_left=None, x_right=None, y_top=None,
         dict of name as key and  images as values with 'border_width'
             removed from each side of the images
     """
-    sides = {"x_left": x_left, "x_right": x_right,
-             "y_top": y_top, "y_bottom": y_bottom}
+    sides = {"x_left": crop_info.x_left, "x_right": crop_info.x_right,
+             "y_top": crop_info.y_top, "y_bottom": crop_info.y_bottom}
 
-    cropped_heroes = []
+    cropped_heroes: List[np.ndarray] = []
     for _name, _side in sides.items():
         if _side is None:
             sides[_name] = border_width
