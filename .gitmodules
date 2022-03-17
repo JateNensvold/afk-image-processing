@@ -1,3 +1,6 @@
 [submodule "yolov5"]
 	path = image_processing/models/yolov5
 	url = git@github.com:ultralytics/yolov5.git
+[submodule "image_processing/database/AFKBuilder"]
+	path = image_processing/database/AFKBuilder
+	url = git@github.com:Dae314/AFKBuilder.git
