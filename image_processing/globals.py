@@ -63,7 +63,8 @@ FI_SI_STAR_MODEL: torch.Tensor = None
 ASCENSION_BORDER_MODEL: DefaultPredictor = None
 IMAGE_DB: "ImageSearch" = None
 ROOT_DIR: pathlib.Path = pathlib.Path(os.path.dirname(__file__)).absolute()
-PORTRAIT_SIZE = 1024
+HERO_PORTRAIT_SIZE = 512
+MODEL_IMAGE_SIZE = 416
 
 # Stores cached function results
 CACHED = {}
@@ -106,7 +107,6 @@ def global_parse_args(arg_string: Union[str, List[str]] = None):
     else:
         parsed_args = None
     ARGS = parser.parse_args(args=parsed_args)
-
 
     TRUTH = ARGS.truth
     DEBUG = ARGS.DEBUG

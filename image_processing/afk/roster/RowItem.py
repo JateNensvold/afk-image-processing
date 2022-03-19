@@ -5,12 +5,13 @@ class RowItem():
     def __str__(self):
         return "({} {})".format(self.name, self.dimensions)
 
-    def __init__(self, dimensions: tuple, name: str = None):
+    def __init__(self, dimensions: DO.SegmentRectangle, name: str = None):
         """
         Create RowItem object from dimensions and name
 
         Args:
-            dimensions: tuple containing (x,y, width, height)
+            dimensions (SegmentRectangle): named tuple 
+                containing (x,y, width, height)
             name: name of RowItem
         """
         self.dimensions = DO.DimensionsObject(dimensions)

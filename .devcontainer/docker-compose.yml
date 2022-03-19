@@ -16,7 +16,7 @@ services:
       - /var/run/docker.sock:/var/run/docker-host.sock 
       # Update this to wherever you want VS Code to mount the folder of your project
       - ..:/workspace/afk-image-processing:cached
-      - ${HOME}/projects/archmage-bot:/workspace/archmage-bot:cached
+      # - ${HOME}/projects/archmage-bot:/workspace/archmage-bot:cached
       - ${HOME}/projects/albedo-bot:/workspace/albedo-bot:cached
       - ${HOME}/.ssh:/home/vscode/.ssh
       # - $SSH_AUTH_SOCK:/ssh-agent # Forward local machine SSH key to docker

@@ -12,7 +12,9 @@
 	"workspaceFolder": "/workspace",
 	// Use this environment variable if you need to bind mount your local source code into a new container.
 	"remoteEnv": {
-		"LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
+		"LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}",
+		// Used to forward X11 traffic to X11 host running in WSL outside container
+		"DISPLAY": "${localEnv:DISPLAY}"
 	},
 	// The 'service' property is the name of the service for the container that VS Code should
 	// use. Update this value and .devcontainer/docker-compose.yml to the real service name.
@@ -32,6 +34,10 @@
 		"python.linting.pycodestylePath": "/usr/local/py-utils/bin/pycodestyle",
 		"python.linting.pydocstylePath": "/usr/local/py-utils/bin/pydocstyle",
 		"python.linting.pylintPath": "/usr/local/py-utils/bin/pylint",
+		"python.linting.pylintArgs": [
+			"--generate-members",
+			"--extension-pkg-whitelist=cv2"
+		],
 		"editor.rulers": [
 			80
 		],
@@ -66,5 +72,6 @@
 		"docker-from-docker": "latest",
 		"git": "os-provided"
 	},
-	"postStartCommand": "pip3 install -r /workspace/albedo-bot/requirements.txt"
+	// Install albedo-bot and afk-image-processing as python development packages
+	"postStartCommand": "cd /workspace/albedo-bot && pip3 install -r requirements.txt  && /workspace/afk-image-processing/requirements/install ${BUILD_TYPE}"
 }

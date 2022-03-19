@@ -37,7 +37,7 @@ class ColumnObjects:
         Args:
             matrix: reference to partent matrix object
         """
-        self.column_rtree = rtree.index.Index()
+        self.column_rtree = rtree.index.Index(interleaved=False)
         self.matrix = matrix
         self.columns: list[DO.DimensionsObject] = []
         self.column_id_to_index: dict[int, int] = {}
@@ -84,9 +84,12 @@ class ColumnObjects:
 
         # TODO Find out why invalid y values cause intersections/overlap to
         #   break
-        _temp_dimensions_object = DO.DimensionsObject(
-            (row_item.dimensions.x, 0,
-             row_item.dimensions.width, self.matrix.source_height))
+        segment_rectangle = DO.SegmentRectangle(
+            row_item.dimensions.x,
+            0,
+            row_item.dimensions.width,
+            self.matrix.source_height)
+        _temp_dimensions_object = DO.DimensionsObject(segment_rectangle)
         _intersections_list = list(self.column_rtree.intersection(
             _temp_dimensions_object.coords()))
 
@@ -112,8 +115,6 @@ class ColumnObjects:
                     #     _column.coords()))
                     # print(auto_add)
                     if auto_add:
-                        # print("adding column intersection: {}".format(
-                        #     overlap_p))
                         index = self.add_column(row_item)
             return index
         elif len(_intersections_list) == 0:
@@ -185,8 +186,7 @@ class ColumnObjects:
         if num_columns != len(self.columns):
             for _itr in range(num_columns - len(self.columns)):
                 self.columns.append(DO.DimensionsObject(
-                    (0, 0,
-                     0, self.matrix.source_height)))
+                    DO.SegmentRectangle(0, 0, 0, self.matrix.source_height)))
         for _column in self.columns:
             self.column_rtree.delete(id(_column), _column.coords())
             _column.x = min_x
@@ -211,7 +211,6 @@ class ColumnObjects:
             height, width = sized_image.shape[:2]
             cv2.rectangle(sized_image, (0, 0), (width, height), (0, 0, 0), 2)
             image_list.append(sized_image)
-        print(len(image_list))
         load.display_image(image_list, *args, multiple=True, ** kwargs)
 
     def _sort(self):
@@ -253,8 +252,10 @@ class ColumnObjects:
             index(int) of new column added
         """
         column_dimensions_object = DO.DimensionsObject(
-            (row_item.dimensions.x, 0,
-             row_item.dimensions.width, self.matrix.source_height))
+            DO.SegmentRectangle(row_item.dimensions.x,
+                                0,
+                                row_item.dimensions.width,
+                                self.matrix.source_height))
         new_column_id = id(column_dimensions_object)
         if resize:
             _intersections_list = list(self.column_rtree.intersection(

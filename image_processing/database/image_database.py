@@ -6,7 +6,7 @@ import numpy as np
 from image_processing.processing import SegmentResult
 import image_processing.globals as GV
 from image_processing.afk.hero.hero_data import HeroImage
-from image_processing.load_images import CropImageInfo, crop_heroes
+from image_processing.load_images import CropImageInfo, crop_heroes, display_image
 
 
 FLANN_INDEX_KDTREE = 1
@@ -94,58 +94,192 @@ class FeatureMatch:
         return f"FeatureMatch<{self.hero_name}, hero_index={self.hero_index}>"
 
 
-class HeroMatch:
-    """_summary_
+class HeroMatchList:
+    """
+    Wrapper around a list of "HeroMatch" objects that has several utility
+        methods for keeping track of the number of flann matches for each hero.
+        By default at all times this data structure should provide a sorted
+        list of HeroMatch objects based on decending HeroMatch.match_count
+    """
 
-    Returns:
-        _type_: _description_
+    def __init__(self, matches: List["HeroMatch"]):
+        """
+        Wrapper around a list of "HeroMatch" objects that has several utility
+        methods for keeping track of the number of flann matches for each hero.
+        By default at all times this data structure should provide a sorted
+        list of HeroMatch objects based on decending HeroMatch.match_count
+
+        Args:
+            matches (List[HeroMatch]): list of hero matches to add
+        """
+        self.hero_matches: List[HeroMatch] = []
+        self.hero_dict: Dict[str, HeroMatch] = {}
+        self.current_iter = 0
+
+        self.extend(matches)
+
+    def __iter__(self):
+        """
+        Return object to iterate over
+
+        Returns:
+            self
+        """
+        return self
+
+    def __next__(self):
+        """
+        Provide the next element to iterate over
+        """
+        if self.current_iter < len(self.hero_matches):
+            self.current_iter += 1
+            return self.hero_matches[self.current_iter - 1]
+        self._cur_iter = 0
+        raise StopIteration
+
+    def __getitem__(self, index: int):
+        """
+        Fetch the element at index
+
+        Args:
+            index (int): Index of list to get
+        """
+        return self.hero_matches[index]
+
+    def __str__(self):
+
+        return f"HeroMatchList<len={len(self.hero_matches)}, top={self.hero_matches[:3]}>"
+
+    def append(self, match: "HeroMatch", sort: bool = True):
+        """
+        Adds a single 'HeroMatch' into 'HeroMatch' list
+            and then optionally sorts self to maintain the match_count order
+
+        Args:
+            match (HeroMatch): match getting added to list
+            sort (bool): flag to sort the match list after adding new element
+        """
+        if match.name in self.hero_dict:
+            self.hero_dict[match.name].combine(match)
+        else:
+            self.hero_dict[match.name] = match
+            self.hero_matches.append(match)
+        if sort:
+            self.sort()
+
+    def sort(self):
+        """
+        Sort list so matches are ordered by decreasing hero_match.match_count
+        """
+        self.hero_matches.sort(key=lambda hero_match: hero_match.match_count,
+                               reverse=True)
+
+    def extend(self, matches: Union[List["HeroMatch"], "HeroMatchList"]):
+        """
+        Merge a List[HeroMatch] or 'HeroMatchList' object into self and
+            combine all matches that are for the same hero
+
+        Args:
+            matches (List[HeroMatch]): matches to get merged in
+        """
+        for hero_match in matches:
+            self.append(hero_match, sort=False)
+        self.sort()
+
+    def best(self):
+        """
+        Returns the HeroMatch with the highest number of matches
+        """
+        if len(self.hero_matches) > 0:
+            return self.hero_matches[0]
+        raise NoMatchException("No HeroMatch to return object length is 0")
+
+
+class HeroMatch:
+    """
+        A Data structure for keeping track of the number of 'FeatureMatch'
+            that a hero has recieved
     """
 
     def __init__(self, hero_name: str):
-        """_summary_
+        """
+
 
         Args:
-            hero_name (str): _description_
-
-        Returns:
-            _type_: _description_
+            hero_name (str): hero name to keep track of FeatureMatch'
         """
         self.name = hero_name
         self.matches: List[FeatureMatch] = []
 
     def __str__(self):
-        """_summary_
-
-        Returns:
-            _type_: _description_
+        """
+        String representation of object, that shows hero name and match_count
         """
         return f"HeroMatch<{self.name}, match_count={self.match_count}>"
 
     def __repr__(self) -> str:
-        """_summary_
-
-        Returns:
-            str: _description_
-        """
         return str(self)
 
     @property
     def match_count(self):
-        """_summary_
-
-        Returns:
-            _type_: _description_
+        """
+        Property method  that calculates number of FeatureMatches for hero
         """
         return len(self.matches)
 
-    def add_match(self, hero_index: int, flann_match: cv2.DMatch):
-        """_summary_
+    def add_match(self, feature_match: FeatureMatch):
+        """
+        Adds a new flann_match to object
+        Args:
+            feature_match (FeatureMatch): match getting added
+        """
+        self.matches.append(feature_match)
+
+    def combine(self, new_match: "HeroMatch"):
+        """
+        Combine 'new_match' into HeroMatch object
 
         Args:
-            hero_index (int): _description_
-            flann_match (_type_): _description_
+            new_match (HeroImage): object getting combined with self
         """
-        self.matches.append(FeatureMatch(self.name, hero_index, flann_match))
+
+        for match in new_match.matches:
+            self.matches.append(match)
+
+    # @classmethod
+    # def merge(cls, first_matches: List["HeroMatch"],
+    #           second_matches: List["HeroMatch"]):
+    #     """_summary_
+
+    #     Args:
+    #         first_matches (List[HeroImage]): _description_
+    #         second_matches (List[HeroImage]): _description_
+
+    #     Raises:
+    #         NoMatchException: _description_
+
+    #     Returns:
+    #         _type_: _description_
+    #     """
+    #     match_dict: Dict[str, HeroMatch] = {}
+
+    #     for hero_match in first_matches:
+    #         if hero_match.name not in match_dict:
+    #             match_dict[hero_match.name] = hero_match
+    #         else:
+    #             match_dict[hero_match.name].combine(hero_match)
+
+    #     for hero_match in second_matches:
+    #         if hero_match.name not in match_dict:
+    #             match_dict[hero_match.name] = hero_match
+    #         else:
+    #             match_dict[hero_match.name].combine(hero_match)
+
+    #     sorted_heroes = sorted(
+    #         match_dict.values(),
+    #         key=lambda hero_match: hero_match.match_count,
+    #         reverse=True)
+    #     return sorted_heroes
 
 
 class ImageSearch():
@@ -172,6 +306,8 @@ class ImageSearch():
         self.matcher = cv2.FlannBasedMatcher(index_param, search_param)
         # self.matcher = cv2.BFMatcher(cv2.NORM_L1)
         self.extractor = cv2.SIFT_create(edgeThreshold=patch_size)
+
+        self.clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
 
         # self.extractor = cv2.ORB_create(
         #     edgeThreshold=patchSize, patchSize=patchSize)
@@ -233,6 +369,41 @@ class ImageSearch():
 
         return good_features
 
+    def image_pre_process(self, hero_image: np.ndarray,
+                          crop_info: CropImageInfo = None,
+                          image_multiplier=1.0) -> np.ndarray:
+        """_summary_
+
+        Args:
+            hero_image (np.ndarray): _description_
+            crop_info (CropImageInfo, optional): _description_. Defaults to None.
+            image_multiplier (float, optional): _description_. Defaults to 1.0.
+
+        Returns:
+            np.ndarray: _description_
+        """
+
+        gray_image = cv2.cvtColor(hero_image, cv2.COLOR_BGR2GRAY)
+
+        width, height = gray_image.shape[:2]
+        ascpect_ratio = width/height
+        new_width = int(GV.HERO_PORTRAIT_SIZE * image_multiplier)
+        image_scale = new_width/width
+        new_height = int(height * image_scale)
+        resized_image = cv2.resize(
+            gray_image, (new_height, new_width))
+
+
+        if crop_info:
+            cropped_heroes_list = crop_heroes([resized_image], crop_info)
+            resized_image = cropped_heroes_list[0]
+
+
+        clahe_image = self.clahe.apply(resized_image)
+        display_image([resized_image, clahe_image])
+
+        return clahe_image
+
     def add_image(self, hero_info: HeroImage,
                   crop_info: CropImageInfo = None):
         """
@@ -248,16 +419,8 @@ class ImageSearch():
         Return:
             None
         """
-        hero_image = hero_info.image
 
-        width, height = hero_image.shape[:2]
-        image_scale = GV.PORTRAIT_SIZE/width
-
-        hero_image = cv2.resize(
-            hero_image, (GV.PORTRAIT_SIZE, int(image_scale * height)))
-        if crop_info:
-            cropped_heroes_list = crop_heroes([hero_image], crop_info)
-            hero_image = cropped_heroes_list[0]
+        hero_image = self.image_pre_process(hero_info.image, crop_info)
 
         _keypoint, descriptor = self.extractor.detectAndCompute(
             hero_image, None)
@@ -266,10 +429,11 @@ class ImageSearch():
 
         hero_index = len(self.index_lookup)
 
-        if GV.VERBOSE_LEVEL >= 2:
+        if GV.verbosity(2):
             print(f"Added Hero ({hero_index}): {hero_info.name} from "
-                  f"{hero_info.image_path} Size: ({width}, {height}) -> "
-                  f"{hero_image.shape[:2]} {'(cropped)' if crop_info else ''}")
+                  f"{hero_info.image_path} Size: ({hero_image.shape[0]}, "
+                  f"{hero_image.shape[1]}) -> {hero_image.shape[:2]} "
+                  f"{'(cropped)' if crop_info else ''}")
 
         if hero_info.name not in self.hero_lookup:
             database_hero = ImageDatabaseHero(
@@ -284,7 +448,8 @@ class ImageSearch():
 
     def search(self, segment_info: SegmentResult,
                min_features: int = 5,
-               crop_info: CropImageInfo = CropImageInfo(0.15, 0.08, 0.25, 0.2)):
+               crop_info: CropImageInfo = CropImageInfo(0.15, 0.08, 0.25, 0.2),
+               image_multiplier=1.0):
         """
         Find closest matching image in the database
 
@@ -303,21 +468,8 @@ class ImageSearch():
                  image: np.ndarray)
             of the closest matching image in the database
         """
-        hero_image = segment_info.image
 
-        width, height = hero_image.shape[:2]
-
-        new_width = int(GV.PORTRAIT_SIZE)
-
-        image_scale = new_width/width
-
-        new_height = int(height * image_scale)
-
-        hero_image = cv2.resize(
-            hero_image, (new_width, new_height))
-        if crop_info:
-            cropped_heroes_list = crop_heroes([hero_image], crop_info)
-            hero_image = cropped_heroes_list[0]
+        hero_image = self.image_pre_process(segment_info.image, crop_info, image_multiplier)
 
         _keypoint, descriptor = self.extractor.detectAndCompute(
             hero_image, None)
@@ -334,8 +486,6 @@ class ImageSearch():
             f"Failed to find enough \"good\" features ({len(good_features)}) "
             "from database to match a similar image. Expected at least "
             f"({min_features}) good features to be found")
-        # if len(good_features) < min_features:
-        #     good_features = matches[0]
 
         hero_matches = self._search_results(good_features)
         if crop_info:
@@ -349,26 +499,27 @@ class ImageSearch():
         #             print(
         #                 self.index_lookup[feature_match.hero_index].hero_index_lookup[feature_match.hero_index].image.shape)
 
-        best_hero_match = hero_matches[0]
-        best_match_info = self.hero_lookup[best_hero_match.name].first()
-        if GV.VERBOSE_LEVEL >= 1:
-            print(hero_matches[:3])
-        if best_hero_match.match_count < 10 or not crop_info:
-
+        # Check for a better hero match with different image preprocessing or
+        #   log diagnostic information about the hero_matches if no better
+        #   preprocessing is possible
+        if hero_matches.best().match_count < 10 or not crop_info:
             if crop_info:
-                if GV.VERBOSE_LEVEL >= 1:
-                    print("Original", self.count, best_hero_match)
-                next_match = self.search(segment_info, crop_info=None)
-
+                if GV.verbosity(1):
+                    print(f"\tOriginal {hero_matches}")
+                new_matches = self.search(segment_info, crop_info=None)
+                hero_matches.extend(new_matches)
             else:
-                if GV.VERBOSE_LEVEL >= 1:
-                    print(
-                        f"Redo {best_hero_match}")
+                if GV.verbosity(1):
+                    print(f"\tRedo {hero_matches}")
 
-        if best_match_info is None:
-            raise NoMatchException("Unable to find a match for ")
+        if self.hero_lookup[hero_matches.best().name].first() is None:
+            raise NoMatchException(
+                f"Unable to find a match for {hero_matches.best().name}")
 
-        return best_match_info
+        if GV.verbosity(1):
+            print(hero_matches.best(), hero_matches)
+
+        return hero_matches
 
     def _search_results(self, good_features: List[cv2.DMatch]):
         """
@@ -379,29 +530,23 @@ class ImageSearch():
                 ratio test.
 
         Return:
-            List of tuples of dictionaries where list is sorted by
-                number(decending) of total keypoint matches to a hero and
-                dictionary is the following
-            dictionary of (name: {"total": total keypoint matches,
-                                 "base": keypoint matches to single image,
-                                 "distance": distance between keypoint
-                                            descriptor and database point})
+            HeroMatchList object containing all HeroMatches extracted
+                from good_features
         """
 
-        hero_matches: Dict[str, HeroMatch] = {}
+        hero_matches_dict: Dict[str, HeroMatch] = {}
         for flann_match in good_features:
             hero_index: int = flann_match.imgIdx
             hero_name = self.index_lookup[hero_index].name
+            feature = FeatureMatch(hero_name, hero_index, flann_match)
 
-            if hero_name not in hero_matches:
-                hero_matches[hero_name] = HeroMatch(hero_name)
-            hero_matches[hero_name].add_match(hero_index, flann_match)
+            if hero_name not in hero_matches_dict:
+                hero_matches_dict[hero_name] = HeroMatch(hero_name)
+            hero_matches_dict[hero_name].add_match(feature)
 
-        sorted_heroes = sorted(
-            hero_matches.values(),
-            key=lambda hero_match: hero_match.match_count,
-            reverse=True)
-        return sorted_heroes
+        hero_matches = HeroMatchList(hero_matches_dict.values())
+
+        return hero_matches
 
 
 def build_flann(image_list: list[HeroImage],

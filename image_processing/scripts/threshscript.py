@@ -182,13 +182,14 @@ def color_threshold(image: np.ndarray):
 
 
 if __name__ == "__main__":
-    # Load image with --image or -i found in image_processing.globals.py
+    # python3 threshscript.py <path to image>
 
-    if GV.ARGS.COLOR:
-        print("Running in RGB mode")
-        color_threshold(
-            cv2.resize(GV.IMAGE_SS,
-                       (GV.IMAGE_SS.shape[1]*IMAGE_SIZE_MULTIPLIER,
-                        GV.IMAGE_SS.shape[0]*IMAGE_SIZE_MULTIPLIER)))
-    else:
-        threshold(GV.IMAGE_SS)
+    # if GV.ARGS.COLOR:
+    #     print("Running in RGB mode")
+    #     color_threshold(
+    #         cv2.resize(GV.IMAGE_SS,
+    #                    (GV.IMAGE_SS.shape[1]*IMAGE_SIZE_MULTIPLIER,
+    #                     GV.IMAGE_SS.shape[0]*IMAGE_SIZE_MULTIPLIER)))
+    # else:
+    GV.global_parse_args()
+    threshold(GV.IMAGE_SS)

@@ -44,6 +44,7 @@ class HeroImage:
 
         return f"HeroImage<{self._raw_name, self.image_path}>"
 
+
 class RosterJson:
     """_summary_
 

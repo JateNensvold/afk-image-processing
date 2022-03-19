@@ -41,9 +41,11 @@ RUN apt-get update && \
 
 RUN python3 -m pip install --upgrade pip
 
+
 # [Optional] If your pip requirements rarely change, uncomment this section to add them to the image.
-COPY requirements /tmp/pip-tmp/requirements 
-RUN /tmp/pip-tmp/requirements/install ${BUILD_TYPE}
+# COPY requirements /tmp/pip-tmp/requirements 
+# COPY . /tmp/pip-tmp/workspace
+# RUN /tmp/pip-tmp/workspace/requirements/install ${BUILD_TYPE}
 
 ENV BUILD_TYPE=${BUILD_TYPE}
 

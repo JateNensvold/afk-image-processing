@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 supported_architecture=("CPU" "CUDA")
 
+PARENT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+cd ${PARENT_DIR}
+
 if [ "$#" -ne 1 ]; then
-    echo "Pass a supported architecture when calling this script: ${supported_architecture}"
+    echo "Pass a supported architecture when calling this script: ${supported_architecture[@]}"
     echo "Ex. 'install CPU'"
     exit 1
 fi
@@ -11,17 +14,19 @@ echo "BUILD Type: ${1}"
 
 case ${1} in
     "CPU")
-        requirements_path="/tmp/pip-tmp/requirements/cpu.txt"
+        requirements_path="./cpu.txt"
     ;;
     "CUDA")
-        requirements_path="/tmp/pip-tmp/requirements/gpu.txt"
+        requirements_path="./gpu.txt"
     ;;
     *)
         echo "Invalid architecture used"
-        echo "${1} not in ${supported_architecture}"
+        echo "${1} not in ${supported_architecture[@]}"
         exit 1
     ;;
 esac
+
+
 
 pip3 --disable-pip-version-check --no-cache-dir install -r ${requirements_path} \
    && rm -rf /tmp/pip-tmp

@@ -16,8 +16,6 @@ import image_processing.globals as GV
 import image_processing.helpers.load_models as LM
 import image_processing.afk.detect_image_attributes as detect
 
-GV.DISABLE_ARGPARSE = True
-
 
 def main():
     """_summary_
@@ -53,6 +51,7 @@ def main():
             json_dict = {"message": exception_message}
             socket.send_multipart(
                 [message_id, json.dumps(json_dict).encode("utf-8")])
+
 
         # socket.send_json(json.dumps(json_dict))
 if __name__ == "__main__":

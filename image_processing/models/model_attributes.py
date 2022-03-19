@@ -4,6 +4,8 @@ feature labels
 """
 from typing import Dict, NamedTuple, Union
 
+from bidict import bidict
+
 
 _SI_FI_MODEL_LABELS = ['0 si', '1 star', '10SI', '2 star', '20 si',
                        '3 fi', '3 star', '30 si', '4 star', '5 star', '9 fi']
@@ -21,13 +23,13 @@ FI_LABELS = {
     10: "9"
 }
 
-ASCENSION_STAR_LABELS = {
+ASCENSION_STAR_LABELS = bidict({
     1: "A1",
     3: "A2",
     6: "A3",
     8: "A4",
     9: "A5"
-}
+})
 
 
 class ModelResult(NamedTuple):

@@ -17,9 +17,9 @@ class CropImageInfo(NamedTuple):
     y_bottom: float
 
 
-def display_image(image: Union[np.ndarray, List], multiple: bool = False,
-                  display: bool = GV.DEBUG, color_correct: bool = True,
-                  colormap: bool = False):
+def display_image(image: Union[np.ndarray, List[np.ndarray]],
+                  multiple: bool = False, display: bool = False,
+                  color_correct: bool = True, colormap: bool = False):
     """
     Display the 'image' passed in in the desired manner based on the flags this
         function was called with
@@ -38,10 +38,10 @@ def display_image(image: Union[np.ndarray, List], multiple: bool = False,
     #         print("Backend: {}".format(backend))
     #     plt.switch_backend("tkagg")
 
-    if not display:
+    if not (display or GV.DEBUG):
         return
 
-    if multiple:
+    if multiple or isinstance(image, list):
         image = concat_resize(image)
     elif color_correct and len(image.shape) == 3:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)

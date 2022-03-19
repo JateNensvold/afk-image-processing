@@ -201,14 +201,15 @@ def get_hero_contours(image: np.array, size_allowance_boundary: float,
     heights = []
     widths = []
 
-    idx = rtree.index.Index()
+    idx = rtree.index.Index(interleaved=False)
 
     for _index, detected_contour in enumerate(detected_contours):
 
-        x_coord, y_coord, width, height = cv2.boundingRect(detected_contour)
-        dim_object = DO.DimensionsObject((x_coord, y_coord, width, height))
-        diff = abs(height-width)
-        avg_h_w = ((height+width)/2)
+        image_segment_info = DO.SegmentRectangle(
+            *cv2.boundingRect(detected_contour))
+        dim_object = DO.DimensionsObject(image_segment_info)
+        diff = abs(image_segment_info.height - image_segment_info.width)
+        avg_h_w = ((image_segment_info.height + image_segment_info.width)/2)
         tolerance = avg_h_w * 0.2
 
         # if GV.DEBUG and display:
@@ -216,53 +217,30 @@ def get_hero_contours(image: np.array, size_allowance_boundary: float,
         intersections = list(idx.intersection(idx_coords))
         if not intersections:
             idx.insert(_index, idx_coords)
-            _split_coords = dim_object.coords(single=False)
+            split_coords = dim_object.coords()
             cv2.rectangle(
-                image, _split_coords[0], _split_coords[1], (0, 0, 255), 2)
+                image,
+                split_coords.vertex1(),
+                split_coords.vertex2(),
+                (0, 0, 255),
+                2)
 
-            # print("cnt", x, y)
-            # detected_hero = image[y:
-            #             y+height,
-            #             x:
-            #             x+width]
-            # cv2.drawContours(image, [c], -1, (0, 0, 255), thickness=2)
-
-            # cv2.rectangle(image, (x, y), (x+width, y+height), (255, 0, 0), 2)
         if diff < tolerance and (dim_object.size()) > 2500:
-            _split_coords = dim_object.coords(single=False)
 
-            # outside = []
-
-            # outside.append(_split_coords[0])
-            # outside.append(_split_coords[1])
-
-            # addStatus = True
-            # for shape in customContour:
-            #     x1, y1 = shape[0]
-            #     a1, b1 = shape[1]
-            #     if not (a < x1 or a1 < x or b < y1 or b1 < y):
-            #         addStatus = False
-            #         break
-            # if not addStatus:
-            #     continue
             size = dim_object.size()
             if size not in sizes:
                 sizes[size] = []
-            # sizes[height*width].append((height, width, x, y))
             sizes[size].append(dim_object)
 
-            # customContour.append(outside)
             heights.append(dim_object.height)
             widths.append(dim_object.width)
 
         image_number += 1
     load.display_image(image, display=(True and GV.DEBUG))
 
-    # mean = np.mean([i for i in sizes.keys()])
     h_mean = np.median(heights)
     w_mean = np.median(widths)
 
-    # print("mean: ", mean)
     lower_boundary = 1.0 - size_allowance_boundary
     upper_boundary = 1.0 + size_allowance_boundary
     h_low = h_mean * lower_boundary
@@ -278,21 +256,12 @@ def get_hero_contours(image: np.array, size_allowance_boundary: float,
             if (h_low <= dimension_object.height <= h_high) or \
                     (w_low <= dimension_object.width <= w_high):
                 occurrences += 1
-                # if size not in valid_sizes:
-                #     valid_sizes[size] = []
-                # name = "{}x{}_{}x{}".format(
-                #     _coords[0], _coords[1], _coords[2], _coords[3])
-                x_coord, y_coord, width, height = dimension_object.dimensional_values()
-                name = f"{x_coord}x{y_coord}_{width}x{height}"
+                segment_rectangle = dimension_object.dimensional_values()
+                name = (f"{segment_rectangle.x}x{segment_rectangle.y}_"
+                        f"{segment_rectangle.width}x{segment_rectangle.height}")
 
                 valid_sizes[name] = dimension_object
 
-    # length = len(detected_contour)
-    # for i in sizes.values():
-    #     length += len(i)
-    # print("occurrences: {}/{} {}%".format(occurrences,
-    #       length, occurrences/length * 100))
-    # print("sizes", sorted(valid_sizes))
     return valid_sizes
 
 
@@ -406,18 +375,18 @@ def get_heroes(image: np.ndarray,  blur_args: dict,
         # print("row({}) length: {}".format(_row_index, len(hero_row)))
         for _object_index, row_item in enumerate(hero_row):
 
-            x_coord = row_item.dimensions.x
-            y_coord = row_item.dimensions.y
+            coord_tuple = row_item.dimensions.coords()
+            # y_coord = row_item.dimensions.y
 
-            x2_coord = row_item.dimensions.x2
-            y2_coord = row_item.dimensions.y2
+            # x2_coord = row_item.dimensions.x2
+            # y2_coord = row_item.dimensions.y2
 
             _hero_name = row_item.name
 
-            segmented_image = original_image_unmodifiable[y_coord:
-                                                          y2_coord,
-                                                          x_coord:
-                                                          x2_coord]
+            segmented_image = original_image_unmodifiable[coord_tuple.y1:
+                                                          coord_tuple.y2,
+                                                          coord_tuple.x1:
+                                                          coord_tuple.x2]
             # load.display_image(segmented_hero, display=True)
 
             if si_adjustment:
@@ -426,12 +395,11 @@ def get_heroes(image: np.ndarray,  blur_args: dict,
                 x_adjust = round(width * si_adjustment)
                 y_adjust = round(height * si_adjustment)
 
-                _new_x = max(round(x_coord - x_adjust), 0)
-                _new_y = max(round(y_coord - y_adjust), 0)
-                segmented_image_copy = original_image_unmodifiable[_new_y:
-                                                                   y2_coord,
-                                                                   _new_x:
-                                                                   x2_coord]
+                _new_x = max(round(coord_tuple.x1 - x_adjust), 0)
+                _new_y = max(round(coord_tuple.y1 - y_adjust), 0)
+                segmented_image_copy = (
+                    original_image_unmodifiable[_new_y:coord_tuple.y2,
+                                                _new_x:coord_tuple.x2])
                 modifiable_segmented_image = segmented_image_copy.copy()
                 blurred = blur_image(modifiable_segmented_image, reverse=True, hsv_range=[
                     np.array([4, 69, 83]), np.array([23, 255, 355])])
@@ -452,8 +420,10 @@ def get_heroes(image: np.ndarray,  blur_args: dict,
 
                 # (dimensions, name)
                 _temp_row_item = RI.RowItem(
-                    (x2_coord-contour_w, y2_coord-contour_h,
-                     contour_w, contour_h))
+                    DO.SegmentRectangle(coord_tuple.x2-contour_w,
+                                        coord_tuple.y2-contour_h,
+                                        contour_w,
+                                        contour_h))
 
                 collision_item_id = hero_row.check_collision(
                     _temp_row_item, size_allowance_boundary=0.07,
@@ -486,33 +456,27 @@ def get_heroes(image: np.ndarray,  blur_args: dict,
                 #                    multiple=True)
                 # segmented_image = new_ROI
                 if GV.DEBUG:
-                    _merged_coords = merged_row_item.dimensions.coords(
-                        single=False)
-                    cv2.rectangle(GV.IMAGE_SS, _merged_coords[0],
-                                  _merged_coords[1], (255, 0, 0), 2)
+                    merged_vertex = merged_row_item.dimensions.coords()
+                    cv2.rectangle(GV.IMAGE_SS,
+                                  merged_vertex.vertex1(),
+                                  merged_vertex.vertex2(),
+                                  (255, 0, 0), 2)
             hero_dict[_hero_name] = {}
             if GV.verbosity(1):
                 height, width = segmented_image.shape[:2]
-                _coords = merged_row_item.dimensions.coords(single=False)
+                vertex_tuple = merged_row_item.dimensions.coords()
                 cv2.rectangle(
-                    GV.IMAGE_SS, _coords[0], _coords[1], (0, 0, 0), 2)
-            # if removeBG:
-            #     out, poly = remove_background(segmented_image)
+                    GV.IMAGE_SS,
+                    vertex_tuple.vertex1(),
+                    vertex_tuple.vertex2(),
+                    (0, 0, 0), 2)
 
-            #     heroes[_hero_name]["image"] = out
-            #     heroes[_hero_name]["poly"] = poly
-            # else:
-            model_image_size = (416, 416)
+            model_image_size = (GV.MODEL_IMAGE_SIZE, GV.MODEL_IMAGE_SIZE)
             segmented_image = cv2.resize(
                 segmented_image,
                 model_image_size,
                 interpolation=cv2.INTER_CUBIC)
-            hero_dict[_hero_name] = SegmentResult(_hero_name, segmented_image, row_item)
-
-        # columns = [hero_row.columns.find_column(_row_item) for _row_item in hero_row]
-        # print(columns)
-        # load.display_image([heroes[_row_item.name]["image"]
-        #                    for _row_item in hero_row], multiple=True,
-        #                    display=True)
+            hero_dict[_hero_name] = SegmentResult(
+                _hero_name, segmented_image, row_item)
 
     return hero_dict, hero_matrix

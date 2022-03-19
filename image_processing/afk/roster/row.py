@@ -17,6 +17,7 @@ import image_processing.afk.roster.RowItem as RI
 
 if TYPE_CHECKING:
     import image_processing.afk.roster.column_objects as CO
+    from image_processing.afk.roster.dimensions_object import SegmentRectangle
 
 
 class RowIntersectionException(Exception):
@@ -53,7 +54,7 @@ class Row():
 
         self._row_items: list[RI.RowItem] = []
         self._idx = 0
-        self.rtree = rtree.index.Index()
+        self.rtree = rtree.index.Index(interleaved=False)
         self.columns = columns
         self.head: int = None
         self.avg_width = 0
@@ -204,11 +205,12 @@ class Row():
             self.avg_width - remove_num) / (len(self._row_items) - 1))
         return output
 
-    def append(self, dimensions, name: str = None, detect_collision=True):
+    def append(self, dimensions: "SegmentRectangle", name: str = None, detect_collision=True):
         """
         Adds a new RowItem to Row
         Args:
-            dimensions: x,y,width,height of object
+            dimensions (SegmentRectangle): named tuple
+                containing (x,y,width,height)
             name: identifier for row item, can be used for lookup later
             detect_collision: check for object overlap/collisions when
                 appending to row
@@ -313,8 +315,8 @@ class Row():
             'collision_item_id'(int)
         """
         _collision_row_item = self._row_items_by_id[collision_item_id]
-        _collision_item_coordinates = _collision_row_item.\
-            dimensions.coords()
+        _collision_item_coordinates = (
+            _collision_row_item.dimensions.coords())
 
         old_coords = _collision_row_item.dimensions.coords()
         # old_width = _collision_row_item.dimensions.width

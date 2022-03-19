@@ -131,4 +131,5 @@ def get_db(rebuild: bool = GV.REBUILD, enriched_db=True):
 
 if __name__ == "__main__":
     GV.VERBOSE_LEVEL = 2
+    # GV.DEBUG = True
     get_db(rebuild=True, enriched_db=True)

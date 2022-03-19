@@ -5,12 +5,126 @@ The DimensionsObject is used to wrap/interact with objects that existing in
 space at a certain location, storing information such as the x and y
 coordinates as well as the width and height of the object
 """
-from typing import Union
+from typing import NamedTuple, Tuple, Union, Any
 
 import numpy as np
 
 import image_processing.globals as GV
 import image_processing.load_images as load
+
+
+class SegmentRectangle(NamedTuple):
+    """_summary_
+
+    Args:
+        NamedTuple (_type_): _description_
+    """
+    x: int
+    y: int
+    width: int
+    height: int
+
+
+class DoubleCoordinates(NamedTuple):
+    """_summary_
+
+    Args:
+        Namedtuple (_type_): _description_
+    """
+    x1: int
+    x2: int
+    y1: int
+    y2: int
+
+    # def __init__(self, x1: int, x2: int, y1: int, y2: int):
+    #     """_summary_
+
+    #     Args:
+    #         x1 (int): _description_
+    #         x2 (int): _description_
+    #         y1 (int): _description_
+    #         y2 (int): _description_
+    #     """
+    #     self._cur_iter = 0
+    #     self._items = [x1, x2, y1, y2]
+    #     self.__dict__["x1"] = x1
+    #     self.__dict__["x2"] = x2
+    #     self.__dict__["y1"] = y1
+    #     self.__dict__["y2"] = y2
+
+    # def __setattr__(self, name: str, value: Any) -> None:
+
+    #     if name in ("x1", "x2", "y1", "y2"):
+    #         raise TypeError(
+    #             "DoubleCoordinates object does not support item assignment")
+    #     else:
+    #         return super().__setattr__(name, value)
+
+    # def __iter__(self):
+    #     return self
+
+    # def __len__(self):
+    #     return len(self._items)
+
+    # def __next__(self):
+    #     """_summary_
+
+    #     Raises:
+    #         StopIteration: _description_
+
+    #     Returns:
+    #         _type_: _description_
+    #     """
+
+    #     if self._cur_iter < len(self._items):
+    #         self._cur_iter += 1
+    #         return self._items[self._cur_iter - 1]
+    #     self._cur_iter = 0
+    #     raise StopIteration
+
+    # def __getitem__(self, index: int):
+    #     """
+    #     Fetch the element at index
+
+    #     Args:
+    #         index (int): Index of list to get
+    #     """
+    #     return self._items[index]
+
+
+    def vertex1(self):
+        """_summary_
+
+        Raises:
+            IndexError: _description_
+
+        Returns:
+            _type_: _description_
+        """
+
+        return Coordinates(self.x1, self.y1)
+
+    def vertex2(self):
+        """_summary_
+
+        Raises:
+            IndexError: _description_
+
+        Returns:
+            _type_: _description_
+        """
+
+        return Coordinates(self.x2, self.y2)
+
+
+class Coordinates(NamedTuple):
+    """_summary_
+
+    Args:
+        NamedTuple (_type_): _description_
+    """
+    x: int
+    y: int
 
 
 class DimensionsObject:
@@ -24,7 +138,7 @@ class DimensionsObject:
     def __str__(self):
         return f"({self.x},{self.y},{self.width},{self.height})"
 
-    def __init__(self, dimensions, full_number: bool = True):
+    def __init__(self, dimensions: SegmentRectangle, full_number: bool = True):
         """
         Create a Dimensions object to hold x,y coordinates as well as
             width and height. Any changes made to x(x2) or y(y2)
@@ -32,15 +146,16 @@ class DimensionsObject:
             for that dimension. Because of this capability always modify,
             x/x2/y/y2 when trying to change width and height.
         Args:
-            dimensions: tuple containing (x,y, width, height)
+            dimensions (SegmentRectangle): named tuple
+                containing (x,y, width, height)
             full_number: flag to enforce all 'DimensionObject' values to
                 be whole numbers during its lifetime
         """
         self.__dict__["full_number"] = full_number
-        self.x = dimensions[0]
-        self.y = dimensions[1]
-        self.width = dimensions[2]
-        self.height = dimensions[3]
+        self.x = dimensions.x
+        self.y = dimensions.y
+        self.width = dimensions.width
+        self.height = dimensions.height
         self.x2 = self.x + self.width
         self.y2 = self.y + self.height
 
@@ -72,7 +187,7 @@ class DimensionsObject:
             will also be automatically updated
         """
         if isinstance(value, (int, float)):
-            if self.full_number: #pylint: disable=no-member
+            if self.full_number:  # pylint: disable=no-member
                 self.__dict__[name] = int(value)
             if (name in ["x", "x2"] and "x" in self.__dict__ and "x2" in
                     self.__dict__):
@@ -175,44 +290,23 @@ class DimensionsObject:
             self.x2 = max(self.x2, dimensions_object.x2)
             self.y2 = max(self.y2, dimensions_object.y2)
 
-    def coords(self, single=True) -> list:
+    def coords(self):
         """
-        return top left and bottom right coordinate pairs
+        Get coordinates of dimension object
 
-        Args:
-            single: flag to return coordinates as single list
         Return:
-            On single=True
-
-            list(x1,y1,x2,y2)
-
-            otherwise list of tuples
-
-            list(TopLeft(x1,y1), BottomRight(x2,y2))
+            [DoubleCoordinates]: named tuple containing (x1, x2, y1, y2)
         """
-        if single:
-            return [self.x, self.y, self.x2, self.y2]
-        else:
-            return [(self.x, self.y), (self.x2, self.y2)]
+        return DoubleCoordinates(self.x, self.x2, self.y, self.y2)
 
-    def dimensional_values(self, single=True):
+    def dimensional_values(self):
         """
-        Return the values stored in the dimension object in two formats
-
-        ((x,y), (width, height)) when single=False
-        (x,y,width,height) when single = True
-
-        Args:
-            single (bool, optional): Flag to return a dimensional_values in a
-                single tuple. Defaults to True.
+        Return the coordinates and width/height values for the dimension object
 
         Returns:
-            [tuple]: [description]
+            [SegmentRectangle]: named tuple containing (x, y, width, height)
         """
-        if single:
-            return (self.x, self.y, self.width, self.height)
-        else:
-            return ((self.x, self.y), (self.width, self.height))
+        return SegmentRectangle(self.x, self.y, self.width, self.height)
 
     def size(self):
         """
@@ -230,7 +324,7 @@ class DimensionsObject:
         """
         x_width = max(0, min(self.x2, dim_object.x2) -
                       max(self.x, dim_object.x))
-        y_height=max(0, min(self.y2, dim_object.y2) -
+        y_height = max(0, min(self.y2, dim_object.y2) -
                        max(self.y, dim_object.y))
         return x_width * y_height
 
@@ -244,13 +338,28 @@ class DimensionsObject:
             tuple(int, float, float) of area of overlap, self percent overlap,
                 and 'dim_object' percent overlap
         """
-        raw_overlap=self.overlap(dim_object)
+        raw_overlap = self.overlap(dim_object)
         return (raw_overlap, raw_overlap/self.size(),
                 raw_overlap/dim_object.size())
 
-    def _display(self, image: np.ndarray, *args, **kwargs):
-        display_object = image[self.y:
-                               self.y2,
-                               self.x:
-                               self.x2]
+    def _display(self, source_image: np.ndarray, *args, **kwargs):
+        display_object = source_image[self.y:
+                                      self.y2,
+                                      self.x:
+                                      self.x2]
         load.display_image(display_object, *args, **kwargs)
+
+    def create_image(self, source_image: np.ndarray):
+        """_summary_
+
+        Args:
+            source_image (np.ndarray): _description_
+
+        Returns:
+            _type_: _description_
+        """
+        image_segment = source_image[self.y:
+                                     self.y2,
+                                     self.x:
+                                     self.x2]
+        return image_segment

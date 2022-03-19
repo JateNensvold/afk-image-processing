@@ -111,7 +111,7 @@ class Matrix():
         else:
             return avg_gap
 
-    def auto_append(self, dimensions: tuple, name: str,
+    def auto_append(self, dimensions: DO.SegmentRectangle, name: str,
                     detect_collision: bool = True,
                     dimension_object=False):
         """
@@ -230,23 +230,19 @@ class Matrix():
                                 extra_gap_width = extra_gap/extra_gap_number
 
                                 _avg_height = self.get_avg_height()
-                                # print(_row_object)
 
                                 for _itr in range(missing_row_items):
-                                    # print(_itr)
-                                    _temp_dims = (
+                                    _temp_dims = DO.SegmentRectangle(
                                         left_x + extra_gap_width,
-                                        _row_object._get_row_bottom(
-                                        ) - _avg_height,
-                                        _avg_width, _avg_height)
+                                        _row_object._get_row_bottom() - _avg_height,
+                                        _avg_width,
+                                        _avg_height)
                                     _temp_dim_object = DO.DimensionsObject(
                                         _temp_dims)
-                                    # print(_temp_dim_object)
                                     left_x = _temp_dim_object.x2
                                     _row_object.append(
                                         _temp_dim_object,
                                         detect_collision=False)
-                                    # print(_row_object)
 
                             elif closest_left:
                                 _avg_height = self.get_avg_height()
@@ -261,7 +257,7 @@ class Matrix():
                                 _leftover_gap = gap_size
 
                                 while _leftover_gap > _avg_width:
-                                    _temp_dims = (
+                                    _temp_dims = DO.SegmentRectangle(
                                         left_x + _avg_gap,
                                         _row_object._get_row_bottom(
                                         ) - _avg_height,
@@ -286,7 +282,7 @@ class Matrix():
 
                                 _leftover_gap = gap_size
                                 while _leftover_gap > _avg_width:
-                                    _temp_dims = (
+                                    _temp_dims = DO.SegmentRectangle(
                                         right_x - _avg_width,
                                         _row_object._get_row_bottom(
                                         ) - _avg_height,
