@@ -10,7 +10,8 @@ from typing import NamedTuple, Tuple, Union, Any
 import numpy as np
 
 import image_processing.globals as GV
-import image_processing.load_images as load
+from image_processing.load_images import display_image
+from image_processing.processing.types import CONTOUR
 
 
 class SegmentRectangle(NamedTuple):
@@ -25,7 +26,11 @@ class SegmentRectangle(NamedTuple):
     height: int
 
 
-class DoubleCoordinates(NamedTuple):
+class DoubleCoordinates(NamedTuple("DoubleCoordinates",
+                                   [("x1", int),
+                                    ("x2", int),
+                                    ("y1", int),
+                                    ("y2", int)])):
     """_summary_
 
     Args:
@@ -36,61 +41,10 @@ class DoubleCoordinates(NamedTuple):
     y1: int
     y2: int
 
-    # def __init__(self, x1: int, x2: int, y1: int, y2: int):
-    #     """_summary_
+    def __new__(cls: type["DoubleCoordinates"],
+                x1: int, x2: int, y1: int, y2: int) -> "DoubleCoordinates":
 
-    #     Args:
-    #         x1 (int): _description_
-    #         x2 (int): _description_
-    #         y1 (int): _description_
-    #         y2 (int): _description_
-    #     """
-    #     self._cur_iter = 0
-    #     self._items = [x1, x2, y1, y2]
-    #     self.__dict__["x1"] = x1
-    #     self.__dict__["x2"] = x2
-    #     self.__dict__["y1"] = y1
-    #     self.__dict__["y2"] = y2
-
-    # def __setattr__(self, name: str, value: Any) -> None:
-
-    #     if name in ("x1", "x2", "y1", "y2"):
-    #         raise TypeError(
-    #             "DoubleCoordinates object does not support item assignment")
-    #     else:
-    #         return super().__setattr__(name, value)
-
-    # def __iter__(self):
-    #     return self
-
-    # def __len__(self):
-    #     return len(self._items)
-
-    # def __next__(self):
-    #     """_summary_
-
-    #     Raises:
-    #         StopIteration: _description_
-
-    #     Returns:
-    #         _type_: _description_
-    #     """
-
-    #     if self._cur_iter < len(self._items):
-    #         self._cur_iter += 1
-    #         return self._items[self._cur_iter - 1]
-    #     self._cur_iter = 0
-    #     raise StopIteration
-
-    # def __getitem__(self, index: int):
-    #     """
-    #     Fetch the element at index
-
-    #     Args:
-    #         index (int): Index of list to get
-    #     """
-    #     return self._items[index]
-
+        return super().__new__(cls, int(x1), int(x2), int(y1), int(y2))
 
     def vertex1(self):
         """_summary_
@@ -136,9 +90,13 @@ class DimensionsObject:
     # pylint: disable=invalid-name
 
     def __str__(self):
-        return f"({self.x},{self.y},{self.width},{self.height})"
+        return f"DimensionsObject<x={self.x},y={self.y},w={self.width},h={self.height}>"
 
-    def __init__(self, dimensions: SegmentRectangle, full_number: bool = True):
+    def __repr__(self) -> str:
+        return str(self)
+
+    def __init__(self, dimensions: SegmentRectangle, raw_data: CONTOUR = None,
+                 full_number: bool = True):
         """
         Create a Dimensions object to hold x,y coordinates as well as
             width and height. Any changes made to x(x2) or y(y2)
@@ -152,6 +110,7 @@ class DimensionsObject:
                 be whole numbers during its lifetime
         """
         self.__dict__["full_number"] = full_number
+        self.raw_data = raw_data
         self.x = dimensions.x
         self.y = dimensions.y
         self.width = dimensions.width
@@ -347,7 +306,7 @@ class DimensionsObject:
                                       self.y2,
                                       self.x:
                                       self.x2]
-        load.display_image(display_object, *args, **kwargs)
+        display_image(display_object, *args, **kwargs)
 
     def create_image(self, source_image: np.ndarray):
         """_summary_

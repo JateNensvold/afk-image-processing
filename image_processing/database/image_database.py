@@ -3,7 +3,7 @@ from typing import Any, Dict, List, TypedDict, Union
 import cv2
 import numpy as np
 
-from image_processing.processing import SegmentResult
+from image_processing.processing.image_data import SegmentResult
 import image_processing.globals as GV
 from image_processing.afk.hero.hero_data import HeroImage
 from image_processing.load_images import CropImageInfo, crop_heroes, display_image
@@ -134,7 +134,7 @@ class HeroMatchList:
         if self.current_iter < len(self.hero_matches):
             self.current_iter += 1
             return self.hero_matches[self.current_iter - 1]
-        self._cur_iter = 0
+        self.current_iter = 0
         raise StopIteration
 
     def __getitem__(self, index: int):
@@ -386,13 +386,11 @@ class ImageSearch():
         gray_image = cv2.cvtColor(hero_image, cv2.COLOR_BGR2GRAY)
 
         width, height = gray_image.shape[:2]
-        ascpect_ratio = width/height
         new_width = int(GV.HERO_PORTRAIT_SIZE * image_multiplier)
         image_scale = new_width/width
         new_height = int(height * image_scale)
         resized_image = cv2.resize(
             gray_image, (new_height, new_width))
-
 
         if crop_info:
             cropped_heroes_list = crop_heroes([resized_image], crop_info)

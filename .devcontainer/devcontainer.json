@@ -35,7 +35,7 @@
 		"python.linting.pydocstylePath": "/usr/local/py-utils/bin/pydocstyle",
 		"python.linting.pylintPath": "/usr/local/py-utils/bin/pylint",
 		"python.linting.pylintArgs": [
-			"--generate-members",
+			// "--generate-members",
 			"--extension-pkg-whitelist=cv2"
 		],
 		"editor.rulers": [

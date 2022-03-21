@@ -1,20 +1,29 @@
-import image_processing.afk.roster.dimensions_object as DO
+from image_processing.afk.roster.dimensions_object import (
+    DimensionsObject, SegmentRectangle)
 
 
 class RowItem():
-    def __str__(self):
-        return "({} {})".format(self.name, self.dimensions)
+    """_summary_
+    """
 
-    def __init__(self, dimensions: DO.SegmentRectangle, name: str = None):
+    def __str__(self):
+        """_summary_
+
+        Returns:
+            _type_: _description_
+        """
+        return f"({self.name} {self.dimensions})"
+
+    def __init__(self, dimensions: SegmentRectangle, name: str = None):
         """
         Create RowItem object from dimensions and name
 
         Args:
-            dimensions (SegmentRectangle): named tuple 
+            dimensions (SegmentRectangle): named tuple
                 containing (x,y, width, height)
             name: name of RowItem
         """
-        self.dimensions = DO.DimensionsObject(dimensions)
+        self.dimensions = DimensionsObject(dimensions)
         if name is None:
             self.name = id(self)
         else:
@@ -24,7 +33,7 @@ class RowItem():
         self.alias.add(id(self))
         self.column = None
 
-    def __getitem__(self, index: int) -> int:
+    def __getitem__(self, index: int):
         """
         Return dimension attribute found at 'index'
 

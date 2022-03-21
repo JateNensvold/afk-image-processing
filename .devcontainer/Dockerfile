@@ -11,13 +11,13 @@ ARG BUILD_TYPE
 
 
 # Install Cuda packages
-RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin && \
-   mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600 && \
-   wget https://developer.download.nvidia.com/compute/cuda/11.3.0/local_installers/cuda-repo-ubuntu2004-11-3-local_11.3.0-465.19.01-1_amd64.deb && \
-   dpkg -i cuda-repo-ubuntu2004-11-3-local_11.3.0-465.19.01-1_amd64.deb && \
-   apt-key add /var/cuda-repo-ubuntu2004-11-3-local/7fa2af80.pub && \
-   ls -la && \ 
-   rm cuda-repo-ubuntu2004-11-3-local_11.3.0-465.19.01-1_amd64.deb
+# RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin && \
+#    mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600 && \
+#    wget https://developer.download.nvidia.com/compute/cuda/11.3.0/local_installers/cuda-repo-ubuntu2004-11-3-local_11.3.0-465.19.01-1_amd64.deb && \
+#    dpkg -i cuda-repo-ubuntu2004-11-3-local_11.3.0-465.19.01-1_amd64.deb && \
+#    apt-key add /var/cuda-repo-ubuntu2004-11-3-local/7fa2af80.pub && \
+#    ls -la && \ 
+#    rm cuda-repo-ubuntu2004-11-3-local_11.3.0-465.19.01-1_amd64.deb
 
 
 
@@ -32,7 +32,7 @@ RUN apt-get update && \
    libsm6 \
    libxext6 \
    vim \
-   cuda-toolkit-11-3 \
+   # cuda-toolkit-11-3 \
    apt-transport-https && \
    # postgresql \
    # postgresql-contrib \

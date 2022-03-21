@@ -2,6 +2,7 @@ import glob
 from typing import List, NamedTuple, Union
 
 import cv2
+import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -17,6 +18,9 @@ class CropImageInfo(NamedTuple):
     y_bottom: float
 
 
+TARGET_BACKEND = "tkagg"
+
+
 def display_image(image: Union[np.ndarray, List[np.ndarray]],
                   multiple: bool = False, display: bool = False,
                   color_correct: bool = True, colormap: bool = False):
@@ -26,25 +30,33 @@ def display_image(image: Union[np.ndarray, List[np.ndarray]],
 
     Args:
         image (np.ndarray): image to display
-        multiple (bool, optional): [description]. Defaults to False.
-        display (bool, optional): [description]. Defaults to GV.DEBUG.
-        color_correct (bool, optional): [description]. Defaults to True.
-        colormap (bool, optional): [description]. Defaults to False.
+        multiple (bool, optional): Flag to treat 'image' as a list of images.
+            Defaults to False.
+        display (bool, optional): flag used to control if the image should be
+            displayed. Defaults to GV.DEBUG so most images are only shown when
+            running in debug mode
+        color_correct (bool, optional): flag to convert color from BGR to
+            RGB. Defaults to True.
+        colormap (bool, optional): flag to treat image as a grayscale image.
+            Defaults to False.
     """
-    # backend = matplotlib.get_backend()
-
-    # if backend.lower() != 'tkagg':
-    #     if GV.verbosity(1):
-    #         print("Backend: {}".format(backend))
-    #     plt.switch_backend("tkagg")
 
     if not (display or GV.DEBUG):
         return
 
+    backend = matplotlib.get_backend()
+
+    if backend.lower() != TARGET_BACKEND:
+        if GV.verbosity(1):
+            print(
+                f"Changing matplotlib backend from ({backend}) to "
+                f"({TARGET_BACKEND})")
+        plt.switch_backend(TARGET_BACKEND)
+
     if multiple or isinstance(image, list):
         image = concat_resize(image)
-    elif color_correct and len(image.shape) == 3:
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    # elif color_correct and len(image.shape) == 3:
+    #     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     plt.ion()
 
     plt.figure()

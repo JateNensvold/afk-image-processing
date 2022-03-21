@@ -2,8 +2,9 @@ import os
 import time
 import cv2
 
-import image_processing.afk.detect_image_attributes as detect
-import image_processing.build_db as BD
+# from image_processing.afk.detect_image_attributes import
+from image_processing.afk.detect_image_attributes import detect_signature_item
+from image_processing.build_db import get_db
 import image_processing.globals as GV
 
 
@@ -77,7 +78,7 @@ def parse_dict(json_dict: dict, hero_dict: dict, hero_dir: str,
 
 
 if __name__ == "__main__":
-    imageDB = BD.get_db(enriched_db=True)
+    imageDB = get_db(enriched_db=True)
 
     if GV.TRUTH:
 
@@ -89,7 +90,7 @@ if __name__ == "__main__":
                     GV.HERO_VALIDATION_DIR, image_file_name)
                 image = cv2.imread(file_path)
                 image_hero_dict = {}
-                hero_json_dict = detect.get_si(
+                hero_json_dict = get_si(
                     image, image_file_name, imageDB=imageDB, hero_dict=image_hero_dict,
                     faction=True)
                 image_hero_dict = image_hero_dict["hero_dict"]
@@ -103,7 +104,7 @@ if __name__ == "__main__":
         #   in with GV.IMAGE_SS(i.e. --image/-i)
         image = GV.IMAGE_SS
         image_hero_dict = {}
-        hero_json_dict = detect.get_si(
+        hero_json_dict = get_si(
             image, GV.IMAGE_SS_NAME, imageDB=imageDB, hero_dict=image_hero_dict,
             faction=True)
         image_hero_dict = image_hero_dict["hero_dict"]

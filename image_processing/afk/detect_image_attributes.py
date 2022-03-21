@@ -11,17 +11,23 @@ import warnings
 
 import cv2
 import numpy as np
+
 from detectron2.structures.instances import Instances
 from pandas import DataFrame
 
 import image_processing.globals as GV
-from image_processing.processing import get_heroes, SegmentResult
+
+from image_processing.load_images import display_image
+from image_processing.afk.hero.process_heroes import (
+    get_heroes, get_hero_contours)
+from image_processing.processing.image_data import SegmentResult
 from image_processing.models.model_attributes import (
     ASCENSION_STAR_LABELS, BORDER_MODEL_LABELS, FI_LABELS, ModelResult,
     SI_LABELS)
 from image_processing.afk.roster.matrix import Matrix
 from image_processing.afk.hero.hero_data import (
     DetectedHeroData, HeroImage, RosterData)
+from image_processing.afk.roster.dimensions_object import DoubleCoordinates
 
 if TYPE_CHECKING:
     from image_processing.models.yolov5.models.common import Detections
@@ -31,6 +37,7 @@ warnings.filterwarnings("ignore")
 FONT = cv2.FONT_HERSHEY_SIMPLEX
 COLOR = (255, 255, 0)
 THICKNESS = 2
+IMAGES: List[np.ndarray] = []
 
 
 def detect_features(roster_image: np.ndarray, debug_raw: bool = None):
@@ -168,11 +175,16 @@ def detect_ascension(detected_ascension_stars: DataFrame,
         _type_: _description_
     """
     ascension_result = ModelResult("E", 0)
-
+    best_match_coordinates = None
     if len(detected_ascension_stars) > 0:
         best_ascension_stars_match = detected_ascension_stars.sort_values(
             "confidence", ascending=False).iloc[0]
-        # print(best_ascension_stars_match)
+        best_match_coordinates = DoubleCoordinates(
+            best_ascension_stars_match["xmin"],
+            best_ascension_stars_match["xmax"],
+            best_ascension_stars_match["ymin"],
+            best_ascension_stars_match["ymax"])
+
         best_ascension_stars_label = ASCENSION_STAR_LABELS[
             best_ascension_stars_match["class"]]
 
@@ -211,16 +223,80 @@ def detect_ascension(detected_ascension_stars: DataFrame,
                 best_ascension_border = ascension_border_results[0]
                 ascension_result = best_ascension_border
 
-    return ascension_result
+    return ascension_result, best_match_coordinates
 
 
-def detect_engraving_(engraving_result: ModelResult, image: np.ndarray):
+def detect_engraving(ascension_result: ModelResult, image: np.ndarray,
+                     star_coordinates: DoubleCoordinates):
     """_summary_
-    """
 
+    Args:
+        ascension_result (ModelResult): _description_
+        image (np.ndarray): _description_
+        star_coordinates (DoubleCoordinates): _description_
+
+    Returns:
+        _type_: _description_
+    """
     engraving_result = ModelResult("0", 0)
-    if engraving_result.label in ASCENSION_STAR_LABELS:
-        engraving_result
+    print(ascension_result.label)
+    if ascension_result.label in ASCENSION_STAR_LABELS.inverse:
+        pass
+        # temp_image = image[star_coordinates.y1:star_coordinates.y2,
+        #                    star_coordinates.x1:star_coordinates.x2]
+        # hsv_range = [
+        #     np.array([0, 0, 178]), np.array([179, 255, 255])]
+        # # new_image = blur_image(temp_image, dilate=True, hsv_range=hsv_range)
+        # # print(new_image.shape)
+        # contour_dict = get_hero_contours(
+        #     temp_image, size_allowance_boundary=0.15, hsv_range=hsv_range)
+        # mask = np.zeros(temp_image.shape, np.uint8)
+
+        # for counter_name, contour_dimension_object in contour_dict.items():
+        #     cv2.drawContours(
+        #         mask, [contour_dimension_object.raw_data], -1, 255, -1)
+
+        # display_image([temp_image, mask], display=True)
+
+        # (hue_min = 0 , saturation_min = 0, value_min = 178), (hue_max = 179 , saturation_max = 255, value_max = 255)
+
+        # Load the image into an array: image
+        # crop image if necessary - required for the original test image because of wide left/right borders, but new image doesn't have borders
+        # image = image[100:560, 368:864, :]
+
+        # show the cropped image
+
+        # Z = temp_image.reshape((-1,3))
+
+        # # convert to np.float32
+        # Z = np.float32(Z)
+
+        # # define criteria, number of clusters(K) and apply kmeans()
+        # criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+        # K = 2
+        # ret,label,center=cv2.kmeans(Z,K,None,criteria,10,cv2.KMEANS_RANDOM_CENTERS)
+
+        # # Now convert back into uint8, and make original image
+        # center = np.uint8(center)
+        # res = center[label.flatten()]
+        # res2 = res.reshape((temp_image.shape))
+
+        # display_image([temp_image, res2], display=True)
+        # print(best_ascension_stars_match)
+        # print(temp_image.shape)
+        # cv2.rectangle(temp_image,
+        #               best_match_coordinates.vertex1(),
+        #               best_match_coordinates.vertex2(),
+        #               255, 1)
+
+        # global IMAGES
+        # IMAGES.append(temp_image)
+        # # display_image(temp_image, display=True)
+        # if len(IMAGES) % 5 == 0:
+        #     display_image(IMAGES, display=True)
+        #     IMAGES = []
+
+    return engraving_result
 
 
 def detect_attributes(hero_image_info: HeroImage, segment_info: SegmentResult):
@@ -241,7 +317,7 @@ def detect_attributes(hero_image_info: HeroImage, segment_info: SegmentResult):
     test_img = segment_info.image[..., ::-1]
 
     # pylint: disable=not-callable
-    raw_model_results: Detections = GV.FI_SI_STAR_MODEL([test_img], size=416)
+    raw_model_results: "Detections" = GV.FI_SI_STAR_MODEL([test_img], size=416)
     labeled_model_results: DataFrame = raw_model_results.pandas().xyxy[0]
 
     detected_furniture: DataFrame = labeled_model_results.loc[
@@ -252,10 +328,11 @@ def detect_attributes(hero_image_info: HeroImage, segment_info: SegmentResult):
         labeled_model_results['class'].isin(SI_LABELS.keys())]
 
     furniture_result = detect_furniture(detected_furniture)
-    ascension_result = detect_ascension(detected_ascension_stars, test_img)
+    ascension_result, star_coordinates = detect_ascension(
+        detected_ascension_stars, test_img)
     signature_item_result = detect_signature_item(detected_signature_items)
-    engraving_result = ModelResult("0", 0)
-    # TODO detect engravings here
+    engraving_result = detect_engraving(
+        ascension_result, test_img, star_coordinates)
 
     hero_data = DetectedHeroData(hero_image_info.name, signature_item_result,
                                  furniture_result, ascension_result,

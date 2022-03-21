@@ -6,7 +6,7 @@ import imutils
 import numpy as np
 import matplotlib.pyplot as plt
 
-import image_processing.processing as processing
+from image_processing.processing.image_processing import blur_image
 import image_processing.globals as GV
 # Need this import to use imutils.contours.sort_contours,
 #   without it Module raises AttributeError
@@ -179,7 +179,7 @@ def signature_template_mask(templates: dict):
 
                 hsv_range = [np.array([0, 0, 206]), np.array([159, 29, 255])]
 
-                thresh = processing.blur_image(
+                thresh = blur_image(
                     template_image, hsv_range=hsv_range, reverse=True)
 
             else:
@@ -462,7 +462,7 @@ def _detect_furniture_item(hero: np.ndarray, fi_dict: dict,
 # (RMin = 133 , GMin = 61, BMin = 35), (RMax = 255 , GMax = 151, BMax = 120)
     rgb_range = [np.array([133, 61, 35]), np.array([255, 151, 120])]
 
-    blur_hero = processing.blur_image(crop_hero, rgb_range=rgb_range)
+    blur_hero = blur_image(crop_hero, rgb_range=rgb_range)
 
     fi_color_contours = cv2.findContours(
         blur_hero, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
