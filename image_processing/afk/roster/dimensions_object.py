@@ -92,6 +92,16 @@ class DimensionsObject:
     def __str__(self):
         return f"DimensionsObject<x={self.x},y={self.y},w={self.width},h={self.height}>"
 
+    @property
+    def name(self):
+        """_summary_
+
+        Returns:
+            _type_: _description_
+        """
+        # return f"<{self.x},y={self.y},w={self.width},h={self.height}>"
+        return f"{self.x}x{self.y}_{self.width}x{self.height}"
+
     def __repr__(self) -> str:
         return str(self)
 

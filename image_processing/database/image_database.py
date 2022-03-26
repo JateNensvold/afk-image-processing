@@ -6,7 +6,7 @@ import numpy as np
 from image_processing.processing.image_data import SegmentResult
 import image_processing.globals as GV
 from image_processing.afk.hero.hero_data import HeroImage
-from image_processing.load_images import CropImageInfo, crop_heroes, display_image
+from image_processing.load_images import CropImageInfo, crop_heroes
 
 
 FLANN_INDEX_KDTREE = 1
@@ -246,41 +246,6 @@ class HeroMatch:
         for match in new_match.matches:
             self.matches.append(match)
 
-    # @classmethod
-    # def merge(cls, first_matches: List["HeroMatch"],
-    #           second_matches: List["HeroMatch"]):
-    #     """_summary_
-
-    #     Args:
-    #         first_matches (List[HeroImage]): _description_
-    #         second_matches (List[HeroImage]): _description_
-
-    #     Raises:
-    #         NoMatchException: _description_
-
-    #     Returns:
-    #         _type_: _description_
-    #     """
-    #     match_dict: Dict[str, HeroMatch] = {}
-
-    #     for hero_match in first_matches:
-    #         if hero_match.name not in match_dict:
-    #             match_dict[hero_match.name] = hero_match
-    #         else:
-    #             match_dict[hero_match.name].combine(hero_match)
-
-    #     for hero_match in second_matches:
-    #         if hero_match.name not in match_dict:
-    #             match_dict[hero_match.name] = hero_match
-    #         else:
-    #             match_dict[hero_match.name].combine(hero_match)
-
-    #     sorted_heroes = sorted(
-    #         match_dict.values(),
-    #         key=lambda hero_match: hero_match.match_count,
-    #         reverse=True)
-    #     return sorted_heroes
-
 
 class ImageSearch():
     """
@@ -396,9 +361,7 @@ class ImageSearch():
             cropped_heroes_list = crop_heroes([resized_image], crop_info)
             resized_image = cropped_heroes_list[0]
 
-
         clahe_image = self.clahe.apply(resized_image)
-        display_image([resized_image, clahe_image])
 
         return clahe_image
 
@@ -467,7 +430,8 @@ class ImageSearch():
             of the closest matching image in the database
         """
 
-        hero_image = self.image_pre_process(segment_info.image, crop_info, image_multiplier)
+        hero_image = self.image_pre_process(
+            segment_info.image, crop_info, image_multiplier)
 
         _keypoint, descriptor = self.extractor.detectAndCompute(
             hero_image, None)

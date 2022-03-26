@@ -61,7 +61,7 @@ def build_database(enriched_db: bool = False) -> "ImageSearch":
             if hero_image is None:
                 raise FileNotFoundError(
                     f"Hero Image not found: {hero_path}")
-            hero_name, *_ = re.split("\.", raw_hero_name)
+            hero_name, *_ = re.split(r"\.", raw_hero_name)
             base_images.append(HeroImage(
                 hero_name, hero_image, hero_path))
     image_db: "ImageSearch" = build_flann(base_images, enriched_db=enriched_db)

@@ -5,8 +5,7 @@ Used to split apart the raw image passed from the CLI to processable
 subsections that can be fed to the Models used to detect AFK Arena Hero
 Attributes
 """
-from statistics import median as stat_median
-from typing import Dict, Tuple
+from typing import Any, Dict, List, Tuple
 
 import cv2
 from rtree.index import Index
@@ -15,126 +14,184 @@ import imutils
 #   without it Module raises AttributeError
 # pylint: disable=unused-import
 from imutils import contours  # noqa
-from numpy import array, ndarray, median
+from numpy import array, ndarray
 
 import image_processing.globals as GV
-from image_processing.load_images import display_image
 from image_processing.afk.roster.dimensions_object import (
     DimensionsObject, SegmentRectangle)
 from image_processing.afk.roster.matrix import Matrix
 from image_processing.afk.roster.RowItem import RowItem
-from image_processing.processing.types import CONTOUR, CONTOUR_LIST
+from image_processing.processing.types import CONTOUR_LIST
 from image_processing.processing.image_data import SegmentResult
 from image_processing.processing.image_processing import blur_image
-
+from image_processing.helpers.utils import list_median
 
 # pylint: disable=invalid-name
 HERO_DICT = Dict[str, SegmentResult]
 
 
-def get_hero_contours(image: array, size_allowance_boundary: float,
-                      **blurKwargs):
+class LineSegment():
+    """_summary_
+
+    Returns:
+        _type_: _description_
+    """
+
+    def __init__(self, point1: int, point2: int):
+        """_summary_
+
+        Returns:
+            _type_: _description_
+        """
+        self.point1 = point1
+        self.point2 = point2
+
+    def is_valid(self, new_point: int):
+        """
+        Check if 'new_point' lies on the line segment
+
+        Args:
+            new_point (int): location of point
+            boundary_extension (int): percentage to expand point1 and point2
+                outward by
+        Returns:
+            bool: true if point is on the line, false otherwise
+        """
+
+        return self.point1 <= new_point <= self.point2
+
+
+class ContoursContainer:
+    """_summary_
+    """
+
+    def __init__(self, image: ndarray):
+        """_summary_
+
+        Args:
+            image (ndarray): _description_
+        """
+        self.image = image
+
+        self.raw_contours: CONTOUR_LIST = []
+        self.contours = self._find_contours(image)
+
+    def _find_contours(self, image: ndarray):
+        """
+        Find contours in image and wrap them in Dimension Object before
+        returning them as a list
+
+        Args:
+            image (ndarray): image to find contours on
+        Returns:
+            (List[DimensionObject]): list of contours wrapped
+                by DimensionObjects
+        """
+
+        contours_hierarchy_tuple = cv2.findContours(
+            image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        detected_contours = imutils.grab_contours(
+            contours_hierarchy_tuple)
+        self.raw_contours = sorted(
+            detected_contours, key=cv2.contourArea, reverse=True)
+
+        contour_list: List[DimensionsObject] = []
+        for detected_contour in self.raw_contours:
+            segment_rectangle = SegmentRectangle(
+                *cv2.boundingRect(detected_contour))
+            dim_object = DimensionsObject(segment_rectangle, detected_contour)
+            contour_list.append(dim_object)
+        return contour_list
+
+    def filter_contours(self, dimension_difference: int = 0.2, min_size: int = 2500,
+                        dimension_median_difference: int = 0.15):
+        """Return a list of contours from image that fit criteria passed to
+            this function
+
+        Args:
+            dimension_difference (int, optional): percent difference that a
+                contours height and width can differ by
+                ex 0.2 = height length can be 20% smaller or larger than
+                height/width average((height+width)/2)
+            minimum_size (int, optional) = minimum area that a contour must take
+                up to get added into the index and get added to the average
+                height/width lists
+            dimension_median_difference (int, optional): percentage amount that a
+                'contours' dimension can differ from the median dimension and
+                still be considered a valid contour (returns contours that have
+                boundary outlines that are close to square)
+                ex 0.2 = contour can have a height/width 20% higher or lower
+                than the average
+        """
+
+        rtree_build_index = Index(interleaved=False)
+        contour_dimension_list: List[DimensionsObject] = []
+        lower_boundary = 1.0 - dimension_median_difference
+        upper_boundary = 1.0 + dimension_median_difference
+
+        for contour_index, dim_object in enumerate(self.contours):
+
+            contour_coordinates = dim_object.coords()
+            contour_intersections = list(rtree_build_index.intersection(
+                contour_coordinates))
+            # no contour intersections so add contour to rtree index
+            if len(contour_intersections) == 0:
+                rtree_build_index.insert(contour_index, contour_coordinates)
+
+            dimension_length_difference = abs(
+                dim_object.height - dim_object.width)
+            average_dimension_length = ((
+                dim_object.height + dim_object.width)/2)
+            allowed_dimension_difference = (
+                average_dimension_length * dimension_difference)
+            if (dimension_length_difference < allowed_dimension_difference and
+                    (dim_object.size()) > min_size):
+                contour_dimension_list.append(dim_object)
+
+        median_height = list_median(
+            [dim_object.height for dim_object in contour_dimension_list])
+        median_width = list_median(
+            [dim_object.width for dim_object in contour_dimension_list])
+
+        height_segment = LineSegment(median_height * lower_boundary,
+                                     median_height * upper_boundary)
+        weight_segment = LineSegment(median_width * lower_boundary,
+                                     median_width * upper_boundary)
+
+        valid_contour_list: List[DimensionsObject] = []
+        for dimension_object in contour_dimension_list:
+            if (height_segment.is_valid(dimension_object.height) or
+                    weight_segment.is_valid(dimension_object.width)):
+                valid_contour_list.append(dimension_object)
+
+        return valid_contour_list
+
+    def largest(self):
+        """_summary_
+
+        Returns:
+            _type_: _description_
+        """
+        return self.contours[0]
+
+
+def get_hero_contours(image: array, **blur_kwargs: Dict[str, Any]):
     """
     Args:
         image: hero roster screenshot
-
     Return:
         dict with imageSize as key and
             image_processing.stamina.DimensionalObject's as values
     """
 
-    dilate = blur_image(image, **blurKwargs)
+    dilated_image = blur_image(image, **blur_kwargs)
+    contours_wrapper = ContoursContainer(dilated_image)
 
-    if GV.DEBUG:
-        display_image(dilate)
-
-    # Find contours
-    contours_hierarchy_tuple = cv2.findContours(
-        dilate, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    detected_contours: CONTOUR_LIST = imutils.grab_contours(
-        contours_hierarchy_tuple)
-    # detected_contours[0] - contour
-    # detected_contours[0][0] - list of points
-    # detected_contours[0][0] - point, ndarray of len 2
-    detected_contours = sorted(detected_contours, key=cv2.contourArea,
-                               reverse=True)
-
-    # Iterate through contours and filter for detected_hero
-    image_number = 0
-    sizes: dict[int, list[DimensionsObject]] = {}
-    heights = []
-    widths = []
-
-    idx = Index(interleaved=False)
-
-    for _index, detected_contour in enumerate(detected_contours):
-
-        image_segment_info = SegmentRectangle(
-            *cv2.boundingRect(detected_contour))
-        dim_object = DimensionsObject(image_segment_info, detected_contour)
-        diff = abs(image_segment_info.height - image_segment_info.width)
-        avg_h_w = ((image_segment_info.height + image_segment_info.width)/2)
-        tolerance = avg_h_w * 0.2
-
-        # if GV.DEBUG and display:
-        idx_coords = dim_object.coords()
-        intersections = list(idx.intersection(idx_coords))
-        if not intersections:
-            idx.insert(_index, idx_coords)
-            if GV.DEBUG:
-                split_coords = dim_object.coords()
-                if split_coords.x1 == 198:
-                    display_image(image, display=True)
-
-                cv2.rectangle(
-                    image,
-                    split_coords.vertex1(),
-                    split_coords.vertex2(),
-                    (0, 0, 255),
-                    2)
-
-        if diff < tolerance and (dim_object.size()) > 2500:
-
-            size = dim_object.size()
-            if size not in sizes:
-                sizes[size] = []
-            sizes[size].append(dim_object)
-
-            heights.append(dim_object.height)
-            widths.append(dim_object.width)
-
-        image_number += 1
-    display_image(image, display=GV.DEBUG)
-
-    h_mean = median(heights)
-    w_mean = median(widths)
-
-    lower_boundary = 1.0 - size_allowance_boundary
-    upper_boundary = 1.0 + size_allowance_boundary
-    h_low = h_mean * lower_boundary
-    h_high = h_mean * upper_boundary
-    w_low = w_mean * lower_boundary
-    w_high = w_mean * upper_boundary
-
-    occurrences = 0
-    valid_sizes: Dict[str, DimensionsObject] = {}
-    for _name, size_list in sizes.items():
-
-        for dimension_object in size_list:
-            if (h_low <= dimension_object.height <= h_high) or \
-                    (w_low <= dimension_object.width <= w_high):
-                occurrences += 1
-                segment_rectangle = dimension_object.dimensional_values()
-                name = (f"{segment_rectangle.x}x{segment_rectangle.y}_"
-                        f"{segment_rectangle.width}x{segment_rectangle.height}")
-
-                valid_sizes[name] = dimension_object
-
-    return valid_sizes
+    return contours_wrapper
 
 
-def get_heroes(image: ndarray,  blur_args: dict,
-               size_allowance_boundary: int = 0.15,
+def get_heroes(roster_image: ndarray,  blur_args: dict,
+               dimension_median_difference: int = 0.15,
                si_adjustment: int = 0.2,
                row_eliminate: int = 5,
                ) -> Tuple[HERO_DICT, Matrix]:
@@ -143,15 +200,16 @@ def get_heroes(image: ndarray,  blur_args: dict,
         components that represent all the heroes in the image
 
     Args:
-        image: image/screenshot of hero roster
-        size_allowance_boundary: percentage that each 'contour' boundary must be
+        roster_image: image/screenshot of hero roster
+        dimension_median_difference: percentage that each 'contour' boundary must be
             within the average contour size
         si_adjustment: percent of the image dimensions to take on the left and
             top side of the image to ensure si30/40 capture during hero
             contour re-evaluation(False/None for no adjustment)
         row_eliminate: minimum row size to allow (helps eliminate false
-            positives i.e. similar size shapes as median hero shape) that are
-            near the same size as the median hero detection)
+            positives i.e. helps remove contours of similar size shapes as the
+            median hero shape) that are near the same size as the median
+            hero detection)
         blur_args: keyword arguments for `processing.blur_image` method
 
     Return:
@@ -160,87 +218,46 @@ def get_heroes(image: ndarray,  blur_args: dict,
             (Ma.Matrix) of positions images were detected in
     """
 
-    original_image_modifiable = image.copy()
-    original_image_unmodifiable = image.copy()
-
+    original_image_unmodifiable = roster_image.copy()
     hero_dict: HERO_DICT = {}
-    base_args = (original_image_modifiable, size_allowance_boundary)
-    multi_valid: list[Dict[str, DimensionsObject]] = []
+    contour_container_list: list[ContoursContainer] = []
 
-    # if maxHeroes:
-    # multi_valid.append(get_hero_contours(*baseArgs, dilate=True))
-    del blur_args["hsv_range"]
-    hsv_range = [
-        array([0, 0, 0]), array([179, 255, 192])]
-    multi_valid.append(get_hero_contours(
-        *base_args, hsv_range=hsv_range, **blur_args))
-    # (hMin = 19 , sMin = 0, vMin = 36), (hMax = 179 , sMax = 255, vMax = 208)
-    # hsv_range = [
-    #     array([19, 0, 36]), array([179, 255, 208])]
-    # multi_valid.append(get_hero_contours(
-    #     *base_args, hsv_range=hsv_range, **blur_args))
-    # (hMin = 0 , sMin = 0, vMin = 74), (hMax = 27 , sMax = 253, vMax = 255)
-    base_args = (image.copy(), size_allowance_boundary)
+    blur_args["hsv_range"] = [array([0, 0, 0]), array([179, 255, 192])]
+    contour_container_list.append(get_hero_contours(
+        roster_image, **blur_args).filter_contours(
+            dimension_median_difference=dimension_median_difference))
 
-    # (RMin = 67 , GMin = 55, BMin = 31), (RMax = 255 , GMax = 223, BMax = 169)
     blur_args["reverse"] = True
+    blur_args["hsv_range"] = [array([0, 0, 74]), array([27, 253, 255])]
+    contour_container_list.append(get_hero_contours(
+        roster_image, **blur_args).filter_contours(
+            dimension_median_difference=dimension_median_difference))
 
-    # rgb_range = [array([67, 55, 31]), array([255, 223, 169])]
-    # multi_valid.append(get_hero_contours(
-    #     *base_args, rgb_range=rgb_range, **blur_args))
+    image_height, image_width = roster_image.shape[:2]
+    hero_matrix = Matrix(image_height, image_width)
+    for hero_contour_container in contour_container_list:
+        for dimension_object in hero_contour_container:
+            hero_matrix.auto_append(
+                dimension_object.dimensional_values(),
+                dimension_object.name)
 
-    hsv_range = [
-        array([0, 0, 74]), array([27, 253, 255])]
-    multi_valid.append(get_hero_contours(
-        *base_args, hsv_range=hsv_range, **blur_args))
-
-    hero_widths = []
-    hero_heights = []
-
-    for _heroes_list in multi_valid:
-        for _object_name, _dimension_object in _heroes_list.items():
-            hero_widths.append(_dimension_object.width)
-            hero_heights.append(_dimension_object.height)
-    hero_widths.sort()
-    hero_heights.sort()
-
-    hero_w_median = stat_median(hero_widths)
-    hero_h_median = stat_median(hero_heights)
-
-    spacing = round((hero_w_median + hero_h_median)/10)
-    image_height, image_width = image.shape[:2]
-    hero_matrix = Matrix(image_height, image_width, spacing=spacing)
-    for _hero_list in multi_valid:
-        for _object_name, _dimension_object in _hero_list.items():
-
-            hero_matrix.auto_append(_dimension_object, _object_name)
     # Sort before pruning so all columns get generated
     hero_matrix.sort()
     hero_matrix.prune(threshold=row_eliminate)
 
-    for _row_index, hero_row in enumerate(hero_matrix):
-        # print("row({}) length: {}".format(_row_index, len(hero_row)))
-        for _object_index, row_item in enumerate(hero_row):
-
+    for hero_row in hero_matrix:
+        for row_item in hero_row:
             coord_tuple = row_item.dimensions.coords()
-            # y_coord = row_item.dimensions.y
-
-            # x2_coord = row_item.dimensions.x2
-            # y2_coord = row_item.dimensions.y2
-
             _hero_name = row_item.name
 
-            segmented_image = original_image_unmodifiable[coord_tuple.y1:
-                                                          coord_tuple.y2,
-                                                          coord_tuple.x1:
-                                                          coord_tuple.x2]
-            # load.display_image(segmented_hero, display=True)
+            contour_image = roster_image[coord_tuple.y1:
+                                         coord_tuple.y2,
+                                         coord_tuple.x1:
+                                         coord_tuple.x2]
 
             if si_adjustment:
-                width = row_item.dimensions.width
-                height = row_item.dimensions.height
-                x_adjust = round(width * si_adjustment)
-                y_adjust = round(height * si_adjustment)
+                x_adjust = round(row_item.dimensions.width * si_adjustment)
+                y_adjust = round(row_item.dimensions.height * si_adjustment)
 
                 _new_x = max(round(coord_tuple.x1 - x_adjust), 0)
                 _new_y = max(round(coord_tuple.y1 - y_adjust), 0)
@@ -260,12 +277,7 @@ def get_heroes(image: ndarray,  blur_args: dict,
                 (_contour_x, _contour_y,
                  contour_w, contour_h) = cv2.boundingRect(
                     new_contours)
-                # if GV.DEBUG:
-                # new_contours = [new_contours]
-                # cv2.fillPoly(modifiable_ROI, new_contours, [255, 0, 0])
-                # load.display_image(modifiable_ROI, display=True)
 
-                # (dimensions, name)
                 _temp_row_item = RowItem(
                     SegmentRectangle(coord_tuple.x2-contour_w,
                                      coord_tuple.y2-contour_h,
@@ -291,17 +303,12 @@ def get_heroes(image: ndarray,  blur_args: dict,
                 merged_row_item.dimensions.y = max(
                     merged_row_item.dimensions.y - h_border_offset, 0)
 
-                # merged_row_item.dimensions._display(GV.IMAGE_SS,
-                #                                      display=True)
-
-                segmented_image = original_image_unmodifiable[
+                contour_image = original_image_unmodifiable[
                     merged_row_item.dimensions.y:
                     merged_row_item.dimensions.y2,
                     merged_row_item.dimensions.x:
                     merged_row_item.dimensions.x2]
-                # load.display_image([segmented_image, new_ROI], display=True,
-                #                    multiple=True)
-                # segmented_image = new_ROI
+
                 if GV.DEBUG:
                     merged_vertex = merged_row_item.dimensions.coords()
                     cv2.rectangle(GV.IMAGE_SS,
@@ -310,7 +317,6 @@ def get_heroes(image: ndarray,  blur_args: dict,
                                   (255, 0, 0), 2)
             hero_dict[_hero_name] = {}
             if GV.verbosity(1):
-                height, width = segmented_image.shape[:2]
                 vertex_tuple = merged_row_item.dimensions.coords()
                 cv2.rectangle(
                     GV.IMAGE_SS,
@@ -319,11 +325,11 @@ def get_heroes(image: ndarray,  blur_args: dict,
                     (0, 0, 0), 2)
 
             model_image_size = (GV.MODEL_IMAGE_SIZE, GV.MODEL_IMAGE_SIZE)
-            segmented_image = cv2.resize(
-                segmented_image,
+            resized_contour_image = cv2.resize(
+                contour_image,
                 model_image_size,
                 interpolation=cv2.INTER_CUBIC)
             hero_dict[_hero_name] = SegmentResult(
-                _hero_name, segmented_image, row_item)
+                _hero_name, resized_contour_image, row_item)
 
     return hero_dict, hero_matrix

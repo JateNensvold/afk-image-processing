@@ -28,8 +28,13 @@ class HeroImage:
         """
         hero_name = raw_hero_name
         if clean_name:
-            name_regex_results = re.split(r"(-|_|\.)", raw_hero_name)
-            hero_name = name_regex_results[0]
+            # Keep file name of awakened heroes so they don't get mixed with normal version
+            if raw_hero_name.endswith("aw") or raw_hero_name.endswith("awakened"):
+                name_regex_results = re.split(r"(\.)", raw_hero_name)
+                hero_name = name_regex_results[0]
+            else:
+                name_regex_results = re.split(r"(-|_|\.)", raw_hero_name)
+                hero_name = name_regex_results[0]
         self.name = hero_name
         self._raw_name = raw_hero_name
         self.image = image

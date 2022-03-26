@@ -31,7 +31,8 @@ class Matrix():
         Args:
             source_height: maximum height of source
             source_width: maximum width of source
-            spacing: minimum distance between each row without merging
+            spacing: minimum distance/height(pixels) between each row
+                without merging
         """
         self.source_height = source_height
         self.source_width = source_width
@@ -42,7 +43,7 @@ class Matrix():
         self.columns = CO.ColumnObjects(self)
 
     def __str__(self):
-        return "\n".join([_row for _row in self._row_list])
+        return "\n".join([self._row_list])
 
     def __iter__(self):
         """

@@ -24,10 +24,11 @@ import torch
 from detectron2.engine import DefaultPredictor
 
 import image_processing.helpers.load_images as load
+from image_processing.helpers.timer import Timer
+from image_processing.database.engravings_database import EngravingSearch
 
 if TYPE_CHECKING:
     from image_processing.database.image_database import ImageSearch
-
 
 parser = argparse.ArgumentParser(description='AFK arena object extraction and '
                                  'image analysis.')
@@ -59,12 +60,16 @@ PARALLEL: bool = None
 IMAGE_SS: numpy.ndarray = None
 IMAGE_SS_NAME: str = None
 VERBOSE_LEVEL: int = 0
+
 FI_SI_STAR_MODEL: torch.Tensor = None
 ASCENSION_BORDER_MODEL: DefaultPredictor = None
 IMAGE_DB: "ImageSearch" = None
+ENGRAVING_DB: EngravingSearch = None
 ROOT_DIR: pathlib.Path = pathlib.Path(os.path.dirname(__file__)).absolute()
 HERO_PORTRAIT_SIZE = 512
 MODEL_IMAGE_SIZE = 416
+GLOBAL_TIMER = Timer()
+
 
 # Stores cached function results
 CACHED = {}
@@ -170,6 +175,9 @@ DATABASE_HERO_VALIDATION_DIR = pathlib.Path(
     os.path.join(DATABASE_DIR, "temp_images"))
 SEGMENTED_HEROES_DIR = os.path.join(
     DATABASE_HERO_VALIDATION_DIR, "segmented_heroes")
+CONFIG_DIR = os.path.join(DATABASE_DIR, "configs")
+ENGRAVING_JSON_PATH = os.path.join(CONFIG_DIR, "engraving_values.json")
+
 
 # AFKBuilder Submodule
 AFKBuilder_dir = pathlib.Path(os.path.join(DATABASE_DIR, "AFKBuilder"))
@@ -197,3 +205,7 @@ FI_SI_STARS_MODEL_PATH = pathlib.Path(
     os.path.join(FINAL_MODELS_DIR, "fi_si_star_model.pt"))
 ASCENSION_BORDER_MODEL_PATH = pathlib.Path(
     os.path.join(FINAL_MODELS_DIR, "hero_ascension_model.pt"))
+
+
+
+ENGRAVING_DB = EngravingSearch.from_json(ENGRAVING_JSON_PATH)

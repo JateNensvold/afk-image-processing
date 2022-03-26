@@ -1,6 +1,7 @@
 from typing import Sequence
 
 import cv2
+from image_processing.load_images import display_image
 from numpy import ndarray, array, ones, uint8, median
 
 
@@ -30,12 +31,9 @@ def blur_image(image: ndarray, dilate=False,
 
     if hsv_range:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-
         output = cv2.inRange(image, hsv_range[0], hsv_range[1])
-
         if reverse:
             output = cv2.bitwise_not(output)
-
         # output = cv2.bitwise_and(output, mask_inv)
     elif rgb_range:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)

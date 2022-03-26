@@ -90,6 +90,9 @@ def load_fi_model(model_path: str):
         model_path (str): path to model being loaded
     """
     start_time = time.time()
+    # device = torch.device("cuda")
+    # model = torch.nn.Module()
+    # model.load_state_dict(torch.load(GV.YOLOV5_DIR.as_uri(), map_location=device))
 
     fi_si_model = torch.hub.load(
         str(GV.YOLOV5_DIR),

@@ -192,4 +192,5 @@ if __name__ == "__main__":
     #                     GV.IMAGE_SS.shape[0]*IMAGE_SIZE_MULTIPLIER)))
     # else:
     GV.global_parse_args()
-    threshold(GV.IMAGE_SS)
+    # threshold(GV.IMAGE_SS)
+    color_threshold(GV.IMAGE_SS)

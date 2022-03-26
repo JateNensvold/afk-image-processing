@@ -9,37 +9,39 @@ ARG BUILD_TYPE
 # ARG NODE_VERSION="none"
 # RUN if [ "${NODE_VERSION}" != "none" ]; then su vscode -c "umask 0002 && . /usr/local/share/nvm/nvm.sh && nvm install ${NODE_VERSION} 2>&1"; fi
 
-
-# Install Cuda packages
-# RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin && \
-#    mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600 && \
-#    wget https://developer.download.nvidia.com/compute/cuda/11.3.0/local_installers/cuda-repo-ubuntu2004-11-3-local_11.3.0-465.19.01-1_amd64.deb && \
-#    dpkg -i cuda-repo-ubuntu2004-11-3-local_11.3.0-465.19.01-1_amd64.deb && \
-#    apt-key add /var/cuda-repo-ubuntu2004-11-3-local/7fa2af80.pub && \
-#    ls -la && \ 
-#    rm cuda-repo-ubuntu2004-11-3-local_11.3.0-465.19.01-1_amd64.deb
-
-
-
-# # Install Dotnet to run Archmage Bot
-# RUN wget https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
-#    dpkg -i packages-microsoft-prod.deb  && \
-#    rm packages-microsoft-prod.deb 
-
 RUN apt-get update && \
    apt-get install --no-install-recommends --yes \
    ffmpeg \
    libsm6 \
    libxext6 \
    vim \
-   # cuda-toolkit-11-3 \
    apt-transport-https && \
-   # postgresql \
-   # postgresql-contrib \
-   # dotnet-sdk-6.0 && \
+   postgresql-client \
    rm -rf /var/lib/apt/lists/* 
 
-RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install --no-cache-dir --upgrade pip
+
+
+# Install Cuda packages when building for CUDA container
+RUN if [ ${BUILD_TYPE} = "CUDA" ];\
+   then \
+   wget --progress=dot:giga https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin && \
+   mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600 && \
+   wget --progress=dot:giga https://developer.download.nvidia.com/compute/cuda/11.3.0/local_installers/cuda-repo-ubuntu2004-11-3-local_11.3.0-465.19.01-1_amd64.deb && \
+   dpkg -i cuda-repo-ubuntu2004-11-3-local_11.3.0-465.19.01-1_amd64.deb && \
+   apt-key add /var/cuda-repo-ubuntu2004-11-3-local/7fa2af80.pub && \
+   rm cuda-repo-ubuntu2004-11-3-local_11.3.0-465.19.01-1_amd64.deb; \
+   fi
+
+RUN if [ ${BUILD_TYPE} = "CUDA" ];\
+   then \
+   apt-get update && \
+   apt-get install --no-install-recommends --yes \
+   cuda-toolkit-11-3 && \
+   rm -rf /var/lib/apt/lists/*; \
+   fi
+
+
 
 
 # [Optional] If your pip requirements rarely change, uncomment this section to add them to the image.
