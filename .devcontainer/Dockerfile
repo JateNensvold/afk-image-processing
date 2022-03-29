@@ -15,8 +15,8 @@ RUN apt-get update && \
    libsm6 \
    libxext6 \
    vim \
-   apt-transport-https && \
    postgresql-client \
+   apt-transport-https \
    git-lfs \
    rm -rf /var/lib/apt/lists/* 
 
