@@ -4,6 +4,7 @@
 ARG VARIANT="3.9"
 FROM mcr.microsoft.com/vscode/devcontainers/python:0-${VARIANT}
 ARG BUILD_TYPE
+ENV BUILD_TYPE=${BUILD_TYPE}
 
 # [Choice] Node.js version: none, lts/*, 16, 14, 12, 10
 # ARG NODE_VERSION="none"
@@ -50,7 +51,6 @@ RUN if [ ${BUILD_TYPE} = "CUDA" ];\
 # COPY . /tmp/pip-tmp/workspace
 # RUN /tmp/pip-tmp/workspace/requirements/install ${BUILD_TYPE}
 
-ENV BUILD_TYPE=${BUILD_TYPE}
 
 # [Optional] Uncomment this section to install additional OS packages.
 # RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \

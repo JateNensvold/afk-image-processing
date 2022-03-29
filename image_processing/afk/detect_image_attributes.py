@@ -68,12 +68,17 @@ def detect_features(roster_image: np.ndarray, debug_raw: bool = None):
 
     detected_hero_data: list[DetectedHeroData] = []
     for _pseudo_segment_name, segment_info in segment_dict.items():
+        start_time = time.time()
         hero_matches = GV.IMAGE_DB.search(segment_info)
 
         best_hero_match = hero_matches.best()
         best_match_info = GV.IMAGE_DB.hero_lookup[best_hero_match.name].first()
-
+        if GV.verbosity(1):
+            print(f"Raw Hero Detection results in {time.time() - start_time}")
+        start_time = time.time()
         detected_hero_result = detect_attributes(best_match_info, segment_info)
+        if GV.verbosity(1):
+            print(f"Raw attribute Detection results in {time.time() - start_time}")
         detected_hero_data.append(detected_hero_result)
 
        # When debuggin Draw hero info on image
@@ -178,6 +183,7 @@ def detect_ascension(detected_ascension_stars: DataFrame,
     ascension_result = ModelResult("E", 0)
     best_match_coordinates = None
     if len(detected_ascension_stars) > 0:
+        # print(f"star results {detected_ascension_stars}")
         best_ascension_stars_match = detected_ascension_stars.sort_values(
             "confidence", ascending=False).iloc[0]
         best_match_coordinates = DoubleCoordinates(
@@ -218,6 +224,7 @@ def detect_ascension(detected_ascension_stars: DataFrame,
 
         ascension_border_results.sort(
             key=lambda model_result: model_result.score)
+        # print(f"border results {ascension_border_results}")
         if len(ascension_border_results) > 0:
             best_ascension_border = ascension_border_results[0]
             ascension_result = best_ascension_border
@@ -287,9 +294,9 @@ def detect_attributes(hero_image_info: HeroImage, segment_info: SegmentResult):
     test_img = segment_info.image[..., ::-1]
 
     # pylint: disable=not-callable
-    start_si_fi_detection = time.time()
+    # start_si_fi_detection = time.time()
     raw_model_results: "Detections" = GV.FI_SI_STAR_MODEL([test_img], size=416)
-    print(f"Raw FI/SI/STAR results in {time.time() - start_si_fi_detection}")
+    # print(f"Raw FI/SI/STAR results in {time.time() - start_si_fi_detection}")
 
     labeled_model_results: DataFrame = raw_model_results.pandas().xyxy[0]
 

@@ -23,7 +23,112 @@ services:
     ...
 ```
 
-## Setup
+
+## Deploying Application with albedo-bot
+Create a directory in your desired file location called `projects`
+with the command 
+
+### Dependencies
+- docker
+- docker-compose
+- tmux
+- git-lfs
+
+1. 
+
+```bash
+cd <host-dir> && mkdir projects
+```
+
+2. Checkout code to deploy
+```bash
+git checkout git@github.com:JateNensvold/afk-image-processing.git
+git checkout git@github.com:JateNensvold/albedo-bot.git
+```
+Go to `projects/afk-image-processing/.devcontainer/docker-compose.yaml` and 
+ensure that the `BUILD_TYPE` is set to the proper argument for your production hardware(CPU or CUDA)
+
+
+3. Build docker image
+
+Move to `afk-image-processing` git repo
+```bash
+cd projects/afk-image-processing
+```
+Go to devcontainer folder
+```
+cd .devcontainer
+```
+Build docker images
+```
+docker compose build
+```
+4. Start the docker containers
+
+```bash
+docker compose up -d
+```
+
+5. Connect to dev container
+```bash
+docker exec -it devcontainer-afk-processing-container-1 bash
+```
+
+6. Install package dependencies
+Go to post-install command in `.devcontainer/devcontainer.json` for the latest command
+the following may be out of date
+```bash
+cd /workspace/albedo-bot && pip3 install -r requirements.txt  && /workspace/afk-image-processing/requirements/install ${BUILD_TYPE}
+```
+
+7. Run database creation
+```bash
+cd /workspace/albedo-bot && python3 albedo_bot/database/create_db.py
+```
+
+8. Run image-processing service
+Disconnect from docker session and start a tmux session to run the
+image-processing service in
+```bash
+tmux new
+```
+Connect to docker container
+```bash
+docker exec -it devcontainer-afk-processing-container-1 bash
+```
+Build Hero Database
+```bash
+cd /workspace/afk-image-processing && python3 image_processing/build_db.py
+```
+Run command to start processing server
+```
+cd /workspace/afk-image-processing/ && python3 image_processing/processing_server.py
+```
+Disconnect from tumux session by hitting `ctrl + 'b'` pause `d`
+
+9. Run abledo-bot service
+Create a second tmux session
+```bash
+tmux new
+```
+Connect to container again
+```bash
+docker exec -it devcontainer-afk-processing-container-1 bash
+```
+Start Albedo bot replacing `<bot token>` with the token listed in the discord
+api developer portal
+```bash
+cd /workspace/albedo-bot/ && TOKEN=<bot token> python3 albedo_bot/albedo_main.py
+```
+
+10. Modifying Bot
+
+Bot should be up and running, to restart or view the console of either application 
+run `tmux ls` and then `tmux attach -t <window number>` to attach to your process window
+
+
+
+## Setup For development
 When developing or executing the afk-image-procesing codebase dependencies and
 environment setup are required before the code can be ran.
 
