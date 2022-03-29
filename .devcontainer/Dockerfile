@@ -17,7 +17,7 @@ RUN apt-get update && \
    vim \
    postgresql-client \
    apt-transport-https \
-   git-lfs \
+   git-lfs && \
    rm -rf /var/lib/apt/lists/* 
 
 RUN python3 -m pip install --no-cache-dir --upgrade pip
