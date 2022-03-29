@@ -193,36 +193,34 @@ def detect_ascension(detected_ascension_stars: DataFrame,
             best_ascension_stars_label,
             best_ascension_stars_match["confidence"])
 
-        if ascension_result.score < 0.75:
-            # pylint: disable=not-callable
-            raw_detected_ascension_borders: Dict = GV.ASCENSION_BORDER_MODEL(
-                test_image)
+    if ascension_result.score < 0.75:
+        # pylint: disable=not-callable
+        raw_detected_ascension_borders: Dict = GV.ASCENSION_BORDER_MODEL(
+            test_image)
+        detected_ascension_borders: Instances = (
+            raw_detected_ascension_borders["instances"])
 
-            detected_ascension_borders: Instances = (
-                raw_detected_ascension_borders["instances"])
+        ascension_border_labels: List[int] = (
+            detected_ascension_borders.pred_classes.cpu().tolist())
+        ascension_border_scores: List[int] = (
+            detected_ascension_borders.scores.cpu().tolist())
 
-            ascension_border_labels: List[int] = (
-                detected_ascension_borders.pred_classes.cpu().tolist())
-            ascension_border_scores: List[int] = (
-                detected_ascension_borders.scores.cpu().tolist())
+        ascension_border_results: List[ModelResult] = []
 
-            ascension_border_results: List[ModelResult] = []
+        for ascension_border_index, ascension_border_class_label in (
+                enumerate(ascension_border_labels)):
+            ascension_border_score = (
+                ascension_border_scores[ascension_border_index])
+            ascension_border_result = ModelResult(
+                BORDER_MODEL_LABELS[ascension_border_class_label],
+                ascension_border_score)
+            ascension_border_results.append(ascension_border_result)
 
-            for ascension_border_index, ascension_border_class_label in (
-                    enumerate(ascension_border_labels)):
-                ascension_border_score = (
-                    ascension_border_scores[ascension_border_index])
-                ascension_border_result = ModelResult(
-                    BORDER_MODEL_LABELS[ascension_border_class_label],
-                    ascension_border_score)
-                ascension_border_results.append(ascension_border_result)
-
-            ascension_border_results.sort(
-                key=lambda model_result: model_result.score)
-
-            if len(ascension_border_results) > 0:
-                best_ascension_border = ascension_border_results[0]
-                ascension_result = best_ascension_border
+        ascension_border_results.sort(
+            key=lambda model_result: model_result.score)
+        if len(ascension_border_results) > 0:
+            best_ascension_border = ascension_border_results[0]
+            ascension_result = best_ascension_border
 
     return ascension_result, best_match_coordinates
 
