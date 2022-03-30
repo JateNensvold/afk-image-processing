@@ -41,22 +41,13 @@ COLOR = (255, 255, 0)
 THICKNESS = 2
 
 
-def detect_features(roster_image: np.ndarray, debug_raw: bool = None):
+def detect_features(roster_image: np.ndarray):
     """
     Detect AFK Arena heroes from a roster screenshot and for each hero detect
         "FI", "SI", "Ascension", and "hero Name"
     Args:
         roster_image: image to run segmentation and detection on
-
-        debug_raw: flag to add raw values for SI, FI and Ascension detection
-            to return dictionary
     """
-
-    if debug_raw is None:
-        if GV.verbosity(1):
-            debug_raw = True
-        else:
-            debug_raw = False
 
     lower_hsv = np.array([0, 0, 0])
     upper_hsv = np.array([179, 255, 192])
@@ -64,27 +55,38 @@ def detect_features(roster_image: np.ndarray, debug_raw: bool = None):
     hsv_range = [lower_hsv, upper_hsv]
     blur_args = {"hsv_range": hsv_range}
     # Run HSV segmentation on hero roster to get hero
-    segment_dict, segment_matrix = get_heroes(roster_image, blur_args)
+    GV.GLOBAL_TIMER.add_level("segment heroes")
+    GV.GLOBAL_TIMER.start()
 
+    segment_dict, segment_matrix = get_heroes(roster_image, blur_args)
+    GV.GLOBAL_TIMER.finish_level()
+
+    GV.GLOBAL_TIMER.add_level("detect hero info")
+    GV.GLOBAL_TIMER.start()
     detected_hero_data: list[DetectedHeroData] = []
     for _pseudo_segment_name, segment_info in segment_dict.items():
-        start_time = time.time()
+        GV.GLOBAL_TIMER.add_level("hero lookup")
+        GV.GLOBAL_TIMER.start()
         hero_matches = GV.IMAGE_DB.search(segment_info)
+        GV.GLOBAL_TIMER.finish_level()
 
         best_hero_match = hero_matches.best()
         best_match_info = GV.IMAGE_DB.hero_lookup[best_hero_match.name].first()
-        if GV.verbosity(1):
-            print(f"Raw Hero Detection results in {time.time() - start_time}")
-        start_time = time.time()
+        GV.GLOBAL_TIMER.add_level("detect attributes")
+        GV.GLOBAL_TIMER.start()
         detected_hero_result = detect_attributes(best_match_info, segment_info)
-        if GV.verbosity(1):
-            print(f"Raw attribute Detection results in {time.time() - start_time}")
+        GV.GLOBAL_TIMER.finish_level()
         detected_hero_data.append(detected_hero_result)
 
        # When debuggin Draw hero info on image
-        if GV.verbosity(1):
+        if GV.verbosity(2):
             label_hero_feature(roster_image, segment_info,
                                detected_hero_result, segment_matrix)
+    GV.GLOBAL_TIMER.finish_level()
+    # End Global/main timer
+    GV.GLOBAL_TIMER.finish_level()
+
+    GV.GLOBAL_TIMER.display_breakdown()
 
     return RosterData(detected_hero_data, segment_matrix)
 

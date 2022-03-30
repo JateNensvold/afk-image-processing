@@ -15,11 +15,6 @@ import image_processing.afk.detect_image_attributes as detect
 from image_processing.helpers.scan_port import check_socket
 
 
-ZMQ_CONTEXT = zmq.Context()
-ZMQ_SOCKET: zmq.Socket = ZMQ_CONTEXT.socket(
-    zmq.DEALER)  # pylint: disable=no-member
-
-
 def remote_compute_results(address: str, timeout: int, args: List[str]) -> Dict:
     """_summary_
 
@@ -30,10 +25,9 @@ def remote_compute_results(address: str, timeout: int, args: List[str]) -> Dict:
             args
     """
 
-    # if check_socket(GV.ZMQ_HOST, GV.ZMQ_PORT):
-    #     json_dict = arg_string(image_path):
-    #     return detect.detect_features(GV.IMAGE_SS)
-    # else
+    ZMQ_CONTEXT = zmq.Context()
+    ZMQ_SOCKET: zmq.Socket = ZMQ_CONTEXT.socket(
+        zmq.DEALER)  # pylint: disable=no-member
 
     ZMQ_SOCKET.connect(address)
     ZMQ_SOCKET.setsockopt(zmq.RCVTIMEO, timeout)

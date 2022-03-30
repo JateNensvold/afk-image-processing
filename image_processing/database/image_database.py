@@ -478,7 +478,7 @@ class ImageSearch():
             raise NoMatchException(
                 f"Unable to find a match for {hero_matches.best().name}")
 
-        if GV.verbosity(1):
+        if GV.verbosity(2):
             print(hero_matches.best(), hero_matches)
 
         return hero_matches

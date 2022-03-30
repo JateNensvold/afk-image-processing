@@ -25,8 +25,6 @@ services:
 
 
 ## Deploying Application with albedo-bot
-Create a directory in your desired file location called `projects`
-with the command 
 
 ### Dependencies
 - docker
@@ -34,7 +32,12 @@ with the command
 - tmux
 - git-lfs
 
-1. 
+
+
+
+1. Project Download
+Create a directory in your desired file location called `projects`
+with the command 
 
 ```bash
 cd <host-dir> && mkdir projects
@@ -47,7 +50,6 @@ git checkout git@github.com:JateNensvold/albedo-bot.git
 ```
 Go to `projects/afk-image-processing/.devcontainer/docker-compose.yaml` and 
 ensure that the `BUILD_TYPE` is set to the proper argument for your production hardware(CPU or CUDA)
-
 
 3. Build docker image
 

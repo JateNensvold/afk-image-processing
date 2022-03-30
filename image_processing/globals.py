@@ -68,7 +68,7 @@ ENGRAVING_DB: EngravingSearch = None
 ROOT_DIR: pathlib.Path = pathlib.Path(os.path.dirname(__file__)).absolute()
 HERO_PORTRAIT_SIZE = 512
 MODEL_IMAGE_SIZE = 416
-GLOBAL_TIMER = Timer()
+GLOBAL_TIMER = None
 
 
 # Stores cached function results
@@ -129,8 +129,11 @@ def reload_globals():
     Process global variables after they are loaded/reloaded
     """
     # global VERBOSE_LEVEL  # pylint: disable=global-statement
+    global GLOBAL_TIMER
     if VERBOSE_LEVEL == 0:
         logging.disable(logging.INFO)
+
+    GLOBAL_TIMER = Timer()
 
 
 try:
@@ -205,7 +208,6 @@ FI_SI_STARS_MODEL_PATH = pathlib.Path(
     os.path.join(FINAL_MODELS_DIR, "fi_si_star_model.pt"))
 ASCENSION_BORDER_MODEL_PATH = pathlib.Path(
     os.path.join(FINAL_MODELS_DIR, "hero_ascension_model.pt"))
-
 
 
 ENGRAVING_DB = EngravingSearch.from_json(ENGRAVING_JSON_PATH)
