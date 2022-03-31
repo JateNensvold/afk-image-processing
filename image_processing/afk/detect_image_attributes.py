@@ -135,7 +135,8 @@ def detect_furniture(detected_furnitures: DataFrame):
     """
 
     furniture_result = ModelResult("0", 0)
-
+    GV.GLOBAL_TIMER.add_level("detect furniture")
+    GV.GLOBAL_TIMER.start()
     if len(detected_furnitures) > 0:
         best_furniture_match = detected_furnitures.sort_values(
             "confidence").iloc[0]
@@ -144,6 +145,7 @@ def detect_furniture(detected_furnitures: DataFrame):
         if best_furniture_match["confidence"] >= 0.85:
             furniture_result = ModelResult(
                 best_furniture_label, best_furniture_match["confidence"])
+    GV.GLOBAL_TIMER.finish_level()
     return furniture_result
 
 
@@ -157,7 +159,8 @@ def detect_signature_item(detected_signature_items: DataFrame):
         _type_: _description_
     """
     signature_item_result = ModelResult("0", 0)
-
+    GV.GLOBAL_TIMER.add_level("detect signature item")
+    GV.GLOBAL_TIMER.start()
     if len(detected_signature_items) > 0:
         best_signature_item_match = detected_signature_items.sort_values(
             "confidence", ascending=False).iloc[0]
@@ -168,6 +171,7 @@ def detect_signature_item(detected_signature_items: DataFrame):
             signature_item_result = ModelResult(
                 best_signature_item_label,
                 best_signature_item_match["confidence"])
+    GV.GLOBAL_TIMER.finish_level()
     return signature_item_result
 
 
@@ -184,6 +188,8 @@ def detect_ascension(detected_ascension_stars: DataFrame,
     """
     ascension_result = ModelResult("E", 0)
     best_match_coordinates = None
+    GV.GLOBAL_TIMER.add_level("detect ascension")
+    GV.GLOBAL_TIMER.start()
     if len(detected_ascension_stars) > 0:
         # print(f"star results {detected_ascension_stars}")
         best_ascension_stars_match = detected_ascension_stars.sort_values(
@@ -203,6 +209,8 @@ def detect_ascension(detected_ascension_stars: DataFrame,
 
     if ascension_result.score < 0.75:
         # pylint: disable=not-callable
+        GV.GLOBAL_TIMER.add_level("detect border")
+        GV.GLOBAL_TIMER.start()
         raw_detected_ascension_borders: Dict = GV.ASCENSION_BORDER_MODEL(
             test_image)
         detected_ascension_borders: Instances = (
@@ -230,7 +238,8 @@ def detect_ascension(detected_ascension_stars: DataFrame,
         if len(ascension_border_results) > 0:
             best_ascension_border = ascension_border_results[0]
             ascension_result = best_ascension_border
-
+        GV.GLOBAL_TIMER.finish_level()
+    GV.GLOBAL_TIMER.finish_level()
     return ascension_result, best_match_coordinates
 
 
@@ -297,8 +306,11 @@ def detect_attributes(hero_image_info: HeroImage, segment_info: SegmentResult):
 
     # pylint: disable=not-callable
     # start_si_fi_detection = time.time()
+    GV.GLOBAL_TIMER.add_level("raw_model_results")
+    GV.GLOBAL_TIMER.start()
     raw_model_results: "Detections" = GV.FI_SI_STAR_MODEL([test_img], size=416)
     # print(f"Raw FI/SI/STAR results in {time.time() - start_si_fi_detection}")
+    GV.GLOBAL_TIMER.finish_level()
 
     labeled_model_results: DataFrame = raw_model_results.pandas().xyxy[0]
 
