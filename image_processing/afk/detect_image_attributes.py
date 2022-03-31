@@ -211,6 +211,9 @@ def detect_ascension(detected_ascension_stars: DataFrame,
         # pylint: disable=not-callable
         GV.GLOBAL_TIMER.add_level("detect border")
         GV.GLOBAL_TIMER.start()
+
+        GV.GLOBAL_TIMER.add_level("raw border results")
+        GV.GLOBAL_TIMER.start()
         raw_detected_ascension_borders: Dict = GV.ASCENSION_BORDER_MODEL(
             test_image)
         detected_ascension_borders: Instances = (
@@ -220,9 +223,11 @@ def detect_ascension(detected_ascension_stars: DataFrame,
             detected_ascension_borders.pred_classes.cpu().tolist())
         ascension_border_scores: List[int] = (
             detected_ascension_borders.scores.cpu().tolist())
-
+        GV.GLOBAL_TIMER.finish_level()
         ascension_border_results: List[ModelResult] = []
 
+        GV.GLOBAL_TIMER.add_level("label border results")
+        GV.GLOBAL_TIMER.start()
         for ascension_border_index, ascension_border_class_label in (
                 enumerate(ascension_border_labels)):
             ascension_border_score = (
@@ -238,6 +243,7 @@ def detect_ascension(detected_ascension_stars: DataFrame,
         if len(ascension_border_results) > 0:
             best_ascension_border = ascension_border_results[0]
             ascension_result = best_ascension_border
+        GV.GLOBAL_TIMER.finish_level()
         GV.GLOBAL_TIMER.finish_level()
     GV.GLOBAL_TIMER.finish_level()
     return ascension_result, best_match_coordinates
