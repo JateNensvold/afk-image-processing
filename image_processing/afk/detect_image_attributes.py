@@ -218,11 +218,16 @@ def detect_ascension(detected_ascension_stars: DataFrame,
             test_image)
         detected_ascension_borders: Instances = (
             raw_detected_ascension_borders["instances"])
-
+        GV.GLOBAL_TIMER.add_level("border pred classes")
+        GV.GLOBAL_TIMER.start()
         ascension_border_labels: List[int] = (
             detected_ascension_borders.pred_classes.cpu().tolist())
+        GV.GLOBAL_TIMER.finish_level()
+        GV.GLOBAL_TIMER.add_level("border scores")
+        GV.GLOBAL_TIMER.start()
         ascension_border_scores: List[int] = (
             detected_ascension_borders.scores.cpu().tolist())
+        GV.GLOBAL_TIMER.finish_level()
         GV.GLOBAL_TIMER.finish_level()
         ascension_border_results: List[ModelResult] = []
 
