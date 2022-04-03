@@ -317,6 +317,7 @@ def detect_attributes(hero_image_info: HeroImage, segment_info: SegmentResult):
     """
 
     test_img = segment_info.image[..., ::-1]
+    print(test_img.shape)
 
     # pylint: disable=not-callable
     # start_si_fi_detection = time.time()

@@ -1,0 +1,1 @@
+# This folder is the location that YoloV5 files (used for detecting hero ascension) will be placed to get trained on by YoloV5

@@ -3,19 +3,16 @@ import json
 import os
 import pathlib
 import datetime
-import argparse
 
-from io import BytesIO
 from typing import Dict, Any
 
-import requests
 import cv2
-
 import numpy as np
-import image_processing.globals as GV
 
-from PIL import Image
-from pycocotools import mask as cocomask
+from image_processing.scripts.boxlabel.utils.input_arguments import (
+    parse_args, load_json)
+from image_processing.scripts.boxlabel.utils.boxlabel_data import (
+    download_image, get_annotation)
 
 
 INFO = {
@@ -92,40 +89,14 @@ def visualize_mask(image: np.ndarray,
     Returns:
         image with a point drawn on it.
     """
-    mask = np.array(
-        Image.open(BytesIO(requests.get(
-            tool["instanceURI"]).content)))[:, :, :3]
-    mask[:, :, 1] *= 0
-    mask[:, :, 2] *= 0
-    weighted = cv2.addWeighted(image, alpha, mask, 1 - alpha, 0)
-    image[np.sum(mask, axis=-1) > 0] = weighted[np.sum(mask, axis=-1) > 0]
+    raw_image_mask = download_image(tool["instanceURI"])
+    raw_image_mask[:, :, 1] *= 0
+    raw_image_mask[:, :, 2] *= 0
+    weighted = cv2.addWeighted(image, alpha, raw_image_mask, 1 - alpha, 0)
+    image[np.sum(raw_image_mask, axis=-1) >
+          0] = weighted[np.sum(raw_image_mask, axis=-1) > 0]
 
     return image
-
-
-def get_annotation(mask: np.ndarray):
-    '''
-    Takes binary image 'mask' and gets the segmentation, bounding box and area
-        of the white part of the image
-    Args:
-        mask: binary image stored as np.ndarray
-    Return:
-        tuple of (segmentation(list(int)), BBox(list(int)), area(UINT32))
-    '''
-    contours, _ = cv2.findContours(
-        mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-    segmentation = []
-    for contour in contours:
-        # Valid polygons have >= 6 coordinates (3 points)
-        if contour.size >= 6:
-            segmentation.append(contour.flatten().tolist())
-    polygons = cocomask.frPyObjects(segmentation, mask.shape[0], mask.shape[1])
-    run_length_encoding = cocomask.merge(polygons)
-    area = cocomask.area(run_length_encoding)
-    [x_coord, y_coord, width, height] = cv2.boundingRect(mask)
-
-    return segmentation, [x_coord, y_coord, width, height], area
 
 
 def convert_format(input_data: dict, output_dir: str = "./", license_index: int = 0,
@@ -174,9 +145,7 @@ def convert_format(input_data: dict, output_dir: str = "./", license_index: int 
         image_name = segmentation_image["External ID"]
         print(f"Starting:{image_id} {image_name} ...")
         image_path = os.path.join(coco_train, image_name)
-        image = np.array(
-            Image.open(BytesIO(requests.get(
-                segmentation_image["Labeled Data"]).content)))
+        image = download_image(segmentation_image["Labeled Data"])
         height, width = image.shape[:2]
         cv2.imwrite(image_path, image)
         temp_image_data_dict["id"] = image_id
@@ -190,22 +159,21 @@ def convert_format(input_data: dict, output_dir: str = "./", license_index: int 
 
         # Annotation Data
         for segmentation_object in segmentation_image["Label"]["objects"]:
-            segmentation_object_value = segmentation_object["value"]
+            segmentation_class_name = segmentation_object["value"]
 
             temp_annotation_data_dict = {}
             temp_annotation_data_dict["id"] = annotation_id
             temp_annotation_data_dict["image_id"] = image_id
             temp_annotation_data_dict["category_id"] = CATEGORIES[
-                segmentation_object_value]["id"]
-            mask = np.array(
-                Image.open(BytesIO(requests.get(
-                    segmentation_object["instanceURI"]).content)))[:, :, :3]
-            mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
+                segmentation_class_name]["id"]
+            raw_image_mask = download_image(segmentation_object["instanceURI"])
+            gray_image_mask = cv2.cvtColor(raw_image_mask, cv2.COLOR_BGR2GRAY)
 
-            segmentation, bbox, area = get_annotation(mask)
-            temp_annotation_data_dict["bbox"] = bbox
-            temp_annotation_data_dict["area"] = float(area)
-            temp_annotation_data_dict["segmentation"] = segmentation
+            segmentation_data = get_annotation(
+                segmentation_class_name, gray_image_mask)
+            temp_annotation_data_dict["bbox"] = segmentation_data.bounding_box
+            temp_annotation_data_dict["area"] = float(segmentation_data.area)
+            temp_annotation_data_dict["segmentation"] = segmentation_data.segmentation
             temp_annotation_data_dict["iscrowd"] = 0
 
             annotation_id += 1
@@ -230,16 +198,22 @@ def convert_format(input_data: dict, output_dir: str = "./", license_index: int 
         coco_json_file.write(json_dump)
 
 
+def generate_coco(output_dir: str, json_path: str):
+    """
+    Generate and write data to Files following the COCO data format
+    https://cocodataset.org/#home
+
+    Args:
+        output_dir (str): directory that the output data direcotry will get
+            generated in
+        json_path (str): path to json file that contains the labelbox data
+    """
+    json_data = load_json(json_path)
+    convert_format(json_data, output_dir=output_dir)
+
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Convert boxlabel file into COCO formated files")
-    parser.add_argument("box_label_file", type=str,
-                        help="Path to box Label JSON file")
-    parser.add_argument(
-        "output_dir", type=str,
-        help="Path to directory where coco files will get generated at")
-    args = parser.parse_args()
-    boxlabel_json_path = args.box_label_file
-    with open(boxlabel_json_path, "r", encoding="utf-8") as json_file:
-        box_label_data = json.loads(json_file.read())
-    convert_format(box_label_data, output_dir=args.output_dir)
+
+    args = parse_args()
+
+    generate_coco(args.output_dir, args.box_label_file)

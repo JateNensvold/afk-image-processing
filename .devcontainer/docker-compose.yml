@@ -7,7 +7,7 @@ services:
       dockerfile: .devcontainer/Dockerfile
       network: host
       args: 
-        BUILD_TYPE: "CPU"
+        BUILD_TYPE: "CUDA"
         VARIANT: 3.9
         NODE_VERSION: "lts/*"
     shm_size: '8G'

@@ -46,16 +46,17 @@
 			"isin",
 			"INET",
 			"devcontainer"
-		]
+		],
+		"todo-tree.filtering.excludeGlobs": ["**/"],
 	},
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
-		"ms-python.python",
-		"ms-python.vscode-pylance",
-		"streetsidesoftware.code-spell-checker",
-		// "ms-dotnettools.csharp",
-		"ms-azuretools.vscode-docker",
-		"njpwerner.autodocstring"
+		"ms-python.python", // Adds vscode support for python
+		"ms-python.vscode-pylance", // Adds linter for python
+		"streetsidesoftware.code-spell-checker", // adds spell checker to all code and other documents
+		"ms-azuretools.vscode-docker", // Integrates docker support into vscode, allowing containers to be built/rebuilt
+		"njpwerner.autodocstring", // Automatically creates docstrings for python functions
+		"Gruntfuggly.todo-tree" //Lists todo's in project
 	],
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],

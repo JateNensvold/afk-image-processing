@@ -153,13 +153,13 @@ To
 1. Download datset
 
 To download the JSON file provided by labelbox with the pretrained data go to the following link
-[boxlabel.json](https://storage.googleapis.com/labelbox-exports/ckrz9srr563510ydl0bpv94w1/ckrzarwja0y510y9u4dc009id/export-2022-03-12T08%3A28%3A41.743Z.json?GoogleAccessId=api-prod%40labelbox-193903.iam.gserviceaccount.com&Expires=1648283347&Signature=QUM8%2B0F6yY2jYNF%2BtcjNLF6j5lUPC8%2BO%2BwLNRj%2F2%2BPQTTKcnaFtwTYoQSKRYXaF3fCmOuDLA4ywMVvIifFjvbBrkJMYOTD5tVq5f6hc9zjYpMi2xa3fYA7sfIOTwmX2kjJwAXICIghsGB0yQBp%2FGbstkIejegM3bk43gvTBVRZ%2BZK9R3TTdQ4G1sUqT6BcAm88n6H3eq4XOALYnXtMLohlLnJeMGy8p0M5v%2F1y841dtQ14pgrbHhJ%2FtbeTKd%2BfyVfmb5R%2FPxzeBs%2BR7l60ZppapM7whQWrIaUS9i8GCN3GMp5kIDk4wAeElZKOxMWHK5dew9z2%2Fefw4P%2B%2BWgQF7UKQ%3D%3D&response-content-disposition=attachment)
+[labelbox.json](https://storage.googleapis.com/labelbox-exports/ckrz9srr563510ydl0bpv94w1/ckrzarwja0y510y9u4dc009id/export-2022-03-12T08%3A28%3A41.743Z.json?GoogleAccessId=api-prod%40labelbox-193903.iam.gserviceaccount.com&Expires=1648283347&Signature=QUM8%2B0F6yY2jYNF%2BtcjNLF6j5lUPC8%2BO%2BwLNRj%2F2%2BPQTTKcnaFtwTYoQSKRYXaF3fCmOuDLA4ywMVvIifFjvbBrkJMYOTD5tVq5f6hc9zjYpMi2xa3fYA7sfIOTwmX2kjJwAXICIghsGB0yQBp%2FGbstkIejegM3bk43gvTBVRZ%2BZK9R3TTdQ4G1sUqT6BcAm88n6H3eq4XOALYnXtMLohlLnJeMGy8p0M5v%2F1y841dtQ14pgrbHhJ%2FtbeTKd%2BfyVfmb5R%2FPxzeBs%2BR7l60ZppapM7whQWrIaUS9i8GCN3GMp5kIDk4wAeElZKOxMWHK5dew9z2%2Fefw4P%2B%2BWgQF7UKQ%3D%3D&response-content-disposition=attachment)
 
 2. Move the dataset
 
-The dataset has to be reloacted to the following location `./image_processing/models/training_data/coco_data`
+The dataset has to be relocated to the following location `./image_processing/models/training_data/coco_data`
 so we can run a special conversion script that will convert the data from the
-`boxlabel` monlith file into the COCO format 
+`labelbox` monolith file into the COCO format 
 
 3. Convert Data
 

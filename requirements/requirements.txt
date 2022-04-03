@@ -11,4 +11,5 @@ pyyaml
 tqdm
 pyzmq
 faiss-cpu
+pycocotools
 -e ..
