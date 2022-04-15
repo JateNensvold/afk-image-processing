@@ -291,7 +291,7 @@ def detect_engraving(ascension_result: ModelResult,
         # When no contours are return from filter_contours we can take the
         #   average color from the largets contour that was detected
         if len(contour_list) == 0:
-            contour_list.append(contour_wrapper.largest())
+            contour_list = contour_wrapper.largest()
 
         engraved_star_mask = np.zeros(temp_image.shape[:2], np.uint8)
         for contour_dimension_object in contour_list:

@@ -86,7 +86,15 @@ cd /workspace/albedo-bot && pip3 install -r requirements.txt  && /workspace/afk_
 
 7. Run database creation
 ```bash
-cd /workspace/albedo-bot && python3 albedo_bot/database/create_db.py
+# Add albedo-bot token listed in the discord api developer portal to
+# /workspace/albedo_bot/albedo_bot/config/config.py in the `token` field,
+# or follow the commands printed on the screen from running one of the commands below
+
+
+# To create a new database
+cd /workspace/albedo-bot && python3 albedo_bot/albedo_main.py init
+# To reinitialize a database
+cd /workspace/albedo-bot && python3 albedo_bot/albedo_main.py reset
 ```
 
 ```
@@ -101,31 +109,25 @@ tmux new
 ```
 Connect to docker container
 ```bash
-docker exec -it devcontainer-afk-processing-container-1 bash
-```
-Build Hero Database
-```bash
-cd /workspace/afk_image_processing && python3 image_processing/build_db.py
+docker exec -it devcontainer-afk_processing_container-1 bash
 ```
 Run command to start processing server
 ```
 cd /workspace/afk_image_processing/ && python3 image_processing/processing_server.py
 ```
-Disconnect from tumux session by hitting `ctrl + 'b'` pause `d`
+Disconnect from tmux session by hitting `ctrl + 'b'` pause `d`
 
-9. Run abledo-bot service
+9. Run albedo-bot service
 Create a second tmux session
 ```bash
 tmux new
 ```
 Connect to container again
 ```bash
-docker exec -it devcontainer-afk-processing-container-1 bash
+docker exec -it devcontainer-afk_processing_container-1 bash
 ```
-Start Albedo bot replacing `<bot token>` with the token listed in the discord
-api developer portal
 ```bash
-cd /workspace/albedo-bot/ && TOKEN=<bot token> python3 albedo_bot/albedo_main.py
+cd /workspace/albedo-bot/ && python3 albedo_bot/albedo_main.py
 ```
 
 10. Modifying Bot
