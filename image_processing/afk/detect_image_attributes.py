@@ -206,60 +206,64 @@ def detect_ascension(detected_ascension_stars: DataFrame,
         ascension_result = ModelResult(
             best_ascension_stars_label,
             best_ascension_stars_match["confidence"])
+    try:
 
-    if ascension_result.score < 0.75:
-        hsv_result_dict: Dict[int, List[Contour]] = {}
-        image_dimensions = DimensionsObject(
-            SegmentRectangle(0, 0, *segment_info.image.shape[:2]))
-        for ascension_hsv_range in ALL_ASCENSION_HSV_RANGE:
+        if ascension_result.score < 0.75:
+            hsv_result_dict: Dict[int, List[Contour]] = {}
+            image_dimensions = DimensionsObject(
+                SegmentRectangle(0, 0, *segment_info.image.shape[:2]))
+            for ascension_hsv_range in ALL_ASCENSION_HSV_RANGE:
 
-            contour_wrapper = get_hero_contours(
-                segment_info.image, hsv_range=ascension_hsv_range)
+                contour_wrapper = get_hero_contours(
+                    segment_info.image, hsv_range=ascension_hsv_range)
 
-            contour_list = contour_wrapper.largest(5)
-            filtered_contour_list: List[Contour] = []
-            bounding_box = DimensionsObject(SegmentRectangle(0, 0, 0, 0))
-            for contour_instance in contour_list:
-                if image_dimensions.within(contour_instance.dimension_object, 0.3):
-                    bounding_box.merge(contour_instance.dimension_object)
-                    filtered_contour_list.append(contour_instance)
-            hsv_result_dict[bounding_box.size] = filtered_contour_list
-        max_hsv_key = max(hsv_result_dict.keys())
-        contour_list = hsv_result_dict[max_hsv_key]
+                contour_list = contour_wrapper.largest(5)
+                filtered_contour_list: List[Contour] = []
+                bounding_box = DimensionsObject(SegmentRectangle(0, 0, 0, 0))
+                for contour_instance in contour_list:
+                    if image_dimensions.within(contour_instance.dimension_object, 0.3):
+                        bounding_box.merge(contour_instance.dimension_object)
+                        filtered_contour_list.append(contour_instance)
+                hsv_result_dict[bounding_box.size] = filtered_contour_list
+            max_hsv_key = max(hsv_result_dict.keys())
+            contour_list = hsv_result_dict[max_hsv_key]
 
-        ascension_border_mask = np.zeros(
-            segment_info.image.shape[:2], np.uint8)
-        largest_contour = contour_list[0]
+            ascension_border_mask = np.zeros(
+                segment_info.image.shape[:2], np.uint8)
+            largest_contour = contour_list[0]
 
-        contour_color = 255
+            contour_color = 255
 
-        cv2.drawContours(
-            ascension_border_mask,
-            [largest_contour.raw_contour],
-            -1, contour_color, -1)
-        for contour_dimension_object in contour_list[1:]:
-
-            if largest_contour._contour_index == contour_dimension_object._parent_contour:
-                contour_color = 0
-            else:
-                contour_color = 255
             cv2.drawContours(
                 ascension_border_mask,
-                [contour_dimension_object.raw_contour],
+                [largest_contour.raw_contour],
                 -1, contour_color, -1)
+            for contour_dimension_object in contour_list[1:]:
 
-        contour_mean_color = cv2.mean(
-            segment_info.image, mask=ascension_border_mask)
-        ascension_results = GV.ASCENSION_DB.search(
-            AscensionData(contour_mean_color[0],
-                          contour_mean_color[1],
-                          contour_mean_color[2]))
-        if GV.verbosity(1):
-            print(f"Ascension Border Result: {ascension_results}")
-        # print(contour_mean_color)
-        # display_image(
-        #     [segment_info.image, ascension_border_mask], display=True)
-        ascension_result = ascension_results[0]
+                if largest_contour._contour_index == contour_dimension_object._parent_contour:
+                    contour_color = 0
+                else:
+                    contour_color = 255
+                cv2.drawContours(
+                    ascension_border_mask,
+                    [contour_dimension_object.raw_contour],
+                    -1, contour_color, -1)
+
+            contour_mean_color = cv2.mean(
+                segment_info.image, mask=ascension_border_mask)
+            ascension_results = GV.ASCENSION_DB.search(
+                AscensionData(contour_mean_color[0],
+                            contour_mean_color[1],
+                            contour_mean_color[2]))
+            if GV.verbosity(1):
+                print(f"Ascension Border Result: {ascension_results}")
+            # print(contour_mean_color)
+            # display_image(
+            #     [segment_info.image, ascension_border_mask], display=True)
+            ascension_result = ascension_results[0]
+    except Exception:
+        import traceback
+        traceback.print_exc()
 
     GV.GLOBAL_TIMER.finish_level()
     return ascension_result, best_match_coordinates
