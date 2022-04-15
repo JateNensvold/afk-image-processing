@@ -2,7 +2,8 @@ import argparse
 import json
 from typing import Any, Dict, List
 
-BOX_LABEL_DATA_FORMAT = List[Dict[str, Any]]
+BOX_LABEL_INSTANCE = Dict[str, Any]
+BOX_LABEL_DATA_FORMAT = List[BOX_LABEL_INSTANCE]
 
 
 def parse_args():

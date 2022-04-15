@@ -1,5 +1,5 @@
-from image_processing.afk.roster.dimensions_object import (
-    DimensionsObject, SegmentRectangle)
+from image_processing.afk.roster.dimensions_object import (DimensionsObject)
+from image_processing.processing.types.types import SegmentRectangle
 
 
 class RowItem():

@@ -17,7 +17,7 @@ from image_processing.scripts.boxlabel.utils.boxlabel_data import (
 
 INFO = {
     "description": "AFK Arena Hero Info Dataset",
-    "url": "https://github.com/JateNensvold/afk-image-processing",
+    "url": "https://github.com/JateNensvold/afk_image_processing",
     "version": "0.1.0",
     "year": 2021,
     "contributor": "jatenensvold",

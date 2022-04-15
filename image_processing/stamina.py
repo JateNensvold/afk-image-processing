@@ -6,7 +6,7 @@ import imutils
 import numpy as np
 import matplotlib.pyplot as plt
 
-from image_processing.processing.image_processing import blur_image
+from image_processing.processing.image_processing import HSV_RANGE, HSVRange, blur_image
 import image_processing.globals as GV
 # Need this import to use imutils.contours.sort_contours,
 #   without it Module raises AttributeError
@@ -177,7 +177,7 @@ def signature_template_mask(templates: dict):
 
             if "morph" in templates[folder] and templates[folder]["morph"]:
 
-                hsv_range = [np.array([0, 0, 206]), np.array([159, 29, 255])]
+                hsv_range = HSVRange(0, 0, 206, 159, 29, 255)
 
                 thresh = blur_image(
                     template_image, hsv_range=hsv_range, reverse=True)

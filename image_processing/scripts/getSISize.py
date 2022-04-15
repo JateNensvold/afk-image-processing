@@ -4,7 +4,7 @@ import statistics
 import cv2
 import numpy as np
 
-from image_processing.processing.image_processing import blur_image
+from image_processing.processing.image_processing import HSVRange, blur_image
 from image_processing.stamina import digit_features
 import image_processing.globals as GV
 
@@ -33,11 +33,10 @@ def get_digit(image):
     cropped = image[0:round(height*0.3), round(width*0.25):width]
 
     # (hMin = 11 , sMin = 4, vMin = 110), (hMax = 38 , sMax = 191, vMax = 255)
-    lower_bound = np.array([11, 4, 167])
-    upper_bound = np.array([38, 191, 255])
+    digit_hsv_range = HSVRange(11, 4, 167, 38, 191, 255)
 
     cropped_blur = blur_image(
-        cropped, hsv_range=[lower_bound, upper_bound])
+        cropped, hsv_range=digit_hsv_range)
 
     digit_countour = cv2.findContours(
         cropped_blur, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)

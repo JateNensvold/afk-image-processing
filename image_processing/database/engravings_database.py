@@ -1,5 +1,5 @@
 import json
-from typing import List, NamedTuple
+from typing import Dict, List, NamedTuple
 
 from numpy import asarray, array, float32, int64
 from faiss import index_factory
@@ -46,9 +46,12 @@ class EngravingSearch:
         """_summary_
         """
         self.index: IndexIDMap = index_factory(ENGRAVING_DIMENSIONS, INDEX_KEY)
-        for engraving_result in engraving_data_list:
+        self.index_lookup: Dict[int, str] = {}
+        for engraving_index, engraving_result in enumerate(engraving_data_list):
+            self.index_lookup[engraving_index] = engraving_result.name
             self.index.add_with_ids(asarray([engraving_result.data()], dtype=float32),
-                                    array([engraving_result.name], int64))
+                                    array([engraving_index], int64))
+        self.ascension_count = len(engraving_data_list)
 
     @classmethod
     def from_json(cls, engraving_json_path: str):
@@ -68,15 +71,19 @@ class EngravingSearch:
                     engraving_data["value"]))
         return EngravingSearch(engraving_list)
 
-    def search(self, engraving_data: EngravingData):
+    def search(self, engraving_data: EngravingData, k: int = 5):
         """_summary_
 
         Args:
-            engraving_index (Tuple[float32]): _description_
+            engraving_data (EngravingData): _description_
+            k (int): number of search results to return (capped by length of
+                search database)
         """
+        model_result_list: List[ModelResult] = []
         distance_array, id_array = self.index.search(
-            asarray([engraving_data], dtype=float32), k=1)
-        result_name = str(id_array[0][0])
-        distance_value = float(distance_array[0][0])
-        output = ModelResult(result_name, distance_value)
-        return output
+            asarray([engraving_data], dtype=float32), k=min(k, self.ascension_count))
+        for num in range(min(k, self.ascension_count)):
+            result_name = self.index_lookup[id_array[0][num]]
+            distance_value = float(distance_array[0][num])
+            model_result_list.append(ModelResult(result_name, distance_value))
+        return model_result_list

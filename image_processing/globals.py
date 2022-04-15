@@ -1,5 +1,5 @@
 """
-File that stores the Config options for the AFK-image-processing package
+File that stores the Config options for the afk_image_processing package
 When imported will automatically provide a CLI through python argparse for
 initializing all the required information for running AFK Arena Roster
 Image Detection
@@ -17,6 +17,7 @@ import pathlib
 import shlex
 
 from typing import TYPE_CHECKING, List, Union
+from image_processing.processing.image_processing import HSVRange
 
 import numpy
 import torch
@@ -26,6 +27,7 @@ from detectron2.engine import DefaultPredictor
 import image_processing.helpers.load_images as load
 from image_processing.helpers.timer import Timer
 from image_processing.database.engravings_database import EngravingSearch
+from image_processing.database.ascension_database import AscensionSearch
 
 if TYPE_CHECKING:
     from image_processing.database.image_database import ImageSearch
@@ -65,6 +67,8 @@ FI_SI_STAR_MODEL: torch.Tensor = None
 ASCENSION_BORDER_MODEL: DefaultPredictor = None
 IMAGE_DB: "ImageSearch" = None
 ENGRAVING_DB: EngravingSearch = None
+ASCENSION_DB: AscensionSearch = None
+
 ROOT_DIR: pathlib.Path = pathlib.Path(os.path.dirname(__file__)).absolute()
 HERO_PORTRAIT_SIZE = 512
 MODEL_IMAGE_SIZE = 416
@@ -180,7 +184,7 @@ SEGMENTED_HEROES_DIR = os.path.join(
     DATABASE_HERO_VALIDATION_DIR, "segmented_heroes")
 CONFIG_DIR = os.path.join(DATABASE_DIR, "configs")
 ENGRAVING_JSON_PATH = os.path.join(CONFIG_DIR, "engraving_values.json")
-
+ASCENSION_JSON_PATH = os.path.join(CONFIG_DIR, "ascension_values.json")
 
 # AFKBuilder Submodule
 AFKBuilder_dir = pathlib.Path(os.path.join(DATABASE_DIR, "AFKBuilder"))
@@ -211,3 +215,9 @@ ASCENSION_BORDER_MODEL_PATH = pathlib.Path(
 
 
 ENGRAVING_DB = EngravingSearch.from_json(ENGRAVING_JSON_PATH)
+ASCENSION_DB = AscensionSearch.from_json(ASCENSION_JSON_PATH)
+
+HERO_PORTRAIT_OUTLINE_HSV = HSVRange(4, 69, 83, 23, 255, 255)
+HERO_ROSTER_HSV = HSVRange(0,0,0, 179, 255, 192)
+ASCENSION_STAR_HSV = HSVRange(0,0,167, 179, 240, 255)
+MATRIX_ROW_SPACING_PERCENT = 0.1

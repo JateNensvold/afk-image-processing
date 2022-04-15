@@ -1,12 +1,53 @@
-from typing import Sequence
+from typing import List, Sequence, NamedTuple
 
 import cv2
-from image_processing.load_images import display_image
 from numpy import ndarray, array, ones, uint8, median
 
 
+HSV_RANGE = List[ndarray]
+
+
+class HSVRange(NamedTuple):
+    """
+    NamedTuple with attributes used for thresholding an image
+    """
+    hue_min: int
+    saturation_min: int
+    value_min: int
+
+    hue_max: int
+    saturation_max: int
+    value_max: int
+
+    def get_range(self):
+        """
+        Create and Format numpy array in format passed to cv2.inrange
+        """
+        hsv_range: HSV_RANGE = [self.lower_range,
+                                self.upper_range]
+        return hsv_range
+
+    @property
+    def lower_range(self):
+        """
+        Create and numpy array with min values
+        """
+        hsv_range: ndarray = array(
+            [self.hue_min, self.saturation_min, self.value_min])
+        return hsv_range
+
+    @property
+    def upper_range(self):
+        """
+        Create and numpy array with max values
+        """
+        hsv_range: ndarray = array(
+            [self.hue_max, self.saturation_max, self.value_max])
+        return hsv_range
+
+
 def blur_image(image: ndarray, dilate=False,
-               hsv_range: Sequence[array] = None,
+               hsv_range: HSVRange = None,
                rgb_range: Sequence[array] = None,
                reverse: bool = False) -> ndarray:
     """
@@ -31,15 +72,19 @@ def blur_image(image: ndarray, dilate=False,
 
     if hsv_range:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-        output = cv2.inRange(image, hsv_range[0], hsv_range[1])
+        output = cv2.inRange(image,
+                             hsv_range.lower_range,
+                             hsv_range.upper_range)
         if reverse:
             output = cv2.bitwise_not(output)
+        image = cv2.cvtColor(image, cv2.COLOR_HSV2BGR)
         # output = cv2.bitwise_and(output, mask_inv)
     elif rgb_range:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         output = cv2.inRange(image, rgb_range[0], rgb_range[1])
         if reverse:
             output = cv2.bitwise_not(output)
+        output = cv2.cvtColor(output, cv2.COLOR_RGB2BGR)
         # output = cv2.bitwise_and(output, mask_inv)
 
     else:

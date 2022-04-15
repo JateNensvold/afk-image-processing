@@ -1,5 +1,5 @@
 # AFK-Imagine-Processing
-Afk-image-processing is a feature recognition application for the game AFK-Arena. It makes use of OpenCV, Faster RCNN and Yolov5 to
+afk_image_processing is a feature recognition application for the game AFK-Arena. It makes use of OpenCV, Faster RCNN and Yolov5 to
 detect in game characters and a facet of features that each character can posses by processing game screenshots.
 
 This repository can detect character names, FI level, SI level and ascension.
@@ -15,7 +15,7 @@ BUILD_TYPE to the desired architecture
 
 ```
 services:
-  afk-processing-container:
+  afk_processing_container:
     build:
     ...
       args:
@@ -45,17 +45,17 @@ cd <host-dir> && mkdir projects
 
 2. Checkout code to deploy
 ```bash
-git checkout git@github.com:JateNensvold/afk-image-processing.git
+git checkout git@github.com:JateNensvold/afk_image_processing.git
 git checkout git@github.com:JateNensvold/albedo-bot.git
 ```
-Go to `projects/afk-image-processing/.devcontainer/docker-compose.yaml` and 
+Go to `projects/afk_image_processing/.devcontainer/docker-compose.yaml` and 
 ensure that the `BUILD_TYPE` is set to the proper argument for your production hardware(CPU or CUDA)
 
 3. Build docker image
 
-Move to `afk-image-processing` git repo
+Move to `afk_image_processing` git repo
 ```bash
-cd projects/afk-image-processing
+cd projects/afk_image_processing
 ```
 Go to devcontainer folder
 ```
@@ -80,7 +80,7 @@ docker exec -it devcontainer-afk-processing-container-1 bash
 Go to post-install command in `.devcontainer/devcontainer.json` for the latest command
 the following may be out of date
 ```bash
-cd /workspace/albedo-bot && pip3 install -r requirements.txt  && /workspace/afk-image-processing/requirements/install ${BUILD_TYPE}
+cd /workspace/albedo-bot && pip3 install -r requirements.txt  && /workspace/afk_image_processing/requirements/install ${BUILD_TYPE}
 ```
 
 7. Run database creation
@@ -100,11 +100,11 @@ docker exec -it devcontainer-afk-processing-container-1 bash
 ```
 Build Hero Database
 ```bash
-cd /workspace/afk-image-processing && python3 image_processing/build_db.py
+cd /workspace/afk_image_processing && python3 image_processing/build_db.py
 ```
 Run command to start processing server
 ```
-cd /workspace/afk-image-processing/ && python3 image_processing/processing_server.py
+cd /workspace/afk_image_processing/ && python3 image_processing/processing_server.py
 ```
 Disconnect from tumux session by hitting `ctrl + 'b'` pause `d`
 
@@ -131,13 +131,15 @@ run `tmux ls` and then `tmux attach -t <window number>` to attach to your proces
 
 
 ## Setup For development
-When developing or executing the afk-image-procesing codebase dependencies and
+When developing or executing the afk_image_processing codebase dependencies and
 environment setup are required before the code can be ran.
 
-1. Initilize submodules
+python3 image_processing/models/yolov5/train.py --img 416 --batch 16 --epochs 3000 --data image_processing/models/training_data/yolo_data/yolo_data/data.yaml --weights yolov5s.pt
+
+1. Initialize submodules
 This repository makes use of a git submodules called YoloV5 for training some
-of the image recognition Neural Networks. To initilze that submodule for the
-first time after checking out the `afk-image-processing` the
+of the image recognition Neural Networks. To initialize that submodule for the
+first time after checking out the `afk_image_processing` the
 following commands needs to be ran
 ```bash
 git submodule init image_processing/models/yolov5/
@@ -150,7 +152,7 @@ To
 ## Training new models
 ### Training new Hero Ascension/Border Model for Detectron
 
-1. Download datset
+1. Download dataset
 
 To download the JSON file provided by labelbox with the pretrained data go to the following link
 [labelbox.json](https://storage.googleapis.com/labelbox-exports/ckrz9srr563510ydl0bpv94w1/ckrzarwja0y510y9u4dc009id/export-2022-03-12T08%3A28%3A41.743Z.json?GoogleAccessId=api-prod%40labelbox-193903.iam.gserviceaccount.com&Expires=1648283347&Signature=QUM8%2B0F6yY2jYNF%2BtcjNLF6j5lUPC8%2BO%2BwLNRj%2F2%2BPQTTKcnaFtwTYoQSKRYXaF3fCmOuDLA4ywMVvIifFjvbBrkJMYOTD5tVq5f6hc9zjYpMi2xa3fYA7sfIOTwmX2kjJwAXICIghsGB0yQBp%2FGbstkIejegM3bk43gvTBVRZ%2BZK9R3TTdQ4G1sUqT6BcAm88n6H3eq4XOALYnXtMLohlLnJeMGy8p0M5v%2F1y841dtQ14pgrbHhJ%2FtbeTKd%2BfyVfmb5R%2FPxzeBs%2BR7l60ZppapM7whQWrIaUS9i8GCN3GMp5kIDk4wAeElZKOxMWHK5dew9z2%2Fefw4P%2B%2BWgQF7UKQ%3D%3D&response-content-disposition=attachment)
@@ -164,7 +166,7 @@ so we can run a special conversion script that will convert the data from the
 3. Convert Data
 
 Run the following command from the `./image_processing/models/training_data/coco_data`
-directory to convert the files to COCO format, dont forget to repalce `<name of json file>`
+directory to convert the files to COCO format, dont forget to replace `<name of json file>`
 ```bash
 python3 ../../../scripts/box_label_to_coco.py <name of json file> ./
 ```
@@ -186,7 +188,7 @@ After the above command finishes running the final model will be located at
 
 ** *Optional*  
 5. Use model for image recognition  
-To use the newly trained model with the afk-image-processing library replace
+To use the newly trained model with the afk_image_processing library replace
 the old model located at `./image_processing/models/final_models/hero_ascension_model.pt`
 with the model created in the previous step
 
@@ -205,7 +207,7 @@ curl -L "<curl link>" > roboflow.zip; unzip roboflow.zip; rm roboflow.zip
 ```
 
 2. Fix Folder Paths
-Due to an incompatability issue between YoloV5 and roboflow data layout we need
+Due to an incompatibility issue between YoloV5 and roboflow data layout we need
 to make a quick change to [data.yaml](./image_processing/models/training_data/si_fi_stars/data.yaml)
 so that the values that are generated have the correct path between the yoloV5
 repo and the location we just put out data. After downloading our data from 
@@ -249,7 +251,7 @@ Results saved to ../../yolov5/runs/train/exp22
 
 ** *Optional*  
 3. Use model for image recognition  
-To use the newly trained model with the afk-image-processing library replace
+To use the newly trained model with the afk_image_processing library replace
 the old model located at `./image_processing/models/final_models/fi_si_star_model.pt`
 with the model called `best.pt` created in the previous step.
 

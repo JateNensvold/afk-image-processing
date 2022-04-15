@@ -19,8 +19,8 @@ def fetch_classes():
     args = parser.parse_args()
     box_label_file_path = os.path.abspath(args.box_label_file)
     json_data = load_json(box_label_file_path)
-    class_labels = get_classes(json_data)
-    return class_labels
+    class_data = get_classes(json_data)
+    return class_data.class_names
 
 
 if __name__ == "__main__":

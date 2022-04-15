@@ -8,11 +8,12 @@ DimensionObject is related to others in the grouping
 from typing import TYPE_CHECKING
 
 import cv2
+from image_processing.processing.types.types import SegmentRectangle
 import rtree
 import numpy as np
 
 import image_processing.load_images as load
-import image_processing.afk.roster.dimensions_object as DO
+from image_processing.afk.roster.dimensions_object import DimensionsObject
 
 if TYPE_CHECKING:
     import image_processing.afk.roster.matrix as MA
@@ -39,9 +40,9 @@ class ColumnObjects:
         """
         self.column_rtree = rtree.index.Index(interleaved=False)
         self.matrix = matrix
-        self.columns: list[DO.DimensionsObject] = []
+        self.columns: list[DimensionsObject] = []
         self.column_id_to_index: dict[int, int] = {}
-        self.column_id_to_column: dict[int, DO.DimensionsObject] = {}
+        self.column_id_to_column: dict[int, DimensionsObject] = {}
 
     def __getitem__(self, index: int):
         """
@@ -84,12 +85,12 @@ class ColumnObjects:
 
         # TODO Find out why invalid y values cause intersections/overlap to
         #   break
-        segment_rectangle = DO.SegmentRectangle(
+        segment_rectangle = SegmentRectangle(
             row_item.dimensions.x,
             0,
             row_item.dimensions.width,
             self.matrix.source_height)
-        _temp_dimensions_object = DO.DimensionsObject(segment_rectangle)
+        _temp_dimensions_object = DimensionsObject(segment_rectangle)
         _intersections_list = list(self.column_rtree.intersection(
             _temp_dimensions_object.coords()))
 
@@ -99,7 +100,7 @@ class ColumnObjects:
             if update_rtree:
                 overlap_raw = _temp_dimensions_object.overlap(
                     _column)
-                overlap_p = overlap_raw / _temp_dimensions_object.size()
+                overlap_p = overlap_raw / _temp_dimensions_object.size
 
                 index = self.column_id_to_index[id(_column)]
                 if overlap_p == 1:
@@ -132,7 +133,7 @@ class ColumnObjects:
                     _column = self.columns[_index]
                     overlap_raw = _temp_dimensions_object.overlap(
                         _column)
-                    overlap_p = overlap_raw / _temp_dimensions_object.size()
+                    overlap_p = overlap_raw / _temp_dimensions_object.size
                     overlap_list.append((_index, overlap_p))
 
                 # print(overlap_list)
@@ -185,8 +186,8 @@ class ColumnObjects:
 
         if num_columns != len(self.columns):
             for _itr in range(num_columns - len(self.columns)):
-                self.columns.append(DO.DimensionsObject(
-                    DO.SegmentRectangle(0, 0, 0, self.matrix.source_height)))
+                self.columns.append(DimensionsObject(
+                    SegmentRectangle(0, 0, 0, self.matrix.source_height)))
         for _column in self.columns:
             self.column_rtree.delete(id(_column), _column.coords())
             _column.x = min_x
@@ -223,7 +224,7 @@ class ColumnObjects:
             self.column_id_to_index[id(_column_object)] = _index
             self.column_id_to_column[id(_column_object)] = _column_object
 
-    def update_column(self, column: DO.DimensionsObject,
+    def update_column(self, column: DimensionsObject,
                       row_item: "RI.RowItem"):
         """
         Update 'column' with the x_coordinate union between 'row_item'
@@ -251,8 +252,8 @@ class ColumnObjects:
         Return:
             index(int) of new column added
         """
-        column_dimensions_object = DO.DimensionsObject(
-            DO.SegmentRectangle(row_item.dimensions.x,
+        column_dimensions_object = DimensionsObject(
+            SegmentRectangle(row_item.dimensions.x,
                                 0,
                                 row_item.dimensions.width,
                                 self.matrix.source_height))
@@ -297,7 +298,7 @@ class ColumnObjects:
         self._sort()
         return self.column_id_to_index[new_column_id]
 
-    def _find_index(self, column_dimensions: DO.DimensionsObject) -> int:
+    def _find_index(self, column_dimensions: DimensionsObject) -> int:
         """
         *Only call to find index of dimensions in empty areas
         Find the forcasted index of an 'x_coord'

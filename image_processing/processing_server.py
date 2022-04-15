@@ -3,7 +3,7 @@ Script used to start the feature detection server
 
 This script provides a way for outside clients or even local clients to connect
 to an environment that is already initialized and also has the Image database
-and already loaded
+and ML models already loaded
 """
 import json
 import time
@@ -28,8 +28,7 @@ def main():
     socket.bind(address)
 
     GV.VERBOSE_LEVEL = 1
-    LM.load_files(str(GV.FI_SI_STARS_MODEL_PATH),
-                  str(GV.ASCENSION_BORDER_MODEL_PATH))
+    LM.load_files(str(GV.FI_SI_STARS_MODEL_PATH))
 
     print("Ready to start processing image requests...")
     while True:

@@ -7,13 +7,14 @@ list of RowItems essentially making the Matrix class a 2 Dimensional Array that
 provides extra features when interacting with groups of Row Objects
 """
 from typing import Callable
+from image_processing.processing.types.types import SegmentRectangle
 
 import numpy as np
 
 import image_processing.globals as GV
 import image_processing.afk.roster.column_objects as CO
 import image_processing.afk.roster.row as RO
-import image_processing.afk.roster.dimensions_object as DO
+from image_processing.afk.roster.dimensions_object import DimensionsObject
 
 
 class Matrix():
@@ -24,26 +25,27 @@ class Matrix():
     """
 
     def __init__(self, source_height: int, source_width: int,
-                 spacing: int = 10):
+                 spacing_percent: int = 0.5):
         """
         Create matrix object to track list of image_processing.stamina.row
 
         Args:
             source_height: maximum height of source
             source_width: maximum width of source
-            spacing: minimum distance/height(pixels) between each row
-                without merging
+            spacing_percent(int): percent that a new object must be overlapping
+                with an existing row to get added to that row
+                (ex. 0.5 = 50% overlap)
         """
         self.source_height = source_height
         self.source_width = source_width
-        self.spacing = spacing
         self._heads: dict[int, Callable[[], int]] = {}
         self._row_list: list[RO.Row] = []
         self._idx = 0
+        self.spacing_percent = spacing_percent
         self.columns = CO.ColumnObjects(self)
 
     def __str__(self):
-        return "\n".join([self._row_list])
+        return "\n".join([str(row_item) for row_item in self._row_list])
 
     def __iter__(self):
         """
@@ -112,7 +114,7 @@ class Matrix():
         else:
             return avg_gap
 
-    def auto_append(self, dimensions: DO.SegmentRectangle, name: str,
+    def auto_append(self, dimensions: SegmentRectangle, name: str,
                     detect_collision: bool = True,
                     dimension_object=False):
         """
@@ -131,12 +133,18 @@ class Matrix():
         if dimension_object:
             _temp_dimensions = dimensions
         else:
-            _temp_dimensions = DO.DimensionsObject(dimensions)
+            _temp_dimensions = DimensionsObject(dimensions)
         y_coord = _temp_dimensions.y
         _row_index = None
         for _index, _head in self._heads.items():
             # If there are no close rows set flag to create new row
-            if abs(_head() - y_coord) < self.spacing:
+            average_row_height = self._row_list[_index]._get_avg_height()
+            row_end = (_head() + average_row_height)
+            object_end = (y_coord + _temp_dimensions.height)
+            object_end_difference = abs(row_end - object_end)
+            # find overlap percentage
+            overlap_percentage = (1 - (object_end_difference/average_row_height))
+            if (overlap_percentage >  self.spacing_percent):
                 _row_index = _index
                 break
         if _row_index is not None:
@@ -233,12 +241,12 @@ class Matrix():
                                 _avg_height = self.get_avg_height()
 
                                 for _itr in range(missing_row_items):
-                                    _temp_dims = DO.SegmentRectangle(
+                                    _temp_dims = SegmentRectangle(
                                         left_x + extra_gap_width,
                                         _row_object._get_row_bottom() - _avg_height,
                                         _avg_width,
                                         _avg_height)
-                                    _temp_dim_object = DO.DimensionsObject(
+                                    _temp_dim_object = DimensionsObject(
                                         _temp_dims)
                                     left_x = _temp_dim_object.x2
                                     _row_object.append(
@@ -258,12 +266,12 @@ class Matrix():
                                 _leftover_gap = gap_size
 
                                 while _leftover_gap > _avg_width:
-                                    _temp_dims = DO.SegmentRectangle(
+                                    _temp_dims = SegmentRectangle(
                                         left_x + _avg_gap,
                                         _row_object._get_row_bottom(
                                         ) - _avg_height,
                                         _avg_width, _avg_height)
-                                    _temp_dim_object = DO.DimensionsObject(
+                                    _temp_dim_object = DimensionsObject(
                                         _temp_dims)
                                     left_x = _temp_dim_object.x2
                                     _row_object.append(_temp_dim_object)
@@ -283,13 +291,13 @@ class Matrix():
 
                                 _leftover_gap = gap_size
                                 while _leftover_gap > _avg_width:
-                                    _temp_dims = DO.SegmentRectangle(
+                                    _temp_dims = SegmentRectangle(
                                         right_x - _avg_width,
                                         _row_object._get_row_bottom(
                                         ) - _avg_height,
                                         _avg_width, _avg_height)
 
-                                    _temp_dim_object = DO.DimensionsObject(
+                                    _temp_dim_object = DimensionsObject(
                                         _temp_dims)
                                     right_x = _temp_dim_object.x
                                     _row_object.append(_temp_dim_object)

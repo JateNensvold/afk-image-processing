@@ -30,7 +30,8 @@ def find_images(folder_path: str, file_dict: Dict[str, Set]):
     for hero_name in os.listdir(folder_path):
         file_path = os.path.join(folder_path, hero_name)
         if os.path.isfile(file_path) and (file_path.endswith(".png") or
-                                          file_path.endswith(".jpg")):
+                                          file_path.endswith(".jpg") or
+                                          file_path.endswith(".webp")):
             if hero_name not in file_dict:
                 file_dict[hero_name] = set()
             file_dict[hero_name].add(file_path)

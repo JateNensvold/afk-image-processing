@@ -5,25 +5,14 @@ The DimensionsObject is used to wrap/interact with objects that existing in
 space at a certain location, storing information such as the x and y
 coordinates as well as the width and height of the object
 """
-from typing import NamedTuple, Tuple, Union, Any
+from typing import Any, NamedTuple, Union
 
 import numpy as np
 
 import image_processing.globals as GV
 from image_processing.load_images import display_image
-from image_processing.processing.types import CONTOUR
-
-
-class SegmentRectangle(NamedTuple):
-    """_summary_
-
-    Args:
-        NamedTuple (_type_): _description_
-    """
-    x: int
-    y: int
-    width: int
-    height: int
+from image_processing.processing.types.types import SegmentRectangle
+from pandas import BooleanDtype
 
 
 class DoubleCoordinates(NamedTuple("DoubleCoordinates",
@@ -105,7 +94,7 @@ class DimensionsObject:
     def __repr__(self) -> str:
         return str(self)
 
-    def __init__(self, dimensions: SegmentRectangle, raw_data: CONTOUR = None,
+    def __init__(self, dimensions: SegmentRectangle, raw_data: Any = None,
                  full_number: bool = True):
         """
         Create a Dimensions object to hold x,y coordinates as well as
@@ -120,13 +109,13 @@ class DimensionsObject:
                 be whole numbers during its lifetime
         """
         self.__dict__["full_number"] = full_number
+        self.full_number = full_number
         self.raw_data = raw_data
         self.x = dimensions.x
         self.y = dimensions.y
-        self.width = dimensions.width
-        self.height = dimensions.height
-        self.x2 = self.x + self.width
-        self.y2 = self.y + self.height
+
+        self.x2 = self.x + dimensions.width
+        self.y2 = self.y + dimensions.height
 
     def __getitem__(self, index: int) -> int:
         """
@@ -150,35 +139,34 @@ class DimensionsObject:
 
     def __setattr__(self, name: str, value: Union[int, float]):
         """
-        Sets 'name' equal to value
+        Sets 'name' equal to 'value'
         If self.full_number is true all number types will be truncated to int
-        When setting x or y values, the corresponding 'width' or 'height' value
-            will also be automatically updated
         """
-        if isinstance(value, (int, float)):
-            if self.full_number:  # pylint: disable=no-member
-                self.__dict__[name] = int(value)
-            if (name in ["x", "x2"] and "x" in self.__dict__ and "x2" in
-                    self.__dict__):
-                self.__dict__["width"] = self.x2 - self.x
-            elif (name in ["y", "y2"] and "y" in self.__dict__ and "y2" in
-                    self.__dict__):
-                self.__dict__["height"] = self.y2 - self.y
-
+        if isinstance(value, (int, float)) and self.full_number:
+            # if self.full_number:  # pylint: disable=no-member
+            self.__dict__[name] = int(value)
         else:
             self.__dict__[name] = value
 
-    def _truncate_values(self):
+    @property
+    def width(self):
         """
-        Private method to enforce each 'DimensionObject' value is a
-            whole number
+        Calculate and return width of self
         """
-        self.x = int(self.x)
-        self.y = int(self.y)
-        self.x2 = int(self.x2)
-        self.y2 = int(self.y2)
-        self.width = int(self.width)
-        self.height = int(self.height)
+        output = self.x2 - self.x
+        if self.full_number:
+            output = int(output)
+        return output
+
+    @property
+    def height(self):
+        """
+        Calculate and return height of self
+        """
+        output = self.y2 - self.y
+        if self.full_number:
+            output = int(output)
+        return output
 
     def merge(self, dimensions_object: "DimensionsObject",
               size_allowance_boundary=None, avg_value_boundary=False,
@@ -268,6 +256,37 @@ class DimensionsObject:
         """
         return DoubleCoordinates(self.x, self.x2, self.y, self.y2)
 
+    def within(self, dimension_object: Union["DimensionsObject", SegmentRectangle],
+               size_difference: int, both: bool = False):
+        """
+        Check if 'dimension_object' and 'self' have a width and height that
+            are no more than 'size_difference' apart
+
+        Args:
+            dimension_object (Union["DimensionsObject", SegmentRectangle]): dimension object to compare
+                size against
+            size_difference (int): percentage as a decimal
+                ex. 0.3 would mean the two objects need to be within 30% of
+                    each other
+        Returns:
+            bool: true when they are within 'size_difference' of each other
+                false otherwise
+        """
+        width_adjustment = dimension_object.width * (size_difference)
+        lower_width_bound = dimension_object.width - width_adjustment
+        upper_width_bound = dimension_object.width + width_adjustment
+
+        height_adjustment = dimension_object.height * (size_difference)
+        lower_height_adjustment = dimension_object.height - height_adjustment
+        upper_height_adjustment = dimension_object.height + height_adjustment
+
+        lower_bound_valid = lower_width_bound <= self.width <= upper_width_bound
+        upper_bound_valid = lower_height_adjustment <= self.height <= upper_height_adjustment
+        if both:
+            return lower_bound_valid and upper_bound_valid
+        else:
+            return lower_bound_valid or upper_bound_valid
+
     def dimensional_values(self):
         """
         Return the coordinates and width/height values for the dimension object
@@ -277,6 +296,7 @@ class DimensionsObject:
         """
         return SegmentRectangle(self.x, self.y, self.width, self.height)
 
+    @property
     def size(self):
         """
         Return the size of the dimension object
@@ -308,8 +328,8 @@ class DimensionsObject:
                 and 'dim_object' percent overlap
         """
         raw_overlap = self.overlap(dim_object)
-        return (raw_overlap, raw_overlap/self.size(),
-                raw_overlap/dim_object.size())
+        return (raw_overlap, raw_overlap/self.size,
+                raw_overlap/dim_object.size)
 
     def _display(self, source_image: np.ndarray, *args, **kwargs):
         display_object = source_image[self.y:

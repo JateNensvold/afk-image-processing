@@ -30,8 +30,7 @@ def hero_data():
     config = read_config()
     json_test_data = config
 
-    LM.load_files(str(GV.FI_SI_STARS_MODEL_PATH),
-                  str(GV.ASCENSION_BORDER_MODEL_PATH))
+    LM.load_files(str(GV.FI_SI_STARS_MODEL_PATH))
     count = 0
     for image_path, si_info in json_test_data.items():
         if count >= 3:

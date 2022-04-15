@@ -62,7 +62,6 @@ def display_image(image: Union[np.ndarray, List[np.ndarray]],
     plt.figure()
     if colormap:
         plt.imshow(image, cmap="gray")
-
     else:
         plt.imshow(image)
 

@@ -8,6 +8,7 @@ Attributes
 from typing import Any, Dict, List, Tuple
 
 import cv2
+from image_processing.processing.types.types import SegmentRectangle
 from rtree.index import Index
 import imutils
 # Need this import to use imutils.contours.sort_contours,
@@ -17,13 +18,13 @@ from imutils import contours  # noqa
 from numpy import array, ndarray
 
 import image_processing.globals as GV
-from image_processing.afk.roster.dimensions_object import (
-    DimensionsObject, SegmentRectangle)
+from image_processing.afk.roster.dimensions_object import (DimensionsObject)
 from image_processing.afk.roster.matrix import Matrix
 from image_processing.afk.roster.RowItem import RowItem
-from image_processing.processing.types import CONTOUR_LIST
+from image_processing.processing.types.contour_types import (
+    CONTOUR_LIST, HIERARCHY_RELATIONSHIP, Contour, ImageContours)
 from image_processing.processing.image_data import SegmentResult
-from image_processing.processing.image_processing import blur_image
+from image_processing.processing.image_processing import HSVRange, blur_image
 from image_processing.helpers.utils import list_median
 
 # pylint: disable=invalid-name
@@ -69,11 +70,12 @@ class ContoursContainer:
         """_summary_
 
         Args:
-            image (ndarray): _description_
+            image (ndarray): blurred, filtered and thresholded image
         """
         self.image = image
 
-        self.raw_contours: CONTOUR_LIST = []
+        self.raw_contours: ImageContours = []
+        self.bounding_box = DimensionsObject(SegmentRectangle(0, 0, 0, 0))
         self.contours = self._find_contours(image)
 
     def _find_contours(self, image: ndarray):
@@ -88,24 +90,25 @@ class ContoursContainer:
                 by DimensionObjects
         """
 
-        contours_hierarchy_tuple = cv2.findContours(
-            image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        detected_contours = imutils.grab_contours(
-            contours_hierarchy_tuple)
-        self.raw_contours = sorted(
-            detected_contours, key=cv2.contourArea, reverse=True)
+        self.raw_contours = ImageContours(*cv2.findContours(
+            image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE))
 
-        contour_list: List[DimensionsObject] = []
+        contour_list: List[Contour] = []
+
         for detected_contour in self.raw_contours:
-            segment_rectangle = SegmentRectangle(
-                *cv2.boundingRect(detected_contour))
-            dim_object = DimensionsObject(segment_rectangle, detected_contour)
-            contour_list.append(dim_object)
+
+            self.bounding_box.merge(detected_contour.dimension_object)
+            contour_list.append(detected_contour)
+
+        contour_list = sorted(
+            contour_list, key=lambda x: cv2.contourArea(x.raw_contour), reverse=True)
+
         return contour_list
 
     def filter_contours(self, dimension_difference: int = 0.2, min_size: int = 2500,
                         dimension_median_difference: int = 0.15):
-        """Return a list of contours from image that fit criteria passed to
+        """
+        Return a list of contours from image that fit criteria passed to
             this function
 
         Args:
@@ -125,12 +128,12 @@ class ContoursContainer:
         """
 
         rtree_build_index = Index(interleaved=False)
-        contour_dimension_list: List[DimensionsObject] = []
+        contour_list: List[Contour] = []
         lower_boundary = 1.0 - dimension_median_difference
         upper_boundary = 1.0 + dimension_median_difference
 
-        for contour_index, dim_object in enumerate(self.contours):
-
+        for contour_index, contour_object in enumerate(self.contours):
+            dim_object = contour_object.dimension_object
             contour_coordinates = dim_object.coords()
             contour_intersections = list(rtree_build_index.intersection(
                 contour_coordinates))
@@ -145,40 +148,41 @@ class ContoursContainer:
             allowed_dimension_difference = (
                 average_dimension_length * dimension_difference)
             if (dimension_length_difference < allowed_dimension_difference and
-                    (dim_object.size()) > min_size):
-                contour_dimension_list.append(dim_object)
+                    (dim_object.size) > min_size):
+                contour_list.append(contour_object)
 
         median_height = list_median(
-            [dim_object.height for dim_object in contour_dimension_list])
+            [contour_instance.dimension_object.height for contour_instance in contour_list])
         median_width = list_median(
-            [dim_object.width for dim_object in contour_dimension_list])
+            [contour_instance.dimension_object.width for contour_instance in contour_list])
 
         height_segment = LineSegment(median_height * lower_boundary,
                                      median_height * upper_boundary)
         weight_segment = LineSegment(median_width * lower_boundary,
                                      median_width * upper_boundary)
 
-        valid_contour_list: List[DimensionsObject] = []
-        for dimension_object in contour_dimension_list:
-            if (height_segment.is_valid(dimension_object.height) or
-                    weight_segment.is_valid(dimension_object.width)):
-                valid_contour_list.append(dimension_object)
+        valid_contour_list: List[Contour] = []
+        for contour_object in contour_list:
+            if (height_segment.is_valid(contour_object.dimension_object.height) or
+                    weight_segment.is_valid(contour_object.dimension_object.width)):
+                valid_contour_list.append(contour_object)
 
         return valid_contour_list
 
-    def largest(self):
-        """_summary_
+    def largest(self, count: int = 1):
+        """
+        Get the first 'count' number of contours
 
         Returns:
-            _type_: _description_
+            list[DimensionsObject]: 'count' number of contours
         """
-        return self.contours[0]
+        return self.contours[:count]
 
 
-def get_hero_contours(image: array, **blur_kwargs: Dict[str, Any]):
+def get_hero_contours(image: ndarray, **blur_kwargs: Dict[str, Any]):
     """
     Args:
-        image: hero roster screenshot
+        image: hero screenshot in BGR format
     Return:
         dict with imageSize as key and
             image_processing.stamina.DimensionalObject's as values
@@ -220,26 +224,27 @@ def get_heroes(roster_image: ndarray,  blur_args: dict,
 
     original_image_unmodifiable = roster_image.copy()
     hero_dict: HERO_DICT = {}
-    contour_container_list: list[ContoursContainer] = []
+    contour_container_list: List[List[Contour]] = []
 
-    blur_args["hsv_range"] = [array([0, 0, 0]), array([179, 255, 192])]
+    blur_args["hsv_range"] = HSVRange(0, 0, 0, 179, 255, 192)
     contour_container_list.append(get_hero_contours(
         roster_image, **blur_args).filter_contours(
             dimension_median_difference=dimension_median_difference))
 
     blur_args["reverse"] = True
-    blur_args["hsv_range"] = [array([0, 0, 74]), array([27, 253, 255])]
+    blur_args["hsv_range"] = HSVRange(0, 0, 74, 27, 253, 255)
     contour_container_list.append(get_hero_contours(
         roster_image, **blur_args).filter_contours(
             dimension_median_difference=dimension_median_difference))
 
     image_height, image_width = roster_image.shape[:2]
-    hero_matrix = Matrix(image_height, image_width)
+    hero_matrix = Matrix(image_height, image_width,
+                         spacing_percent=GV.MATRIX_ROW_SPACING_PERCENT)
     for hero_contour_container in contour_container_list:
-        for dimension_object in hero_contour_container:
+        for contour_object in hero_contour_container:
             hero_matrix.auto_append(
-                dimension_object.dimensional_values(),
-                dimension_object.name)
+                contour_object.dimension_object.dimensional_values(),
+                contour_object.dimension_object.name)
 
     # Sort before pruning so all columns get generated
     hero_matrix.sort()
@@ -261,12 +266,12 @@ def get_heroes(roster_image: ndarray,  blur_args: dict,
 
                 _new_x = max(round(coord_tuple.x1 - x_adjust), 0)
                 _new_y = max(round(coord_tuple.y1 - y_adjust), 0)
-                segmented_image_copy = (
+                segmented_image_unmodifiable = (
                     original_image_unmodifiable[_new_y:coord_tuple.y2,
                                                 _new_x:coord_tuple.x2])
-                modifiable_segmented_image = segmented_image_copy.copy()
-                blurred = blur_image(modifiable_segmented_image, reverse=True, hsv_range=[
-                    array([4, 69, 83]), array([23, 255, 355])])
+                modifiable_segmented_image = segmented_image_unmodifiable.copy()
+                blurred = blur_image(modifiable_segmented_image, reverse=True,
+                                     hsv_range=GV.HERO_PORTRAIT_OUTLINE_HSV)
 
                 new_contours = cv2.findContours(
                     blurred, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
@@ -316,7 +321,7 @@ def get_heroes(roster_image: ndarray,  blur_args: dict,
                                   merged_vertex.vertex2(),
                                   (255, 0, 0), 2)
             hero_dict[_hero_name] = {}
-            if GV.verbosity(1):
+            if GV.DEBUG:
                 vertex_tuple = merged_row_item.dimensions.coords()
                 cv2.rectangle(
                     GV.IMAGE_SS,
@@ -330,6 +335,7 @@ def get_heroes(roster_image: ndarray,  blur_args: dict,
                 model_image_size,
                 interpolation=cv2.INTER_CUBIC)
             hero_dict[_hero_name] = SegmentResult(
-                _hero_name, resized_contour_image, row_item)
+                _hero_name, resized_contour_image, row_item,
+                original_image_unmodifiable)
 
     return hero_dict, hero_matrix

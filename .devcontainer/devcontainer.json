@@ -8,7 +8,7 @@
 	"dockerComposeFile": [
 		"docker-compose.yml"
 	],
-	"service": "afk-processing-container",
+	"service": "afk_processing_container",
 	"workspaceFolder": "/workspace",
 	// Use this environment variable if you need to bind mount your local source code into a new container.
 	"remoteEnv": {
@@ -36,8 +36,9 @@
 		"python.linting.pylintPath": "/usr/local/py-utils/bin/pylint",
 		"python.linting.pylintArgs": [
 			// "--generate-members",
-			"--extension-pkg-whitelist=cv2"
-		],
+			"--extension-pkg-whitelist=cv2",
+			"--rcfile",
+			"${workspaceFolder}/afk_image_processing/.pylintrc"],
 		"editor.rulers": [
 			80
 		],
@@ -47,7 +48,9 @@
 			"INET",
 			"devcontainer"
 		],
-		"todo-tree.filtering.excludeGlobs": ["**/"],
+		"todo-tree.filtering.excludeGlobs": [
+			"**/"
+		],
 	},
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
@@ -73,6 +76,6 @@
 		"docker-from-docker": "latest",
 		"git": "os-provided"
 	},
-	// Install albedo-bot and afk-image-processing as python development packages
-	"postStartCommand": "cd /workspace/albedo-bot && pip3 install -r requirements.txt  && /workspace/afk-image-processing/requirements/install ${BUILD_TYPE}"
+	// Install albedo-bot and afk_image_processing as python development packages
+	"postStartCommand": "cd /workspace/albedo-bot && pip3 install -r requirements.txt  && /workspace/afk_image_processing/requirements/install ${BUILD_TYPE}"
 }

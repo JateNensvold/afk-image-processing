@@ -1,12 +1,16 @@
-from typing import List, NamedTuple, Set
-from image_processing.scripts.boxlabel.utils.input_arguments import BOX_LABEL_DATA_FORMAT
+import collections
 import requests
 import cv2
 from io import BytesIO
+from typing import Dict, List, NamedTuple, Set
 
 import numpy as np
 from PIL import Image
 from pycocotools import mask as cocomask
+
+from image_processing.scripts.boxlabel.utils.input_arguments import (
+    BOX_LABEL_DATA_FORMAT)
+
 
 # Example of Boxlabel image instance
 # {
@@ -62,6 +66,15 @@ class SegmentationData(NamedTuple):
     segmentation: List[int]
     bounding_box: BoundingBox
     area: int
+
+
+class ClassData(NamedTuple):
+    """
+    Data from a Box Label Json in an organize format
+    """
+
+    class_names: List[str]
+    class_distribution: Dict[str, BOX_LABEL_DATA_FORMAT]
 
 
 def download_image(image_url: str):
@@ -122,11 +135,12 @@ def get_classes(json_data: BOX_LABEL_DATA_FORMAT):
         List[str] : list of all unique class names found in json_data 
     """
     class_set: Set[str] = set()
-
+    class_frequency: Dict[str,
+                          BOX_LABEL_DATA_FORMAT] = collections.defaultdict(list)
     for image_label_data in json_data:
-
         for label_instance in image_label_data["Label"]["objects"]:
             class_name = label_instance["value"]
             class_set.add(class_name)
+        class_frequency[class_name].append(image_label_data)
 
-    return list(class_set)
+    return ClassData(list(class_set), class_frequency)

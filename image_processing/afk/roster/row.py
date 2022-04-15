@@ -17,7 +17,7 @@ import image_processing.afk.roster.RowItem as RI
 
 if TYPE_CHECKING:
     import image_processing.afk.roster.column_objects as CO
-    from image_processing.afk.roster.dimensions_object import SegmentRectangle
+    from image_processing.processing.types.types import SegmentRectangle
 
 
 class RowIntersectionException(Exception):
@@ -231,7 +231,7 @@ class Row():
                 # output = temp_row_item.dimensions.overlap(
                 #     self._row_items_by_id[collision_status].dimensions)
                 # print("collision", collision_status,
-                #       output/temp_row_item.dimensions.size())
+                #       output/temp_row_item.dimensions.size)
                 return collision_status
         temp_id = id(temp_row_item)
         self._row_items_by_name[name] = temp_row_item

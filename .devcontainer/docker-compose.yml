@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  afk-processing-container:
+  afk_processing_container:
     build: 
       context: ..
       dockerfile: .devcontainer/Dockerfile
@@ -15,7 +15,7 @@ services:
       # Forwards the local Docker socket to the container.
       - /var/run/docker.sock:/var/run/docker-host.sock 
       # Update this to wherever you want VS Code to mount the folder of your project
-      - ..:/workspace/afk-image-processing:cached
+      - ..:/workspace/afk_image_processing:cached
       # - ${HOME}/projects/archmage-bot:/workspace/archmage-bot:cached
       - ${HOME}/projects/albedo-bot:/workspace/albedo-bot:cached
       - ${HOME}/.ssh:/home/vscode/.ssh
@@ -68,7 +68,7 @@ services:
 
     networks:
       devnet:
-        ipv4_address: 172.20.0.7
+        ipv4_address: 172.40.0.7
 
     # Add "forwardPorts": ["5432"] to **devcontainer.json** to forward PostgreSQL locally.
     # (Adding the "ports" property to this file will not forward from a Codespace.)
@@ -81,4 +81,4 @@ networks:
     ipam:
       # driver: default
       config:
-        - subnet: 172.20.0.0/24
+        - subnet: 172.40.0.0/24
