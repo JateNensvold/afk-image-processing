@@ -57,7 +57,6 @@ def detect_features(roster_image: np.ndarray):
     GV.GLOBAL_TIMER.start()
 
     segment_dict, segment_matrix = get_heroes(roster_image, blur_args)
-    print(segment_matrix)
     GV.GLOBAL_TIMER.finish_level()
 
     GV.GLOBAL_TIMER.add_level("detect hero info")

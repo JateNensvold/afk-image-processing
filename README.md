@@ -73,10 +73,11 @@ docker compose up -d
 
 5. Connect to dev container
 ```bash
-docker exec -it devcontainer-afk-processing-container-1 bash
+docker exec -it devcontainer-afk_processing_container-1 bash
 ```
 
 6. Install package dependencies
+
 Go to post-install command in `.devcontainer/devcontainer.json` for the latest command
 the following may be out of date
 ```bash
@@ -86,6 +87,10 @@ cd /workspace/albedo-bot && pip3 install -r requirements.txt  && /workspace/afk_
 7. Run database creation
 ```bash
 cd /workspace/albedo-bot && python3 albedo_bot/database/create_db.py
+```
+
+```
+cd /workspace/afk_image_processing && python3 image_processing/build_db.py
 ```
 
 8. Run image-processing service
