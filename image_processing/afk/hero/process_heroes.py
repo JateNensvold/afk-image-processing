@@ -25,7 +25,7 @@ from image_processing.processing.types.contour_types import (
     CONTOUR_LIST, HIERARCHY_RELATIONSHIP, Contour, ImageContours)
 from image_processing.processing.image_data import SegmentResult
 from image_processing.processing.image_processing import HSVRange, blur_image
-from image_processing.helpers.utils import list_median
+from image_processing.utils.utils import list_median
 
 # pylint: disable=invalid-name
 HERO_DICT = Dict[str, SegmentResult]

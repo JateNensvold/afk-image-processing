@@ -17,3 +17,11 @@ ascended_hsv_range = HSVRange(hue_min=88, saturation_min=0, value_min=187,
 #   can by discovered by running an image through the filter
 ALL_ASCENSION_HSV_RANGE = [elite_hsv_range, legendary_hsv_range,
                            ascended_hsv_range, mythic_hsv_range]
+
+ASENSION_TYPES = ["rare",
+                  "elite",
+                  "legendary",
+                  "mythic",
+                  "ascended"]
+
+ASCENSION_COLOR_DIMENSIONS = 3

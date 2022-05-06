@@ -12,7 +12,6 @@ import numpy as np
 import image_processing.globals as GV
 from image_processing.load_images import display_image
 from image_processing.processing.types.types import SegmentRectangle
-from pandas import BooleanDtype
 
 
 class DoubleCoordinates(NamedTuple("DoubleCoordinates",

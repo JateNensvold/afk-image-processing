@@ -2,10 +2,12 @@ import threading
 import time
 import torch
 
-import image_processing.helpers.verbose_print as VP
+import image_processing.utils.verbose_print as VP
 import image_processing.build_db as BD
 import image_processing.globals as GV
-import image_processing.helpers.load_models as LM
+import image_processing.utils.load_models as LM
+
+import warnings
 
 
 def load_files(model_path: str, enriched_db=True,
@@ -22,6 +24,9 @@ def load_files(model_path: str, enriched_db=True,
             the threads loading the models and database execute. Defaults to
             True.
     """
+    # Silence Module loading warnings from pytorch
+    warnings.filterwarnings("ignore")
+
     if GV.IMAGE_DB is None:
         db_thread = threading.Thread(
             kwargs={"enriched_db": enriched_db},

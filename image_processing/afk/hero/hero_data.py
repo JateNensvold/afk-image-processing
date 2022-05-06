@@ -1,6 +1,7 @@
 import json
 import re
 from typing import Dict, List
+import jsonpickle
 import numpy as np
 
 from image_processing.models.model_attributes import ModelResult
@@ -84,7 +85,7 @@ class RosterJson:
         for hero_data in self.hero_data_list:
             json_dict["heroes"].append(hero_data.to_dict())
 
-        return json_dict
+        return jsonpickle.encode(json_dict)
 
     @classmethod
     def from_json(cls, json_dict: Dict):
@@ -125,12 +126,12 @@ class RosterData:
         self.hero_data_list = hero_data_list
         self.roster_matrix = roster_matrix
 
-    def json(self):
-        """_summary_
-        """
-        row_length = len(self.roster_matrix)
-        column_length = len(max(self.roster_matrix, key=len))
-        return RosterJson(self.hero_data_list, row_length, column_length).json()
+    # def json(self):
+    #     """_summary_
+    #     """
+    #     row_length = len(self.roster_matrix)
+    #     column_length = len(max(self.roster_matrix, key=len))
+    #     return RosterJson(self.hero_data_list, row_length, column_length).json()
 
 
 class DetectedHeroData:

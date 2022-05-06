@@ -24,8 +24,8 @@ import torch
 
 from detectron2.engine import DefaultPredictor
 
-import image_processing.helpers.load_images as load
-from image_processing.helpers.timer import Timer
+import image_processing.utils.load_images as load
+from image_processing.utils.timer import Timer
 from image_processing.database.engravings_database import EngravingSearch
 from image_processing.database.ascension_database import AscensionSearch
 

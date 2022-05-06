@@ -23,7 +23,7 @@ TARGET_BACKEND = "tkagg"
 
 def display_image(image: Union[np.ndarray, List[np.ndarray]],
                   multiple: bool = False, display: bool = False,
-                  color_correct: bool = True, colormap: bool = False):
+                  color_correct: bool = True, colormap: bool = False, message: str = None):
     """
     Display the 'image' passed in in the desired manner based on the flags this
         function was called with
@@ -39,6 +39,10 @@ def display_image(image: Union[np.ndarray, List[np.ndarray]],
             RGB. Defaults to True.
         colormap (bool, optional): flag to treat image as a grayscale image.
             Defaults to False.
+        message (str): message to send to console during display instead of the
+            default image
+    Returns:
+        input_sequence (str): input entered during display
     """
 
     if not (display or GV.DEBUG):
@@ -64,10 +68,13 @@ def display_image(image: Union[np.ndarray, List[np.ndarray]],
         plt.imshow(image, cmap="gray")
     else:
         plt.imshow(image)
-
     plt.show()
-    input('Press any key to continue...')
+    display_message = "Press any key to continue..."
+    if message is not None:
+        display_message = message
+    input_sequence = input(display_message)
     plt.close("all")
+    return input_sequence
 
 
 def find_files(path: str, flag=True, lower=False):

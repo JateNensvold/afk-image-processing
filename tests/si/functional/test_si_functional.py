@@ -7,7 +7,7 @@ import pytest
 import tests.data
 import tests.data.build_data as b_data
 import image_processing.globals as GV
-import image_processing.helpers.load_models as LM
+import image_processing.utils.load_models as LM
 
 DATA_DIR = tests.data.DIR
 JSON_FILE = os.path.join(DATA_DIR, "test_data.json")

@@ -11,9 +11,10 @@ import traceback
 from typing import List
 
 import zmq
+import jsonpickle
 
 import image_processing.globals as GV
-import image_processing.helpers.load_models as LM
+import image_processing.utils.load_models as LM
 import image_processing.afk.detect_image_attributes as detect
 
 
@@ -44,13 +45,13 @@ def main():
             print(f"Detected features in: {time.time() - start_time}")
             #  Send reply back to client
             socket.send_multipart(
-                [message_id, json.dumps(roster_data.json()).encode("utf-8")])
+                [message_id, jsonpickle.encode(roster_data).encode("utf-8")])
         except Exception as _exception:
             exception_message = traceback.format_exc()
             print(exception_message)
             json_dict = {"message": exception_message}
             socket.send_multipart(
-                [message_id, json.dumps(json_dict).encode("utf-8")])
+                [message_id, jsonpickle.encode(json_dict).encode("utf-8")])
 
 
 if __name__ == "__main__":

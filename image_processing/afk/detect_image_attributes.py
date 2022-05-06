@@ -6,14 +6,13 @@ Calling detect_features assumes that the image processing environment has been
 initialized and will parse apart an image and feed it into the various models
 needed to detect AFK Arena Hero Features
 """
-from typing import Dict, List, TYPE_CHECKING
-import warnings
+import traceback
+from typing import TYPE_CHECKING
 
 import cv2
-from image_processing.processing.types.contour_types import Contour
-from image_processing.processing.types.types import SegmentRectangle
-import numpy as np
+from image_processing.utils.color_helper import MplColorHelper
 
+import numpy as np
 from pandas import DataFrame
 
 import image_processing.globals as GV
@@ -27,20 +26,15 @@ from image_processing.models.model_attributes import (
 from image_processing.afk.roster.matrix import Matrix
 from image_processing.afk.hero.hero_data import (
     DetectedHeroData, HeroImage, RosterData)
-from image_processing.afk.roster.dimensions_object import (
-    DimensionsObject, DoubleCoordinates)
+from image_processing.afk.roster.dimensions_object import DoubleCoordinates
 from image_processing.database.engravings_database import EngravingData
-from image_processing.database.ascension_database import AscensionData
-from image_processing.database.configs.ascension_constants import (
-    ALL_ASCENSION_HSV_RANGE)
 
 if TYPE_CHECKING:
     from image_processing.models.yolov5.models.common import Detections
 
-# Silence Module loading warnings from pytorch
-warnings.filterwarnings("ignore")
+
 FONT = cv2.FONT_HERSHEY_SIMPLEX
-COLOR = (255, 255, 0)
+TEXT_COLOR = MplColorHelper().get_rgb("red")
 THICKNESS = 2
 
 
@@ -122,7 +116,7 @@ def label_hero_feature(roster_image: np.ndarray,
                               hero_pixel_coordinate[1] + round(5 * height))
 
     cv2.putText(roster_image, result, bottom_left_coordinate, FONT,
-                abs(font_scale), COLOR, THICKNESS, cv2.LINE_AA)
+                abs(font_scale), TEXT_COLOR, THICKNESS, cv2.LINE_AA)
 
 
 def detect_furniture(detected_furnitures: DataFrame):
@@ -207,62 +201,27 @@ def detect_ascension(detected_ascension_stars: DataFrame,
             best_ascension_stars_label,
             best_ascension_stars_match["confidence"])
     try:
-
+        # If ascension score for ascended hero with stars is below 0.75
+        #   confidence, detect border results for E - A ascension levels
         if ascension_result.score < 0.75:
-            hsv_result_dict: Dict[int, List[Contour]] = {}
-            image_dimensions = DimensionsObject(
-                SegmentRectangle(0, 0, *segment_info.image.shape[:2]))
-            for ascension_hsv_range in ALL_ASCENSION_HSV_RANGE:
+            ascension_results = GV.ASCENSION_DB.search_image(
+                segment_info.image, auto_label=True, manual_update=True)
 
-                contour_wrapper = get_hero_contours(
-                    segment_info.image, hsv_range=ascension_hsv_range)
+            best_label = ascension_results.most_common(1)
+            best_label_name = best_label[0]
+            best_label_count = best_label[1]
 
-                contour_list = contour_wrapper.largest(5)
-                filtered_contour_list: List[Contour] = []
-                bounding_box = DimensionsObject(SegmentRectangle(0, 0, 0, 0))
-                for contour_instance in contour_list:
-                    if image_dimensions.within(contour_instance.dimension_object, 0.3):
-                        bounding_box.merge(contour_instance.dimension_object)
-                        filtered_contour_list.append(contour_instance)
-                hsv_result_dict[bounding_box.size] = filtered_contour_list
-            max_hsv_key = max(hsv_result_dict.keys())
-            contour_list = hsv_result_dict[max_hsv_key]
+            ascension_result = ModelResult(
+                best_label_name,
+                best_label_count / sum(ascension_results.values()))
 
-            ascension_border_mask = np.zeros(
-                segment_info.image.shape[:2], np.uint8)
-            largest_contour = contour_list[0]
-
-            contour_color = 255
-
-            cv2.drawContours(
-                ascension_border_mask,
-                [largest_contour.raw_contour],
-                -1, contour_color, -1)
-            for contour_dimension_object in contour_list[1:]:
-
-                if largest_contour._contour_index == contour_dimension_object._parent_contour:
-                    contour_color = 0
-                else:
-                    contour_color = 255
-                cv2.drawContours(
-                    ascension_border_mask,
-                    [contour_dimension_object.raw_contour],
-                    -1, contour_color, -1)
-
-            contour_mean_color = cv2.mean(
-                segment_info.image, mask=ascension_border_mask)
-            ascension_results = GV.ASCENSION_DB.search(
-                AscensionData(contour_mean_color[0],
-                            contour_mean_color[1],
-                            contour_mean_color[2]))
             if GV.verbosity(1):
-                print(f"Ascension Border Result: {ascension_results}")
-            # print(contour_mean_color)
-            # display_image(
-            #     [segment_info.image, ascension_border_mask], display=True)
-            ascension_result = ascension_results[0]
+                print(f"Ascension Border Result: {ascension_result}")
+
+            display_image(
+                cv2.cvtColor(segment_info.image, cv2.COLOR_BGR2RGB), display=True)
+
     except Exception:
-        import traceback
         traceback.print_exc()
 
     GV.GLOBAL_TIMER.finish_level()

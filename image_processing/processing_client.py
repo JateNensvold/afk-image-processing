@@ -9,10 +9,9 @@ import pprint
 from typing import Dict, List
 
 import zmq
+import jsonpickle
 
 import image_processing.globals as GV
-import image_processing.afk.detect_image_attributes as detect
-from image_processing.helpers.scan_port import check_socket
 
 
 def remote_compute_results(address: str, timeout: int, args: List[str]) -> Dict:
@@ -30,13 +29,16 @@ def remote_compute_results(address: str, timeout: int, args: List[str]) -> Dict:
         zmq.DEALER)  # pylint: disable=no-member
 
     ZMQ_SOCKET.connect(address)
+    # pylint: disable=no-member
     ZMQ_SOCKET.setsockopt(zmq.RCVTIMEO, timeout)
 
     print(f"Arguments: {args}")
 
     ZMQ_SOCKET.send_string(json.dumps(args))
     received = ZMQ_SOCKET.recv()
-    json_dict = json.loads(received)
+
+    json_dict = jsonpickle.decode(received)
+    # json_dict = json.loads(received)
     return json_dict
 
 
