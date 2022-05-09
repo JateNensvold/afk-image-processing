@@ -12,4 +12,5 @@ tqdm
 pyzmq
 faiss-cpu
 pycocotools
+jsonpickle
 -e ..

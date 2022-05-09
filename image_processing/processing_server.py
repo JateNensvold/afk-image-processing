@@ -29,7 +29,8 @@ def main():
     socket.bind(address)
 
     GV.VERBOSE_LEVEL = 1
-    LM.load_files(str(GV.FI_SI_STARS_MODEL_PATH))
+    LM.load_files(str(GV.FI_SI_STARS_MODEL_PATH),
+                  str(GV.ASCENSION_BORDER_MODEL_PATH))
 
     print("Ready to start processing image requests...")
     while True:
@@ -41,12 +42,13 @@ def main():
             GV.global_parse_args(args)
             start_time = time.time()
             roster_data = detect.detect_features(GV.IMAGE_SS)
-
             print(f"Detected features in: {time.time() - start_time}")
             #  Send reply back to client
             socket.send_multipart(
-                [message_id, jsonpickle.encode(roster_data).encode("utf-8")])
-        except Exception as _exception:
+                [message_id, jsonpickle.encode(roster_data.roster_json()).encode("utf-8")])
+        # Catch all errors that occur during image processing and send
+        #   through json_dict
+        except Exception as _exception:  # pylint: disable=broad-except
             exception_message = traceback.format_exc()
             print(exception_message)
             json_dict = {"message": exception_message}

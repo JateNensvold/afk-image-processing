@@ -7,6 +7,7 @@ import sys
 import json
 import pprint
 from typing import Dict, List
+from image_processing.afk.hero.hero_data import RosterJson
 
 import zmq
 import jsonpickle
@@ -37,9 +38,9 @@ def remote_compute_results(address: str, timeout: int, args: List[str]) -> Dict:
     ZMQ_SOCKET.send_string(json.dumps(args))
     received = ZMQ_SOCKET.recv()
 
-    json_dict = jsonpickle.decode(received)
+    roster_json: RosterJson = jsonpickle.decode(received)
     # json_dict = json.loads(received)
-    return json_dict
+    return roster_json.json_dict()
 
 
 def main():

@@ -1,3 +1,4 @@
+from bidict import bidict
 from image_processing.processing.image_processing import HSVRange
 
 # elite
@@ -18,10 +19,12 @@ ascended_hsv_range = HSVRange(hue_min=88, saturation_min=0, value_min=187,
 ALL_ASCENSION_HSV_RANGE = [elite_hsv_range, legendary_hsv_range,
                            ascended_hsv_range, mythic_hsv_range]
 
-ASENSION_TYPES = ["rare",
-                  "elite",
-                  "legendary",
-                  "mythic",
-                  "ascended"]
+ASCENSION_TYPES = bidict({0: 'ascended',
+                          1: 'elite',
+                          2: 'elite+',
+                          3: 'legendary',
+                          4: 'legendary+',
+                          5: 'mythic',
+                          6: 'mythic+'})
 
 ASCENSION_COLOR_DIMENSIONS = 3

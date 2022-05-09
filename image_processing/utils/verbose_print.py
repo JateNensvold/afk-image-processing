@@ -1,7 +1,7 @@
 import image_processing.globals as GV
 
 
-def print_verbose(message: str, verbose_level: int = 1):
+def print_verbose(message: str, verbose_level: int = 2):
     """
     Prints a message when the verbose level of the program is above the
         'verbose_level' passed into this function

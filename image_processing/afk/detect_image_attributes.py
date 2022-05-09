@@ -6,10 +6,10 @@ Calling detect_features assumes that the image processing environment has been
 initialized and will parse apart an image and feed it into the various models
 needed to detect AFK Arena Hero Features
 """
-import traceback
 from typing import TYPE_CHECKING
 
 import cv2
+from image_processing.database.configs.ascension_constants import ASCENSION_TYPES
 from image_processing.utils.color_helper import MplColorHelper
 
 import numpy as np
@@ -28,6 +28,7 @@ from image_processing.afk.hero.hero_data import (
     DetectedHeroData, HeroImage, RosterData)
 from image_processing.afk.roster.dimensions_object import DoubleCoordinates
 from image_processing.database.engravings_database import EngravingData
+from image_processing.utils.verbose_print import print_verbose
 
 if TYPE_CHECKING:
     from image_processing.models.yolov5.models.common import Detections
@@ -47,41 +48,34 @@ def detect_features(roster_image: np.ndarray):
     """
     blur_args = {"hsv_range": GV.HERO_ROSTER_HSV}
     # Run HSV segmentation on hero roster to get hero
-    GV.GLOBAL_TIMER.add_level("segment heroes")
-    GV.GLOBAL_TIMER.start()
+    GV.GLOBAL_TIMER.start('Roster Segmentation', reset=True)
 
     segment_dict, segment_matrix = get_heroes(roster_image, blur_args)
-    GV.GLOBAL_TIMER.finish_level()
+    GV.GLOBAL_TIMER.stop()
 
-    GV.GLOBAL_TIMER.add_level("detect hero info")
-    GV.GLOBAL_TIMER.start()
+    GV.GLOBAL_TIMER.start("Image Recognition")
     detected_hero_data: list[DetectedHeroData] = []
     for _pseudo_segment_name, segment_info in segment_dict.items():
         # display_image(segment_info.image, display=True)
 
-        GV.GLOBAL_TIMER.add_level("hero lookup")
-        GV.GLOBAL_TIMER.start()
+        GV.GLOBAL_TIMER.start("Hero Detection")
         hero_matches = GV.IMAGE_DB.search(segment_info)
-        GV.GLOBAL_TIMER.finish_level()
+        GV.GLOBAL_TIMER.stop()
 
         best_hero_match = hero_matches.best()
-        print(best_hero_match)
+        print_verbose(f"Detected hero: {best_hero_match}")
         best_match_info = GV.IMAGE_DB.hero_lookup[best_hero_match.name].first()
-        GV.GLOBAL_TIMER.add_level("detect attributes")
-        GV.GLOBAL_TIMER.start()
+        GV.GLOBAL_TIMER.start("Attribute Detection")
         detected_hero_result = detect_attributes(best_match_info, segment_info)
-        GV.GLOBAL_TIMER.finish_level()
+        GV.GLOBAL_TIMER.stop()
         detected_hero_data.append(detected_hero_result)
 
        # When debuggin Draw hero info on image
         if GV.verbosity(2):
             label_hero_feature(roster_image, segment_info,
                                detected_hero_result, segment_matrix)
-    GV.GLOBAL_TIMER.finish_level()
-    # End Global/main timer
-    GV.GLOBAL_TIMER.finish_level()
 
-    GV.GLOBAL_TIMER.display_breakdown()
+    GV.GLOBAL_TIMER.display()
 
     return RosterData(detected_hero_data, segment_matrix)
 
@@ -130,8 +124,7 @@ def detect_furniture(detected_furnitures: DataFrame):
     """
 
     furniture_result = ModelResult("0", 0)
-    GV.GLOBAL_TIMER.add_level("detect furniture")
-    GV.GLOBAL_TIMER.start()
+    GV.GLOBAL_TIMER.start("Detect Furniture")
     if len(detected_furnitures) > 0:
         best_furniture_match = detected_furnitures.sort_values(
             "confidence").iloc[0]
@@ -140,7 +133,7 @@ def detect_furniture(detected_furnitures: DataFrame):
         if best_furniture_match["confidence"] >= 0.85:
             furniture_result = ModelResult(
                 best_furniture_label, best_furniture_match["confidence"])
-    GV.GLOBAL_TIMER.finish_level()
+    GV.GLOBAL_TIMER.stop()
     return furniture_result
 
 
@@ -154,8 +147,7 @@ def detect_signature_item(detected_signature_items: DataFrame):
         _type_: _description_
     """
     signature_item_result = ModelResult("0", 0)
-    GV.GLOBAL_TIMER.add_level("detect signature item")
-    GV.GLOBAL_TIMER.start()
+    GV.GLOBAL_TIMER.start("Detect SI")
     if len(detected_signature_items) > 0:
         best_signature_item_match = detected_signature_items.sort_values(
             "confidence", ascending=False).iloc[0]
@@ -166,12 +158,12 @@ def detect_signature_item(detected_signature_items: DataFrame):
             signature_item_result = ModelResult(
                 best_signature_item_label,
                 best_signature_item_match["confidence"])
-    GV.GLOBAL_TIMER.finish_level()
+    GV.GLOBAL_TIMER.stop()
     return signature_item_result
 
 
 def detect_ascension(detected_ascension_stars: DataFrame,
-                     segment_info: SegmentResult):
+                     image: np.ndarray):
     """_summary_
 
     Args:
@@ -183,8 +175,7 @@ def detect_ascension(detected_ascension_stars: DataFrame,
     """
     ascension_result = ModelResult("E", 0)
     best_match_coordinates = None
-    GV.GLOBAL_TIMER.add_level("detect ascension")
-    GV.GLOBAL_TIMER.start()
+    GV.GLOBAL_TIMER.start("Detect Ascension(All)")
     if len(detected_ascension_stars) > 0:
         best_ascension_stars_match = detected_ascension_stars.sort_values(
             "confidence", ascending=False).iloc[0]
@@ -200,31 +191,35 @@ def detect_ascension(detected_ascension_stars: DataFrame,
         ascension_result = ModelResult(
             best_ascension_stars_label,
             best_ascension_stars_match["confidence"])
-    try:
-        # If ascension score for ascended hero with stars is below 0.75
-        #   confidence, detect border results for E - A ascension levels
-        if ascension_result.score < 0.75:
-            ascension_results = GV.ASCENSION_DB.search_image(
-                segment_info.image, auto_label=True, manual_update=True)
+    # If ascension score for ascended hero with stars is below 0.75
+    #   confidence, detect border results for E - A ascension levels
+    if ascension_result.score < 0.75:
+        GV.GLOBAL_TIMER.start("Detect Ascension(E-A)")
+        # pylint: disable=not-callable
+        raw_ascension_model_results: "Detections" = GV.ASCENSION_BORDER_MODEL(
+            [image], size=GV.MODEL_IMAGE_SIZE)
 
-            best_label = ascension_results.most_common(1)
-            best_label_name = best_label[0]
-            best_label_count = best_label[1]
+        labeled_ascension_model_results: DataFrame = \
+            raw_ascension_model_results.pandas().xyxy[0]
+        detected_ascension = labeled_ascension_model_results
 
-            ascension_result = ModelResult(
-                best_label_name,
-                best_label_count / sum(ascension_results.values()))
+        if len(detected_ascension) > 0:
 
-            if GV.verbosity(1):
-                print(f"Ascension Border Result: {ascension_result}")
+            best_ascension_match = detected_ascension.sort_values(
+                "confidence", ascending=False).iloc[0]
+            best_ascension_label = (
+                ASCENSION_TYPES[best_ascension_match["class"]])
 
-            display_image(
-                cv2.cvtColor(segment_info.image, cv2.COLOR_BGR2RGB), display=True)
+            ascension_result = ModelResult(best_ascension_label,
+                                           best_ascension_match["confidence"])
 
-    except Exception:
-        traceback.print_exc()
+            print_verbose(f"Ascension Results: {ascension_result}")
+        GV.GLOBAL_TIMER.stop()
+    GV.GLOBAL_TIMER.stop()
 
-    GV.GLOBAL_TIMER.finish_level()
+    # display_image(
+    #     cv2.cvtColor(segment_info.image, cv2.COLOR_BGR2RGB), display=True)
+
     return ascension_result, best_match_coordinates
 
 
@@ -235,13 +230,12 @@ def detect_engraving(ascension_result: ModelResult,
 
     Args:
         ascension_result (ModelResult): _description_
-        image (np.ndarray): image in BGR format
+        image (np.ndarray): image in RGB format
         star_coordinates (DoubleCoordinates): _description_
 
     Returns:
         _type_: _description_
     """
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
     engraving_result = ModelResult("0", 0)
     if ascension_result.label in ASCENSION_STAR_LABELS.inverse:  # pylint: disable=unsupported-membership-test
@@ -265,8 +259,7 @@ def detect_engraving(ascension_result: ModelResult,
         mean = cv2.mean(temp_image, mask=engraved_star_mask)
         engraving_results = GV.ENGRAVING_DB.search(
             EngravingData(mean[0], mean[1], mean[2]))
-        if GV.verbosity(1):
-            print(f"Engraving Result: {engraving_results}")
+        print_verbose(f"Engraving Result: {engraving_results}")
         engraving_result = engraving_results[0]
     return engraving_result
 
@@ -291,11 +284,10 @@ def detect_attributes(hero_image_info: HeroImage, segment_info: SegmentResult):
     rgb_image = cv2.cvtColor(resized_image, cv2.COLOR_BGR2RGB)
 
     # pylint: disable=not-callable
-    GV.GLOBAL_TIMER.add_level("raw_model_results")
-    GV.GLOBAL_TIMER.start()
+    GV.GLOBAL_TIMER.start("Attribute Model Results")
     raw_model_results: "Detections" = GV.FI_SI_STAR_MODEL(
         [rgb_image], size=GV.MODEL_IMAGE_SIZE)
-    GV.GLOBAL_TIMER.finish_level()
+    GV.GLOBAL_TIMER.stop()
 
     labeled_model_results: DataFrame = raw_model_results.pandas().xyxy[0]
 
@@ -308,12 +300,12 @@ def detect_attributes(hero_image_info: HeroImage, segment_info: SegmentResult):
 
     furniture_result = detect_furniture(detected_furniture)
     ascension_result, star_coordinates = detect_ascension(
-        detected_ascension_stars, segment_info)
+        detected_ascension_stars, rgb_image)
     signature_item_result = detect_signature_item(detected_signature_items)
     engraving_result = detect_engraving(
-        ascension_result, segment_info.image, star_coordinates)
+        ascension_result, rgb_image, star_coordinates)
 
     hero_data = DetectedHeroData(hero_image_info.name, signature_item_result,
                                  furniture_result, ascension_result,
-                                 engraving_result, segment_info.image)
+                                 engraving_result, rgb_image)
     return hero_data

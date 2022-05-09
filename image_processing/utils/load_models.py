@@ -1,17 +1,16 @@
-import threading
 import time
+import warnings
+from multiprocessing.pool import ThreadPool
+
 import torch
 
 import image_processing.utils.verbose_print as VP
 import image_processing.build_db as BD
 import image_processing.globals as GV
-import image_processing.utils.load_models as LM
-
-import warnings
 
 
-def load_files(model_path: str, enriched_db=True,
-               thread_wait: bool = True):
+def load_files(attributes_model_path: str, ascension_model_path: str,
+               enriched_db=True):
     """
     Load the pytorch and detectron models and hero image database
 
@@ -20,33 +19,25 @@ def load_files(model_path: str, enriched_db=True,
         enriched_db (bool, optional): flag to add every hero to the database a
             second time with parts of the the image border removed from each
             side. Defaults to True.
-        thread_wait (bool, optional): flag that causes program to wait while
-            the threads loading the models and database execute. Defaults to
-            True.
     """
     # Silence Module loading warnings from pytorch
     warnings.filterwarnings("ignore")
 
-    if GV.IMAGE_DB is None:
-        db_thread = threading.Thread(
-            kwargs={"enriched_db": enriched_db},
-            target=BD.get_db)
-        GV.THREADS["IMAGE_DB"] = db_thread
-        db_thread.start()
+    thread_pool = ThreadPool(processes=3)
 
-    if GV.FI_SI_STAR_MODEL is None:
-        model_thread = threading.Thread(
-            args=[model_path],
-            target=LM.load_fi_model)
-        GV.THREADS["FI_SI_STAR_MODEL"] = model_thread
-        model_thread.start()
+    attribute_model_thread = thread_pool.apply_async(
+        load_model, [attributes_model_path])
+    ascension_model_thread = thread_pool.apply_async(
+        load_model, [ascension_model_path])
+    hero_database_thread = thread_pool.apply_async(
+        BD.get_db, [], {"enriched_db": enriched_db})
 
-    if thread_wait:
-        for _thread_name, thread in GV.THREADS.items():
-            thread.join()
+    GV.IMAGE_DB = hero_database_thread.get()
+    GV.ASCENSION_BORDER_MODEL = ascension_model_thread.get()
+    GV.FI_SI_STAR_MODEL = attribute_model_thread.get()
 
 
-def load_fi_model(model_path: str):
+def load_model(model_path: str):
     """
     Load hero FI/SI/Stars model into GV.FI_SI_STAR_MODEL
 
@@ -55,7 +46,7 @@ def load_fi_model(model_path: str):
     """
     start_time = time.time()
 
-    fi_si_model = torch.hub.load(
+    yolov5_model = torch.hub.load(
         str(GV.YOLOV5_DIR),
         "custom",
         model_path,
@@ -63,5 +54,6 @@ def load_fi_model(model_path: str):
 
     end_time = time.time()
     VP.print_verbose(
-        f"Loaded FI/SI/Ascension model({model_path}) in: {end_time - start_time}", verbose_level=1)
-    GV.FI_SI_STAR_MODEL = fi_si_model
+        f"Loaded model({model_path}) in: {end_time - start_time}", verbose_level=1)
+
+    return yolov5_model

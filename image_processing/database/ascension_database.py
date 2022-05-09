@@ -16,7 +16,7 @@ from image_processing.database.mixin.label_mixin import LabelMixin
 from image_processing.database.mixin.contour_mixin import ContourMixin
 
 from .configs.ascension_constants import (
-    ALL_ASCENSION_HSV_RANGE, ASCENSION_COLOR_DIMENSIONS, ASENSION_TYPES)
+    ALL_ASCENSION_HSV_RANGE, ASCENSION_COLOR_DIMENSIONS, ASCENSION_TYPES)
 INDEX_KEY = "IDMap,Flat"
 
 TEXT_COLOR = MplColorHelper().get_rgb("red")
@@ -42,7 +42,7 @@ class AscensionConfig(Config):
         if self.class_name not in self._db:
             self._db[self.class_name] = {}
         class_dict = self._db[self.class_name]
-        for ascension_type in ASENSION_TYPES:
+        for ascension_type in ASCENSION_TYPES:
             if ascension_type not in class_dict:
                 class_dict[ascension_type] = set()
         self.save()
@@ -147,7 +147,7 @@ class AscensionSearch(LabelMixin, ContourMixin):
                 ascension_result_counter.update(
                     [ascension_result.label
                         for ascension_result in ascension_results])
-
+        print(ascension_result_counter)
         return ascension_result_counter
 
     def search(self,
@@ -197,6 +197,8 @@ class AscensionSearch(LabelMixin, ContourMixin):
 
             model_result_list.append(
                 ModelResult(result_label, distance_result))
+
+        print(model_result_list)
 
         counter = collections.Counter(
             [model_result.label for model_result in model_result_list])

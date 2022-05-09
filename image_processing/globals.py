@@ -17,7 +17,6 @@ import pathlib
 import shlex
 
 from typing import TYPE_CHECKING, List, Union
-from image_processing.processing.image_processing import HSVRange
 
 import numpy
 import torch
@@ -25,9 +24,10 @@ import torch
 from detectron2.engine import DefaultPredictor
 
 import image_processing.utils.load_images as load
+
 from image_processing.utils.timer import Timer
+from image_processing.processing.image_processing import HSVRange
 from image_processing.database.engravings_database import EngravingSearch
-from image_processing.database.ascension_database import AscensionSearch
 
 if TYPE_CHECKING:
     from image_processing.database.image_database import ImageSearch
@@ -67,7 +67,6 @@ FI_SI_STAR_MODEL: torch.Tensor = None
 ASCENSION_BORDER_MODEL: DefaultPredictor = None
 IMAGE_DB: "ImageSearch" = None
 ENGRAVING_DB: EngravingSearch = None
-ASCENSION_DB: AscensionSearch = None
 
 ROOT_DIR: pathlib.Path = pathlib.Path(os.path.dirname(__file__)).absolute()
 HERO_PORTRAIT_SIZE = 512
@@ -203,11 +202,11 @@ SI_TEMPLATE_DIR = pathlib.Path(os.path.join(SI_DIR, "signature_item_icon"))
 FI_DIR = pathlib.Path(os.path.join(AFK_DIR, "fi"))
 FI_TEMPLATE_DIR = pathlib.Path(os.path.join(FI_DIR, "furniture_icons"))
 
-# Yolov5(Stars, FI) and Detectron(Ascension) Model output
+# Yolov5(Stars, FI) and Yolov5(Ascension) Model output
 FINAL_MODELS_DIR = pathlib.Path(os.path.join(MODELS_DIR, "final_models"))
 YOLOV5_DIR = pathlib.Path(os.path.join(MODELS_DIR, "yolov5"))
 
-# Path to Detectron2 and Yolov5 models
+# Path to Yolov5 models
 FI_SI_STARS_MODEL_PATH = pathlib.Path(
     os.path.join(FINAL_MODELS_DIR, "fi_si_star_model.pt"))
 ASCENSION_BORDER_MODEL_PATH = pathlib.Path(
@@ -215,9 +214,8 @@ ASCENSION_BORDER_MODEL_PATH = pathlib.Path(
 
 
 ENGRAVING_DB = EngravingSearch.from_json(ENGRAVING_JSON_PATH)
-ASCENSION_DB = AscensionSearch.from_json(ASCENSION_JSON_PATH)
 
 HERO_PORTRAIT_OUTLINE_HSV = HSVRange(4, 69, 83, 23, 255, 255)
-HERO_ROSTER_HSV = HSVRange(0,0,0, 179, 255, 192)
-ASCENSION_STAR_HSV = HSVRange(0,0,167, 179, 240, 255)
+HERO_ROSTER_HSV = HSVRange(0, 0, 0, 179, 255, 192)
+ASCENSION_STAR_HSV = HSVRange(0, 0, 167, 179, 240, 255)
 MATRIX_ROW_SPACING_PERCENT = 0.1

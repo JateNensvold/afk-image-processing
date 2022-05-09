@@ -141,7 +141,7 @@ class DimensionsObject:
         Sets 'name' equal to 'value'
         If self.full_number is true all number types will be truncated to int
         """
-        if isinstance(value, (int, float)) and self.full_number:
+        if isinstance(value, (int, float)) and (hasattr(self, "full_number") and self.full_number):
             # if self.full_number:  # pylint: disable=no-member
             self.__dict__[name] = int(value)
         else:

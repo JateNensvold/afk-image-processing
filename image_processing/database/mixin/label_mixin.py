@@ -43,7 +43,7 @@ class LabelMixin:
         if display_images is None:
             display_images = []
 
-        display_images.append(label_palette)
+        display_images = [*display_images, label_palette]
 
         update = False
         while not update:

@@ -7,14 +7,15 @@ list of RowItems essentially making the Matrix class a 2 Dimensional Array that
 provides extra features when interacting with groups of Row Objects
 """
 from typing import Callable
-from image_processing.processing.types.types import SegmentRectangle
 
 import numpy as np
 
 import image_processing.globals as GV
 import image_processing.afk.roster.column_objects as CO
 import image_processing.afk.roster.row as RO
+
 from image_processing.afk.roster.dimensions_object import DimensionsObject
+from image_processing.processing.types.types import SegmentRectangle
 
 
 class Matrix():

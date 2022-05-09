@@ -74,7 +74,7 @@ class RosterJson:
         self.column_length = column_len
         self.row_length = row_len
 
-    def json(self):
+    def json_dict(self):
         """_summary_
         """
         json_dict = {}
@@ -85,7 +85,15 @@ class RosterJson:
         for hero_data in self.hero_data_list:
             json_dict["heroes"].append(hero_data.to_dict())
 
-        return jsonpickle.encode(json_dict)
+        return json_dict
+
+    def json(self):
+        """_summary_
+
+        Returns:
+            _type_: _description_
+        """
+        return json.dumps(self.json_dict())
 
     @classmethod
     def from_json(cls, json_dict: Dict):
@@ -126,12 +134,17 @@ class RosterData:
         self.hero_data_list = hero_data_list
         self.roster_matrix = roster_matrix
 
-    # def json(self):
-    #     """_summary_
-    #     """
-    #     row_length = len(self.roster_matrix)
-    #     column_length = len(max(self.roster_matrix, key=len))
-    #     return RosterJson(self.hero_data_list, row_length, column_length).json()
+    def roster_json(self):
+        """_summary_
+        """
+        row_length = len(self.roster_matrix)
+        column_length = len(max(self.roster_matrix, key=len))
+        return RosterJson(self.hero_data_list, row_length, column_length)
+
+    def json(self):
+        """_summary_
+        """
+        return self.roster_json().json()
 
 
 class DetectedHeroData:

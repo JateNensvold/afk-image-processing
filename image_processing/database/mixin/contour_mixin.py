@@ -40,7 +40,6 @@ class ContourMixin:
                 if image_dimensions.within(contour_instance.dimension_object, 0.4):
                     bounding_box.merge(contour_instance.dimension_object)
                     filtered_contour_list.append(contour_instance)
-            self.draw_contour(image, contour_list)
 
             if len(filtered_contour_list) > 0:
                 hsv_result_dict[bounding_box.size] = filtered_contour_list
@@ -82,7 +81,9 @@ class ContourMixin:
         merged_image = cv2.bitwise_and(
             image, image, mask=ascension_border_mask)
 
-        centroids = self.find_dominate(merged_image)
+        # centroids = self.find_dominate(merged_image)
+        centroids = self.find_dominate(image)
+
         return centroids, ascension_border_mask
 
     def find_dominate(self, image: np.ndarray):
