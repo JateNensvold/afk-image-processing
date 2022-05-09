@@ -27,4 +27,12 @@ ASCENSION_TYPES = bidict({0: 'ascended',
                           5: 'mythic',
                           6: 'mythic+'})
 
+ABBREVIATED_ASCENSION_TYPES = bidict({0: 'A',
+                                     1: 'E',
+                                     2: 'E+',
+                                     3: 'L',
+                                     4: 'L+',
+                                     5: 'M',
+                                     6: 'M+'})
+
 ASCENSION_COLOR_DIMENSIONS = 3

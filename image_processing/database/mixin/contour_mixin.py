@@ -81,8 +81,7 @@ class ContourMixin:
         merged_image = cv2.bitwise_and(
             image, image, mask=ascension_border_mask)
 
-        # centroids = self.find_dominate(merged_image)
-        centroids = self.find_dominate(image)
+        centroids = self.find_dominate(merged_image)
 
         return centroids, ascension_border_mask
 

@@ -6,7 +6,7 @@ image/arguments passed to this script
 import sys
 import json
 import pprint
-from typing import Dict, List
+from typing import List
 from image_processing.afk.hero.hero_data import RosterJson
 
 import zmq
@@ -15,7 +15,7 @@ import jsonpickle
 import image_processing.globals as GV
 
 
-def remote_compute_results(address: str, timeout: int, args: List[str]) -> Dict:
+def remote_compute_results(address: str, timeout: int, args: List[str]):
     """_summary_
 
     Args:
@@ -40,7 +40,7 @@ def remote_compute_results(address: str, timeout: int, args: List[str]) -> Dict:
 
     roster_json: RosterJson = jsonpickle.decode(received)
     # json_dict = json.loads(received)
-    return roster_json.json_dict()
+    return roster_json
 
 
 def main():
@@ -50,9 +50,9 @@ def main():
     address = "tcp://localhost:5555"
     GV.global_parse_args()
 
-    json_dict = remote_compute_results(address, 15000, sys.argv[1:])
+    roster_json = remote_compute_results(address, 15000, sys.argv[1:])
 
-    pprint.pprint(json_dict, width=200)
+    pprint.pprint(roster_json.json_dict(), width=200)
 
 
 if __name__ == "__main__":

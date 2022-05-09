@@ -9,7 +9,8 @@ needed to detect AFK Arena Hero Features
 from typing import TYPE_CHECKING
 
 import cv2
-from image_processing.database.configs.ascension_constants import ASCENSION_TYPES
+from image_processing.database.configs.ascension_constants import (
+    ABBREVIATED_ASCENSION_TYPES)
 from image_processing.utils.color_helper import MplColorHelper
 
 import numpy as np
@@ -208,7 +209,7 @@ def detect_ascension(detected_ascension_stars: DataFrame,
             best_ascension_match = detected_ascension.sort_values(
                 "confidence", ascending=False).iloc[0]
             best_ascension_label = (
-                ASCENSION_TYPES[best_ascension_match["class"]])
+                ABBREVIATED_ASCENSION_TYPES[best_ascension_match["class"]])
 
             ascension_result = ModelResult(best_ascension_label,
                                            best_ascension_match["confidence"])
