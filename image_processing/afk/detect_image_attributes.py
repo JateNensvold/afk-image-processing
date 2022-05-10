@@ -18,7 +18,6 @@ from pandas import DataFrame
 
 import image_processing.globals as GV
 
-from image_processing.load_images import display_image
 from image_processing.afk.hero.process_heroes import (
     get_heroes, get_hero_contours)
 from image_processing.processing.image_data import SegmentResult
@@ -217,9 +216,6 @@ def detect_ascension(detected_ascension_stars: DataFrame,
             print_verbose(f"Ascension Results: {ascension_result}")
         GV.GLOBAL_TIMER.stop()
     GV.GLOBAL_TIMER.stop()
-
-    # display_image(
-    #     cv2.cvtColor(segment_info.image, cv2.COLOR_BGR2RGB), display=True)
 
     return ascension_result, best_match_coordinates
 
