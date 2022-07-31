@@ -22,7 +22,7 @@ def main():
     """_summary_
     """
     context = zmq.Context()
-    socket = context.socket(zmq.ROUTER)  # pylint: disable=no-member
+    socket: zmq.sugar.socket.Socket = context.socket(zmq.ROUTER)
     address = f"tcp://*:{GV.ZMQ_PORT}"
     print(f"Binding on ({address})")
 
@@ -35,7 +35,7 @@ def main():
     print("Ready to start processing image requests...")
     while True:
         #  Wait for next request from client
-        # pylint: disable=unbalanced-tuple-unpacking
+        # pylint: disable=unpacking-non-sequence
         message_id, byte_args = socket.recv_multipart()
         args: List[str] = json.loads(byte_args)
         try:

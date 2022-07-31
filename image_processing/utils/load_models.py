@@ -39,7 +39,7 @@ def load_files(attributes_model_path: str, ascension_model_path: str,
 
 def load_model(model_path: str):
     """
-    Load hero FI/SI/Stars model into GV.FI_SI_STAR_MODEL
+    Load a YOLOV5 model ie (hero, FI/SI/Stars model)
 
     Args:
         model_path (str): path to model being loaded

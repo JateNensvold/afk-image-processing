@@ -31,6 +31,18 @@ class DoubleCoordinates(NamedTuple("DoubleCoordinates",
 
     def __new__(cls: type["DoubleCoordinates"],
                 x1: int, x2: int, y1: int, y2: int) -> "DoubleCoordinates":
+        """_summary_
+
+        Args:
+            cls (type[&quot;DoubleCoordinates&quot;]): _description_
+            x1 (int): _description_
+            x2 (int): _description_
+            y1 (int): _description_
+            y2 (int): _description_
+
+        Returns:
+            DoubleCoordinates: _description_
+        """
 
         return super().__new__(cls, int(x1), int(x2), int(y1), int(y2))
 

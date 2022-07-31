@@ -50,7 +50,7 @@
 		],
 		"todo-tree.filtering.excludeGlobs": [
 			"**/"
-		],
+		]
 	},
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
@@ -77,5 +77,5 @@
 		"git": "os-provided"
 	},
 	// Install albedo-bot and afk_image_processing as python development packages
-	"postStartCommand": "cd /workspace/albedo-bot && pip3 install -r requirements.txt  && /workspace/afk_image_processing/requirements/install ${BUILD_TYPE}"
+	"postStartCommand": "cd /workspace/albedo-bot && pip3 install -r requirements.txt  && /workspace/afk_image_processing/requirements/install -s"
 }

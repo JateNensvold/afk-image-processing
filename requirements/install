@@ -1,32 +1,79 @@
 #!/usr/bin/env bash
 supported_architecture=("CPU" "CUDA")
 
+Help()
+{
+    # Display Help
+    echo "Install all depencencies of this package, the package source or both"
+    echo
+    echo "Syntax: install -d [" "${supported_architecture[@]}" "] [-s|h]"
+    echo "options:"
+    echo "s       Install the package source"
+    echo "h       Print this help"
+    echo "d       Install dependencies for the entered architecture"
+    echo
+    echo "Ex. install -d CUDA, this will install the dependencies that run on the CUDA architecture "
+    echo "Ex. install -s, this will install the package source" 
+}
+
+should_install_source=0
+should_install_dependecy=0
+source_path="./source.txt"
+
+while getopts ":hsd:" option; do
+    case $option in
+        h) # display Help
+            Help
+            exit;;
+        s) # Install Source
+            # shift
+            should_install_source=1;;
+        d)
+            architecture=$OPTARG
+            should_install_dependecy=1
+            case ${architecture} in
+                "CPU")
+                    requirements_path="./cpu.txt";;
+                "CUDA")
+                    requirements_path="./gpu.txt";;
+                *)
+                    echo "Invalid architecture used, '${architecture}' not in [" "${supported_architecture[@]}" "]"
+                    echo "Reference 'install -h' for more information"
+                    exit;;
+            esac;;
+        \?) # Invalid option
+            echo "Error: Invalid option"
+            exit;;
+    esac
+done
+
+# Install a type of dependency
+
+
+install_dependency()
+{
+    echo "Installing dependency, BUILD Type: ${architecture}..."
+    pip3 --disable-pip-version-check --no-cache-dir install -r ${requirements_path}
+}
+
+install_source()
+{
+    echo "Install Source..."
+    pip3 --disable-pip-version-check --no-cache-dir install -r $source_path
+}
+
+
 PARENT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-cd ${PARENT_DIR}
+cd "${PARENT_DIR}" || exit
 
-if [ "$#" -ne 1 ]; then
-    echo "Pass a supported architecture when calling this script: ${supported_architecture[@]}"
-    echo "Ex. 'install CPU'"
-    exit 1
+if [ $should_install_dependecy -eq 0 ] && [ $should_install_source -eq 0 ]; then
+    echo "Nothing was installed..."
 fi
-echo "BUILD Type: ${1}"
+if [ $should_install_dependecy -eq 1 ]; then
+    install_dependency
+fi
+if [ $should_install_source -eq 1 ]; then
+    install_source
+fi
 
-
-case ${1} in
-    "CPU")
-        requirements_path="./cpu.txt"
-    ;;
-    "CUDA")
-        requirements_path="./gpu.txt"
-    ;;
-    *)
-        echo "Invalid architecture used"
-        echo "${1} not in ${supported_architecture[@]}"
-        exit 1
-    ;;
-esac
-
-
-
-pip3 --disable-pip-version-check --no-cache-dir install -r ${requirements_path} \
-   && rm -rf /tmp/pip-tmp
+# rm -rf /tmp/pip-tmp

@@ -1,4 +1,4 @@
--r requirements.txt
+-r dependents.txt
 # GPU pyTorch
 #--find-links https://download.pytorch.org/whl/torch_stable.html
 -f https://download.pytorch.org/whl/cu113/torch_stable.html

@@ -21,8 +21,6 @@ from typing import TYPE_CHECKING, List, Union
 import numpy
 import torch
 
-from detectron2.engine import DefaultPredictor
-
 import image_processing.utils.load_images as load
 
 from image_processing.utils.timer import Timer
@@ -64,7 +62,7 @@ IMAGE_SS_NAME: str = None
 VERBOSE_LEVEL: int = 0
 
 FI_SI_STAR_MODEL: torch.Tensor = None
-ASCENSION_BORDER_MODEL: DefaultPredictor = None
+ASCENSION_BORDER_MODEL: torch.Tensor = None
 IMAGE_DB: "ImageSearch" = None
 ENGRAVING_DB: EngravingSearch = None
 

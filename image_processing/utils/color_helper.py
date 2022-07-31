@@ -118,3 +118,12 @@ class MplColorHelper:
         """
         color_tuple = mpl.colors.to_rgba(color_name)
         return [int(color_val*self.color_range) for color_val in color_tuple]
+
+    def get_unicode(self, color_name: str):
+        """_summary_
+
+        Args:
+            color_name (str): _description_
+        """
+
+        return int(mpl.colors.to_hex(color_name)[1:], 16)
