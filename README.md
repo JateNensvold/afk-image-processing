@@ -81,7 +81,7 @@ docker exec -it devcontainer-afk_processing_container-1 bash
 Go to post-install command in `.devcontainer/devcontainer.json` for the latest command
 the following may be out of date
 ```bash
-cd /workspace/albedo-bot && pip3 install -r requirements.txt  && /workspace/afk_image_processing/requirements/install -s"
+cd /workspace/albedo-bot && pip3 install -r requirements.txt  && /workspace/afk_image_processing/requirements/install -s
 ```
 
 ### 7. Run database creation

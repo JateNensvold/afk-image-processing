@@ -1,7 +1,6 @@
 import json
 import re
-from typing import Dict, List
-import jsonpickle
+from typing import Union
 import numpy as np
 
 from image_processing.models.model_attributes import ModelResult
@@ -58,12 +57,12 @@ class RosterJson:
         _type_: _description_
     """
 
-    def __init__(self, hero_data_list: List["DetectedHeroData"],
+    def __init__(self, hero_data_list: list["DetectedHeroData"],
                  row_len: int, column_len: int):
         """_summary_
 
         Args:
-            hero_data_list (List[&quot;DetectedHeroData&quot;]): _description_
+            hero_data_list (list[&quot;DetectedHeroData&quot;]): _description_
             row_len (int): _description_
             column_len (int): _description_
 
@@ -96,7 +95,7 @@ class RosterJson:
         return json.dumps(self.json_dict())
 
     @classmethod
-    def from_json(cls, json_dict: Dict):
+    def from_json(cls, json_str: str):
         """_summary_
 
         Args:
@@ -105,11 +104,13 @@ class RosterJson:
         Returns:
             _type_: _description_
         """
+        json_dict: dict = json.loads(json_str)
+
         raw_hero_list = json_dict["heroes"]
         hero_list = []
         for hero_dict in raw_hero_list:
             detected_hero = DetectedHeroData(
-                hero_dict["name"],
+                HeroMatchJson.from_dict(hero_dict["name"]),
                 ModelResult.from_dict(hero_dict["signature_item"]),
                 ModelResult.from_dict(hero_dict["furniture"]),
                 ModelResult.from_dict(hero_dict["ascension"]),
@@ -124,7 +125,7 @@ class RosterData:
     """_summary_
     """
 
-    def __init__(self, hero_data_list: List["DetectedHeroData"],
+    def __init__(self, hero_data_list: list["DetectedHeroData"],
                  roster_matrix: Matrix):
         """_summary_
 
@@ -142,7 +143,8 @@ class RosterData:
         return RosterJson(self.hero_data_list, row_length, column_length)
 
     def json(self):
-        """_summary_
+        """
+        Convert a roster_json into a JSON String
         """
         return self.roster_json().json()
 
@@ -151,7 +153,7 @@ class DetectedHeroData:
     """_summary_
     """
 
-    def __init__(self, hero_name: str, signature_item: ModelResult,
+    def __init__(self, hero_name: "HeroMatchJson", signature_item: ModelResult,
                  furniture: ModelResult, hero_ascension: ModelResult,
                  hero_engraving: ModelResult, image: np.ndarray = None):
         """_summary_
@@ -178,7 +180,7 @@ class DetectedHeroData:
             _type_: _description_
         """
         hero_dict = {
-            "name": self.name,
+            "name": self.name.to_dict(),
             "signature_item": self.signature_item.to_dict(),
             "furniture": self.furniture.to_dict(),
             "ascension": self.ascension.to_dict(),
@@ -193,3 +195,79 @@ class DetectedHeroData:
 
     def __repr__(self) -> str:
         return str(self)
+
+
+class HeroMatchJson:
+    """_summary_
+    """
+
+    def __init__(self, hero_name: str, match_count: int, total_matches: int):
+        self.hero_name = hero_name
+        self.match_count = match_count
+        self.total_matches = total_matches
+
+    @property
+    def confidence(self):
+        """
+        Calculate the confidence level of the hero predication as
+            hero_matches/total_matches
+        """
+        return self.match_count / self.total_matches
+
+    def valid_match(self):
+        """
+        A set of criteria to determine if a hero_match is valid
+
+        """
+        if self.match_count < 10:
+            if self.confidence < 0.80:
+                return False
+        else:
+            if self.confidence < 0.15:
+                return False
+        return True
+
+    @classmethod
+    def from_dict(cls, hero_match_json: dict[str, Union[str, int]]):
+        """_summary_
+
+        Args:
+            model_result (Dict[str, str]): _description_
+        """
+
+        return HeroMatchJson(hero_match_json["name"],
+                             hero_match_json["match_count"],
+                             hero_match_json["total_matches"])
+
+    def to_dict(self):
+        """_summary_
+
+        Returns:
+            _type_: _description_
+        """
+        return {"name": self.hero_name, "match_count": self.match_count,
+                "total_matches": self.total_matches}
+
+    def __str__(self):
+        """_summary_
+        """
+        if self.total_matches is not None:
+            match_percentage = self.confidence * 100
+            match_percentage_str = f"{match_percentage:.2f}%"
+        else:
+            match_percentage_str = "?%"
+        return (f"{self.hero_name} - {self.match_count}/{self.total_matches} "
+                f"confidence={match_percentage_str}>")
+
+    def __repr__(self):
+        """
+        String representation of object, that shows hero name and match_count
+        """
+        if self.total_matches is not None:
+            match_percentage = self.confidence
+            match_percentage_str = f"{match_percentage:.2f}%"
+        else:
+            match_percentage_str = "?%"
+        return (f"HeroMatchJson<{self.hero_name}, match_count="
+                f"{self.match_count}/{self.total_matches}, "
+                f"confidence={match_percentage_str}>")

@@ -45,7 +45,7 @@ def main():
             print(f"Detected features in: {time.time() - start_time}")
             #  Send reply back to client
             socket.send_multipart(
-                [message_id, jsonpickle.encode(roster_data.roster_json()).encode("utf-8")])
+                [message_id, roster_data.json().encode("utf-8")])
         # Catch all errors that occur during image processing and send
         #   through json_dict
         except Exception as _exception:  # pylint: disable=broad-except

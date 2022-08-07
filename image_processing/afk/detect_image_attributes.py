@@ -9,15 +9,13 @@ needed to detect AFK Arena Hero Features
 from typing import TYPE_CHECKING
 
 import cv2
-from image_processing.database.configs.ascension_constants import (
-    ABBREVIATED_ASCENSION_TYPES)
-from image_processing.utils.color_helper import MplColorHelper
-
 import numpy as np
 from pandas import DataFrame
 
 import image_processing.globals as GV
-
+from image_processing.database.configs.ascension_constants import (
+    ABBREVIATED_ASCENSION_TYPES)
+from image_processing.utils.color_helper import MplColorHelper
 from image_processing.afk.hero.process_heroes import (
     get_heroes, get_hero_contours)
 from image_processing.processing.image_data import SegmentResult
@@ -25,7 +23,7 @@ from image_processing.models.model_attributes import (
     ASCENSION_STAR_LABELS, FI_LABELS, ModelResult, SI_LABELS)
 from image_processing.afk.roster.matrix import Matrix
 from image_processing.afk.hero.hero_data import (
-    DetectedHeroData, HeroImage, RosterData)
+    DetectedHeroData, RosterData, HeroMatchJson)
 from image_processing.afk.roster.dimensions_object import DoubleCoordinates
 from image_processing.database.engravings_database import EngravingData
 from image_processing.utils.verbose_print import print_verbose
@@ -63,14 +61,20 @@ def detect_features(roster_image: np.ndarray):
         GV.GLOBAL_TIMER.stop()
 
         best_hero_match = hero_matches.best()
-        print_verbose(f"Detected hero: {best_hero_match}")
+        print_verbose(f"Detected hero: {best_hero_match}", verbose_level=1)
+        # Get the hero information about the detected hero
         best_match_info = GV.IMAGE_DB.hero_lookup[best_hero_match.name].first()
+        hero_prediction_result = HeroMatchJson(best_match_info.name,
+                                               best_hero_match.match_count,
+                                               best_hero_match.total_matches)
+
         GV.GLOBAL_TIMER.start("Attribute Detection")
-        detected_hero_result = detect_attributes(best_match_info, segment_info)
+        detected_hero_result = detect_attributes(hero_prediction_result,
+                                                 segment_info)
         GV.GLOBAL_TIMER.stop()
         detected_hero_data.append(detected_hero_result)
 
-       # When debuggin Draw hero info on image
+       # When debugging Draw hero info on image
         if GV.verbosity(2):
             label_hero_feature(roster_image, segment_info,
                                detected_hero_result, segment_matrix)
@@ -113,7 +117,7 @@ def label_hero_feature(roster_image: np.ndarray,
                 abs(font_scale), TEXT_COLOR, THICKNESS, cv2.LINE_AA)
 
 
-def detect_furniture(detected_furnitures: DataFrame):
+def detect_furniture(detected_furniture: DataFrame):
     """_summary_
 
     Args:
@@ -125,8 +129,8 @@ def detect_furniture(detected_furnitures: DataFrame):
 
     furniture_result = ModelResult("0", 0)
     GV.GLOBAL_TIMER.start("Detect Furniture")
-    if len(detected_furnitures) > 0:
-        best_furniture_match = detected_furnitures.sort_values(
+    if len(detected_furniture) > 0:
+        best_furniture_match = detected_furniture.sort_values(
             "confidence").iloc[0]
         best_furniture_label = FI_LABELS[best_furniture_match["class"]]
 
@@ -235,7 +239,8 @@ def detect_engraving(ascension_result: ModelResult,
     """
 
     engraving_result = ModelResult("0", 0)
-    if ascension_result.label in ASCENSION_STAR_LABELS.inverse:  # pylint: disable=unsupported-membership-test
+    # pylint: disable=unsupported-membership-test
+    if ascension_result.label in ASCENSION_STAR_LABELS.inverse:
         temp_image = image[star_coordinates.y1:star_coordinates.y2,
                            star_coordinates.x1:star_coordinates.x2]
         contour_wrapper = get_hero_contours(
@@ -243,7 +248,7 @@ def detect_engraving(ascension_result: ModelResult,
         contour_list = contour_wrapper.filter_contours()
 
         # When no contours are return from filter_contours we can take the
-        #   average color from the largets contour that was detected
+        #   average color from the largest contour that was detected
         if len(contour_list) == 0:
             contour_list = contour_wrapper.largest()
 
@@ -261,7 +266,8 @@ def detect_engraving(ascension_result: ModelResult,
     return engraving_result
 
 
-def detect_attributes(hero_image_info: HeroImage, segment_info: SegmentResult):
+def detect_attributes(name_result: HeroMatchJson, segment_info: SegmentResult,
+                      ):
     """
     Detect hero features such as FI, SI, Stars and ascension level using'
         custom trained yolov5 and detectron2 image recognition models
@@ -272,6 +278,8 @@ def detect_attributes(hero_image_info: HeroImage, segment_info: SegmentResult):
             name and the location the image was loaded from
         segment_info (processing.SegmentResult): object with info describing the
             location of 'detected_hero_result' in DetectedHeroData
+        name_result (ModelResult): A model result containing the detected heroes
+            name and confidence/score of the hero prediction
     Returns:
         [type]: [description]
     """
@@ -302,7 +310,7 @@ def detect_attributes(hero_image_info: HeroImage, segment_info: SegmentResult):
     engraving_result = detect_engraving(
         ascension_result, rgb_image, star_coordinates)
 
-    hero_data = DetectedHeroData(hero_image_info.name, signature_item_result,
+    hero_data = DetectedHeroData(name_result, signature_item_result,
                                  furniture_result, ascension_result,
                                  engraving_result, rgb_image)
     return hero_data

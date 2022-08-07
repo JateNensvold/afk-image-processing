@@ -35,7 +35,8 @@
 		"python.linting.pydocstylePath": "/usr/local/py-utils/bin/pydocstyle",
 		"python.linting.pylintPath": "/usr/local/py-utils/bin/pylint",
 		"python.linting.pylintArgs": [
-			// "--generate-members",
+			// generates functions stubs for packages like cv2
+			"--generate-members",
 			"--extension-pkg-whitelist=cv2",
 			"--rcfile",
 			"${workspaceFolder}/afk_image_processing/.pylintrc"],

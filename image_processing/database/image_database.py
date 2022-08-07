@@ -115,6 +115,7 @@ class HeroMatchList:
         self.hero_matches: List[HeroMatch] = []
         self.hero_dict: Dict[str, HeroMatch] = {}
         self.current_iter = 0
+        self.total_matches = 0
 
         self.extend(matches)
 
@@ -159,6 +160,7 @@ class HeroMatchList:
             match (HeroMatch): match getting added to list
             sort (bool): flag to sort the match list after adding new element
         """
+        self.total_matches += match.match_count
         if match.name in self.hero_dict:
             self.hero_dict[match.name].combine(match)
         else:
@@ -191,7 +193,9 @@ class HeroMatchList:
         Returns the HeroMatch with the highest number of matches
         """
         if len(self.hero_matches) > 0:
-            return self.hero_matches[0]
+            best_match = self.hero_matches[0]
+            best_match.total_matches = self.total_matches
+            return best_match
         raise NoMatchException("No HeroMatch to return object length is 0")
 
 
@@ -203,19 +207,57 @@ class HeroMatch:
 
     def __init__(self, hero_name: str):
         """
-
-
         Args:
             hero_name (str): hero name to keep track of FeatureMatch'
         """
         self.name = hero_name
         self.matches: List[FeatureMatch] = []
 
+        self._total_matches = -1
+
+    @property
+    def total_matches(self):
+        """
+        A field that represents the total match count of the ImageSegment
+        that this HeroMatch was pulled from, when it is set to None it
+        represents an unknown match count
+
+        Returns:
+            _type_: _description_
+        """
+        return self._total_matches
+
+    @total_matches.setter
+    def total_matches(self, new_total_matches: int):
+        """
+        Property setter for setting the total_matches of this object, if
+        total_matches is None it means that the total match count has not
+        been set
+
+        Args:
+            new_total_matches (int): number to set total_matches to
+        """
+        self._total_matches = new_total_matches
+
+    @property
+    def confidence(self):
+        """
+        Calculate the confidence level of the hero predication as
+            hero_matches/total_matches
+        """
+        return self.match_count / self.total_matches
+
     def __str__(self):
         """
         String representation of object, that shows hero name and match_count
         """
-        return f"HeroMatch<{self.name}, match_count={self.match_count}>"
+        if self.total_matches is not None:
+            match_percentage = self.confidence
+            match_percentage_str = f"{match_percentage:.2f}%"
+        else:
+            match_percentage_str = "?%"
+        return (f"HeroMatch<{self.name}, match_count={self.match_count}, "
+                f"confidence={match_percentage_str}>")
 
     def __repr__(self) -> str:
         return str(self)

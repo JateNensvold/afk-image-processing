@@ -7,11 +7,11 @@ import sys
 import json
 import pprint
 from typing import List
-from image_processing.afk.hero.hero_data import RosterJson
 
 import zmq
 import jsonpickle
 
+from image_processing.afk.hero.hero_data import RosterJson
 import image_processing.globals as GV
 
 
@@ -25,22 +25,20 @@ def remote_compute_results(address: str, timeout: int, args: List[str]):
             args
     """
 
-    ZMQ_CONTEXT = zmq.Context()
-    ZMQ_SOCKET: zmq.Socket = ZMQ_CONTEXT.socket(
+    zmq_context = zmq.Context()
+    zmq_socket: zmq.Socket = zmq_context.socket(
         zmq.DEALER)  # pylint: disable=no-member
 
-    ZMQ_SOCKET.connect(address)
+    zmq_socket.connect(address)
     # pylint: disable=no-member
-    ZMQ_SOCKET.setsockopt(zmq.RCVTIMEO, timeout)
+    zmq_socket.setsockopt(zmq.RCVTIMEO, timeout)
 
     print(f"Arguments: {args}")
 
-    ZMQ_SOCKET.send_string(json.dumps(args))
-    received = ZMQ_SOCKET.recv()
-
-    roster_json: RosterJson = jsonpickle.decode(received)
-    # json_dict = json.loads(received)
-    return roster_json
+    zmq_socket.send_string(json.dumps(args))
+    received = zmq_socket.recv()
+    roster_json_str = received.decode("utf-8")
+    return roster_json_str
 
 
 def main():
@@ -50,9 +48,16 @@ def main():
     address = "tcp://localhost:5555"
     GV.global_parse_args()
 
-    roster_json = remote_compute_results(address, 15000, sys.argv[1:])
+    roster_json_str = remote_compute_results(address, 15000, sys.argv[1:])
 
-    pprint.pprint(roster_json.json_dict(), width=200)
+    try:
+        roster_json = RosterJson.from_json(roster_json_str)
+        pprint.pprint(roster_json.json_dict(), width=200)
+
+    # pylint: disable=broad-except
+    except Exception as _serialization_exception:
+        error_message = jsonpickle.decode(roster_json_str)
+        print(error_message["message"])
 
 
 if __name__ == "__main__":

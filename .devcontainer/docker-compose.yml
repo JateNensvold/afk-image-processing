@@ -26,13 +26,14 @@ services:
       - devnet
     # Overrides default command so things don't shut down after the process ends.
     command: sleep infinity
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
+    # Uncomment the deploy section to enable NVIDIA GPU development
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
     # Uncomment the next four lines if you will use a ptrace-based debuggers like C++, Go, and Rust.
     # cap_add:
     #  - SYS_PTRACE
