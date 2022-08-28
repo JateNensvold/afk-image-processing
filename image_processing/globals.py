@@ -66,7 +66,7 @@ ASCENSION_BORDER_MODEL: torch.Tensor = None
 IMAGE_DB: "ImageSearch" = None
 ENGRAVING_DB: EngravingSearch = None
 
-ROOT_DIR: pathlib.Path = pathlib.Path(os.path.dirname(__file__)).absolute()
+ROOT_DIR: pathlib.Path = pathlib.Path(__file__).parent.resolve()
 HERO_PORTRAIT_SIZE = 512
 MODEL_IMAGE_SIZE = 416
 GLOBAL_TIMER = None
@@ -164,8 +164,9 @@ MODELS_DIR = os.path.join(GLOBALS_DIR, "models")
 # Paths to data inside the Database directory
 # HERO_ICON_DIR = pathlib.Path(os.path.join(DATABASE_DIR, "hero_icon"))
 HERO_PORTRAIT_DIRECTORIES: List[pathlib.Path] = []
-HERO_PORTRAIT_DIRECTORIES.append(pathlib.Path(
-    os.path.join(DATABASE_DIR, "images", "heroes")))
+IMAGE_PROCESSING_PORTRAITS = pathlib.Path(
+    os.path.join(DATABASE_DIR, "images", "heroes"))
+HERO_PORTRAIT_DIRECTORIES.append(IMAGE_PROCESSING_PORTRAITS)
 
 DATABASE_FLAN_PATH = pathlib.Path(
     os.path.join(DATABASE_DIR, "IMAGE_DB.flann"))
@@ -184,9 +185,10 @@ ENGRAVING_JSON_PATH = os.path.join(CONFIG_DIR, "engraving_values.json")
 ASCENSION_JSON_PATH = os.path.join(CONFIG_DIR, "ascension_values.json")
 
 # AFKBuilder Submodule
-AFKBuilder_dir = pathlib.Path(os.path.join(DATABASE_DIR, "AFKBuilder"))
-HERO_PORTRAIT_DIRECTORIES.append(pathlib.Path(os.path.join(
-    AFKBuilder_dir, "public", "img", "portraits")))
+AFK_Builder_dir = pathlib.Path(os.path.join(DATABASE_DIR, "AFKBuilder"))
+AFK_BUILDER_PORTRAITS = pathlib.Path(os.path.join(
+    AFK_Builder_dir, "public", "img", "portraits"))
+HERO_PORTRAIT_DIRECTORIES.append(AFK_BUILDER_PORTRAITS)
 
 # Tests directory
 TESTS_DIR = pathlib.Path(os.path.join(

@@ -501,7 +501,9 @@ class ImageSearch():
         #         print(hero_match.name, self.hero_lookup[hero_match.name])
         #         for feature_match in hero_match.matches:
         #             print(
-        #                 self.index_lookup[feature_match.hero_index].hero_index_lookup[feature_match.hero_index].image.shape)
+        #                 self.index_lookup[
+        # feature_match.hero_index].hero_index_lookup[
+        # feature_match.hero_index].image.shape)
 
         # Check for a better hero match with different image preprocessing or
         #   log diagnostic information about the hero_matches if no better
@@ -557,7 +559,7 @@ def build_flann(image_list: list[HeroImage],
                 ratio: int = 0.8,
                 enriched_db=False) -> "ImageSearch":
     """
-    Build database of heroes to match to
+    Build database of heroes to match against
 
     Args:
         image_list: list of (image(np.array), name(str), faction(str)) tuples

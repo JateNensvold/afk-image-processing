@@ -19,13 +19,12 @@ if typing.TYPE_CHECKING:
 
 
 def find_images(folder_path: str, file_dict: Dict[str, Set]):
-    """_summary_
+    """
     Recursively iterate through directory adding all ".jpg" and ".png" files
         to file_dict
     Args:
         folder_path (str): folder path to recurse through
         file_dict (dict): file dictionary to add images to
-
     """
     for hero_name in os.listdir(folder_path):
         file_path = os.path.join(folder_path, hero_name)
