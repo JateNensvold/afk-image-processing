@@ -18,7 +18,7 @@ def rename_heroes(directory: Path):
     required hero
 
     Args:
-        directory (Path): _description_
+        directory (Path): path to directory with files
     """
 
     hero_list = os.listdir(directory)
@@ -56,6 +56,31 @@ def rename_heroes(directory: Path):
         hero_dict[split_name][required_type].append(portrait_name)
 
 
+def convert_name(directory: Path):
+    """
+    Replace all dashes(-) in hero names with periods(.)
+    Insert a dot(.) before all numbers
+
+    Args:
+        directory (Path): path to directory with files
+    """
+    hero_list = os.listdir(directory)
+
+    for image_index, image_name in enumerate(hero_list):
+
+        old_path = Path(directory, image_name)
+        portrait_name = re.sub(r"\-", ".", image_name)
+        numbers_list = re.findall(r"\d+", portrait_name)
+        for number in numbers_list:
+            portrait_name = portrait_name.replace(number, f".{number}")
+        portrait_path = Path(directory, portrait_name)
+
+        old_path.rename(portrait_path)
+
+        print(f"Renamed Image #{image_index} - {old_path} -> "
+              f"{portrait_path.name}")
+
+
 if __name__ == "__main__":
     local_dir = Path(__file__).parent
-    rename_heroes(local_dir.joinpath("heroes"))
+    convert_name(local_dir.joinpath("heroes"))
