@@ -9,6 +9,7 @@ import json
 import time
 import traceback
 from typing import List
+from image_processing.build_db import load_database
 
 import zmq
 import jsonpickle
@@ -18,8 +19,12 @@ import image_processing.utils.load_models as LM
 import image_processing.afk.detect_image_attributes as detect
 
 
+DATABASE_LOAD_MESSAGE = "Database loaded successfully"
+RELOAD_COMMAND_LIST = ["reload"]
+
 def main():
-    """_summary_
+    """
+    Setup the processing server to listen for requests
     """
     context = zmq.Context()
     socket: zmq.sugar.socket.Socket = context.socket(zmq.ROUTER)
@@ -38,14 +43,25 @@ def main():
         # pylint: disable=unpacking-non-sequence
         message_id, byte_args = socket.recv_multipart()
         args: List[str] = json.loads(byte_args)
+        if args == RELOAD_COMMAND_LIST:
+            database_reload = True
+        else:
+            database_reload = False
         try:
-            GV.global_parse_args(args)
-            start_time = time.time()
-            roster_data = detect.detect_features(GV.IMAGE_SS)
-            print(f"Detected features in: {time.time() - start_time}")
-            #  Send reply back to client
-            socket.send_multipart(
-                [message_id, roster_data.json().encode("utf-8")])
+            if database_reload:
+                GV.IMAGE_DB = load_database()
+                json_dict = {"message": DATABASE_LOAD_MESSAGE}
+                socket.send_multipart(
+                    [message_id, jsonpickle.encode(json_dict).encode("utf-8")])
+            else:
+                GV.global_parse_args(args)
+                start_time = time.time()
+                roster_data = detect.detect_features(GV.IMAGE_SS)
+                print(f"Detected features in: {time.time() - start_time}")
+                #  Send reply back to client
+                socket.send_multipart(
+                    [message_id, roster_data.json().encode("utf-8")])
+
         # Catch all errors that occur during image processing and send
         #   through json_dict
         except Exception as _exception:  # pylint: disable=broad-except

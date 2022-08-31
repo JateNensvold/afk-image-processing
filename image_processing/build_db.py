@@ -18,53 +18,80 @@ if typing.TYPE_CHECKING:
     from image_processing.database.image_database import ImageSearch
 
 
-def find_images(folder_path: str, file_dict: Dict[str, Set]):
+FilePathDict = dict[str, set[Path]]
+
+
+def find_images(folder_path: Path, file_dict: FilePathDict):
     """
-    Recursively iterate through directory adding all ".jpg" and ".png" files
+    Iterate through directory adding all ".jpg" and ".png" files
         to file_dict
     Args:
-        folder_path (str): folder path to recurse through
+        folder_path (Path): folder path to iterate through
         file_dict (dict): file dictionary to add images to
     """
     for hero_name in os.listdir(folder_path):
-        file_path = os.path.join(folder_path, hero_name)
-        if os.path.isfile(file_path) and (file_path.endswith(".png") or
-                                          file_path.endswith(".jpg") or
-                                          file_path.endswith(".webp")):
+        file_path = folder_path.joinpath(hero_name)
+
+        if os.path.isfile(file_path) and (hero_name.endswith(".png") or
+                                          hero_name.endswith(".jpg") or
+                                          hero_name.endswith(".webp")):
             if hero_name not in file_dict:
                 file_dict[hero_name] = set()
             file_dict[hero_name].add(file_path)
 
 
-def build_database(enriched_db: bool = False) -> "ImageSearch":
-    """
+def build_database(enriched_db: bool = False,
+                   hero_portrait_directories: list[Path] = None,
+                   base_images: list[HeroImage] = None) -> "ImageSearch":
+    """ 
     Build and save a new hero database
+
     Args:
-        enriched_db: flag to add every hero to the database a second time with
-            parts of the the image border removed from each side
+        enriched_db(bool): flag to add every hero to the database a second
+            time with parts of the the image border removed from each side
+        hero_portrait_directories (list[Path], optional): a list of directories
+            to search for hero_portraits, when nothing is passed for this value
+            the default hero portrait directories from the config file will be
+            used. Defaults to None
+        base_images (list[HeroImage, optional]): when a list of HeroImage are
+            passed in then the detection and loading of portraits from
+            `hero_portrait_directories` will be skipped, when None the images
+            be auto detected from `hero_portrait_directories`. Defaults to None.
+
+    Raises:
+        FileNotFoundError: raised when a hero_path does not exist, or when an
+            image cannot be read from a hero_path
+
     Return:
-        "ImageSearch" database object
+        ImageSearch: database object
     """
-    file_dict: Dict[str, Union[Dict, Set]] = {}
     if GV.verbosity(1):
         print("Building database!")
     start_time = time.time()
-    for hero_portrait_dir in GV.HERO_PORTRAIT_DIRECTORIES:
-        find_images(hero_portrait_dir, file_dict)
-    base_images: List[HeroImage] = []
 
-    for raw_hero_name, hero_path_set in file_dict.items():
-        for hero_path in hero_path_set:
-            if not os.path.exists(hero_path):
-                raise FileNotFoundError(hero_path)
-            hero_image = cv2.imread(hero_path)
-            if hero_image is None:
-                raise FileNotFoundError(
-                    f"Hero Image not found: {hero_path}")
-            hero_name, *_ = re.split(r"\.", raw_hero_name)
-            base_images.append(HeroImage(
-                hero_name, hero_image, hero_path))
-    image_db: "ImageSearch" = build_flann(base_images, enriched_db=enriched_db)
+    if base_images is None:
+        file_dict: FilePathDict = {}
+
+        if hero_portrait_directories is None:
+            hero_portrait_directories = GV.HERO_PORTRAIT_DIRECTORIES
+
+        for hero_portrait_dir in hero_portrait_directories:
+            find_images(hero_portrait_dir, file_dict)
+        base_images: List[HeroImage] = []
+
+        for raw_hero_name, hero_path_set in file_dict.items():
+            for hero_path in hero_path_set:
+                if not os.path.exists(hero_path):
+                    raise FileNotFoundError(hero_path)
+                hero_image = cv2.imread(hero_path)
+                if hero_image is None:
+                    raise FileNotFoundError(
+                        f"Hero Image not found: {hero_path}")
+                hero_name, *_ = re.split(r"\.", raw_hero_name)
+                base_images.append(HeroImage(
+                    hero_name, hero_image, hero_path))
+    image_db: "ImageSearch" = build_flann(base_images,
+                                          enriched_db=enriched_db)
 
     end_time = time.time()
     with open(GV.DATABASE_PICKLE_PATH, 'wb') as handle:
@@ -74,8 +101,8 @@ def build_database(enriched_db: bool = False) -> "ImageSearch":
     return image_db
 
 
-def load_database(
-        pickle_path: Path = GV.DATABASE_PICKLE_PATH) -> "ImageSearch":
+def load_database(pickle_path: Path = GV.DATABASE_PICKLE_PATH
+                  ) -> "ImageSearch":
     """
     Load hero database from pickle file.
 

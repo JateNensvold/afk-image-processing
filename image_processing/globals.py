@@ -36,8 +36,9 @@ parser.add_argument("-d", "--DEBUG", help="Runs the program in debug mode,"
                     "prints verbose output and displays incremental image"
                     "analysis", action="store_true")
 
-parser.add_argument("image_path", metavar="path/to/image",
-                    type=str, help="Relative or Absolute Path to Hero Roster Screen shot")
+parser.add_argument(
+    "image_path", metavar="path/to/image", type=str,
+    help="Relative or Absolute Path to Hero Roster Screen shot")
 
 parser.add_argument("-r", "--rebuild", help="Rebuild hero database from"
                     "source images", action="store_true")

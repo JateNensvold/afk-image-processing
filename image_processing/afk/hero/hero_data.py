@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 import re
 from typing import Union
 import numpy as np
@@ -16,19 +17,23 @@ class HeroImage:
         _type_: _description_
     """
 
-    def __init__(self, raw_hero_name: str, image: np.ndarray, image_path: str,
+    def __init__(self, raw_hero_name: str, image: np.ndarray, image_path: Path,
                  clean_name=True):
-        """_summary_
+        """
+        Initialize the data to create a HeroImage 
 
         Args:
-            raw_hero_name (str): _description_
-            image (np.ndarray): _description_
-            image_path (str): _description_
-            clean_name (bool, optional): _description_. Defaults to True.
+            raw_hero_name (str): the raw filename of hero
+            image (np.ndarray): image of hero
+            image_path (str): path to Image
+            clean_name (bool, optional): A boolean flag to attempt to "clean" 
+                up the `raw_hero_name` to a normalized version of the name. 
+                Defaults to True.
         """
         hero_name = raw_hero_name
         if clean_name:
-            # Keep file name of awakened heroes so they don't get mixed with normal version
+            # Keep file name of awakened heroes so they don't get mixed
+            #   with normal version
             if raw_hero_name.endswith("aw") or raw_hero_name.endswith("awakened"):
                 name_regex_results = re.split(r"(\.)", raw_hero_name)
                 hero_name = name_regex_results[0]
@@ -41,10 +46,11 @@ class HeroImage:
         self.image_path = image_path
 
     def __str__(self):
-        """_summary_
+        """
+        A string representation of a HeroImage object
 
         Returns:
-            _type_: _description_
+            str: string representation of HeroImage object
         """
 
         return f"HeroImage<{self._raw_name, self.image_path}>"
