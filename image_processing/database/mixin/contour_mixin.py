@@ -4,7 +4,7 @@ import numpy as np
 import cv2
 
 from image_processing.processing.types.contour_types import Contour
-from image_processing.processing.image_processing import HSVRange
+from image_processing.processing.image_processing_utils import HSVRange
 from image_processing.afk.roster.dimensions_object import DimensionsObject
 from image_processing.processing.types.types import SegmentRectangle
 from image_processing.afk.hero.process_heroes import get_hero_contours

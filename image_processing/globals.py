@@ -24,7 +24,7 @@ import torch
 import image_processing.utils.load_images as load
 
 from image_processing.utils.timer import Timer
-from image_processing.processing.image_processing import HSVRange
+from image_processing.processing.image_processing_utils import HSVRange
 from image_processing.database.engravings_database import EngravingSearch
 
 if TYPE_CHECKING:
@@ -78,7 +78,7 @@ CACHED = {}
 THREADS: dict[str, threading.Thread] = {}
 
 ZMQ_HOST = "127.0.0.1"
-ZMQ_PORT = "5555"
+ZMQ_PORT = 5555
 
 
 def verbosity(verbose_level: int) -> bool:

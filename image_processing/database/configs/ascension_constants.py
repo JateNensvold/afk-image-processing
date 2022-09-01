@@ -1,5 +1,5 @@
 from bidict import bidict
-from image_processing.processing.image_processing import HSVRange
+from image_processing.processing.image_processing_utils import HSVRange
 
 # elite
 elite_hsv_range = HSVRange(hue_min=114, saturation_min=78, value_min=150,

@@ -93,10 +93,11 @@ class RosterJson:
         return json_dict
 
     def json(self):
-        """_summary_
+        """
+        Convert the RosterJson object into a str
 
         Returns:
-            _type_: _description_
+            str: RosterJson object as a str
         """
         return json.dumps(self.json_dict())
 

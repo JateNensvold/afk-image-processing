@@ -4,7 +4,7 @@ import statistics
 import cv2
 import numpy as np
 
-from image_processing.processing.image_processing import HSVRange, blur_image
+from image_processing.processing.image_processing_utils import HSVRange, blur_image
 from image_processing.stamina import digit_features
 import image_processing.globals as GV
 

@@ -6,7 +6,7 @@ import imutils
 import numpy as np
 import matplotlib.pyplot as plt
 
-from image_processing.processing.image_processing import HSV_RANGE, HSVRange, blur_image
+from image_processing.processing.image_processing_utils import HSV_RANGE, HSVRange, blur_image
 import image_processing.globals as GV
 # Need this import to use imutils.contours.sort_contours,
 #   without it Module raises AttributeError
