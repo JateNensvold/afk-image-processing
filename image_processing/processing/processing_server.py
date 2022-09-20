@@ -28,16 +28,18 @@ RELOAD_COMMAND_LIST = ["reload"]
 class ProcessingServer:
     def __init__(self, host: str | None = None, port: int = GV.ZMQ_PORT):
         """
-        Initialize all the ZMQ variables to allow for the processing
+        Initialize all the ZMQ variables to allow for the image processing
         server to run
 
         Args:
             host (str | None): address to listen on, when None will listen
-                on all address. Defaults to None
+                on all address. Defaults to None. Host cannot be `localhost`
+                when binding, using ipv4 equivalent instead
             port (int): port to listen on. Defaults to GV.ZMQ_PORT
         """
         self.context = zmq.Context()
-        self.socket: zmq.sugar.socket.Socket = self.context.socket(zmq.ROUTER)
+        # Rep Socket can only receive a single message at a time
+        self.socket: zmq.Socket = self.context.socket(zmq.ROUTER)
         if host is None:
             host = "*"
         self.host = host
@@ -57,12 +59,12 @@ class ProcessingServer:
                       str(GV.ASCENSION_BORDER_MODEL_PATH))
 
         print("Ready to start listening to image requests...")
-        while True:
-            try:
+        try:
+            while True:
                 self.run()
-            except Exception as _exception:
-                exception_message = traceback.format_exc()
-                print(exception_message)
+        except Exception as _exception:
+            exception_message = traceback.format_exc()
+            print(f"Aborting processing server due to \n\n{exception_message}")
 
     def run(self):
         """
@@ -71,7 +73,21 @@ class ProcessingServer:
 
         #  Wait for next request from client
         # pylint: disable=unpacking-non-sequence
-        message_id, byte_args = self.socket.recv_multipart()
+        # output = self.socket.recv_multipart()
+        # print(output)
+        # # job_id
+        # message_id = output[0]
+        # byte_args = output
+        output = self.socket.recv_multipart()
+        print(output)
+        # Dealer response
+        if len(output) == 2:
+            message_id, byte_args = output
+            message_code = "No code"
+
+        else:
+            message_id, message_code, byte_args = output
+        print(f"Received message: {message_id} with code ({message_code})")
         args: List[str] = json.loads(byte_args)
 
         response = self.compute(args)
