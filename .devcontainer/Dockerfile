@@ -15,6 +15,7 @@ RUN apt-get update && \
    libsm6 \
    libxext6 \
    vim \
+   cron \
    apt-transport-https \
    git-lfs && \
    rm -rf /var/lib/apt/lists/* 
