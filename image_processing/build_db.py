@@ -83,7 +83,7 @@ def build_database(enriched_db: bool = False,
             for hero_path in hero_path_set:
                 if not os.path.exists(hero_path):
                     raise FileNotFoundError(hero_path)
-                hero_image = cv2.imread(hero_path)
+                hero_image = cv2.imread(str(hero_path))
                 if hero_image is None:
                     raise FileNotFoundError(
                         f"Hero Image not found: {hero_path}")
