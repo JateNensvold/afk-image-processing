@@ -15,10 +15,16 @@ RUN apt-get update && \
    libsm6 \
    libxext6 \
    vim \
-   postgresql-client \
    apt-transport-https \
    git-lfs && \
    rm -rf /var/lib/apt/lists/* 
+
+# Install Postgres-client-14
+RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list' && \
+   wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add - && \
+   apt-get update && \
+   apt-get install --no-install-recommends --yes \
+   postgresql-14
 
 RUN python3 -m pip install --no-cache-dir --upgrade pip
 

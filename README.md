@@ -95,6 +95,9 @@ cd /workspace/albedo-bot && pip3 install -r requirements.txt  && /workspace/afk_
 cd /workspace/albedo-bot && python3 albedo_bot/albedo_main.py init
 # To reinitialize a database
 cd /workspace/albedo-bot && python3 albedo_bot/albedo_main.py reset
+# To migrate the database
+cd /workspace/albedo-bot && python3 albedo_bot/albedo_main.py migrate
+# Follow the instructions from the migrate command
 ```
 
 ```
@@ -113,7 +116,7 @@ docker exec -it devcontainer-afk_processing_container-1 bash
 ```
 Run command to start processing server
 ```
-cd /workspace/afk_image_processing/ && python3 image_processing/processing_server.py
+cd /workspace/afk_image_processing/ && python3 image_processing/processing/processing_server.py
 ```
 Disconnect from tmux session by hitting `ctrl + 'b'` pause `d`
 
