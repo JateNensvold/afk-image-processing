@@ -27,7 +27,7 @@ class ProcessingResponse(NamedTuple):
         if self.status == ProcessingStatus.success:
             response_dict["result"] = self.result.json()
         else:
-            response_dict = None
+            response_dict["result"] = None
         response_dict["message"] = jsonpickle.encode(self.message)
         return response_dict
 
