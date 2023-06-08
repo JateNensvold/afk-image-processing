@@ -1,0 +1,7 @@
+python3 image_processing/afk/si/get_si.py -v -i /workspace/afk_image_processing/IMG_20211124_084352.jpg
+
+python3 image_processing/processing_server.py
+python image_processing/processing_client.py "/workspace/afk_image_processing/IMG_20211124_084352.jpg"
+python image_processing/processing_client.py "https://media.discordapp.net/attachments/939041923442827306/953223043424059422/IMG_1222.png"
+
+
